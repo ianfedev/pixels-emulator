@@ -117,7 +117,12 @@ func TestCreateDefaultConfig(t *testing.T) {
 	configPath := filepath.Join(tempDir, "config.ini")
 
 	logger, err := zap.NewDevelopment()
-	defer logger.Sync()
+
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			t.Logf("Error clearing logger: %v", err)
+		}
+	}()
 
 	err = CreateDefaultConfig(configPath, logger)
 	if err != nil {
@@ -141,7 +146,11 @@ func TestCreateDefaultConfig(t *testing.T) {
 func TestCreateDefaultConfig_Error(t *testing.T) {
 
 	logger, err := zap.NewDevelopment()
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			t.Logf("Error clearing logger: %v", err)
+		}
+	}()
 
 	invalidPath := "/invalid/path/config.ini"
 

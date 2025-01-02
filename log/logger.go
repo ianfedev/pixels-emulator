@@ -45,7 +45,7 @@ func SetupLogger(cfg *config.Config) []*bytes.Buffer {
 	}
 
 	logLevel := zapcore.InfoLevel
-	_ = logLevel.UnmarshalText([]byte(cfg.Logging.Level))
+	_ = (logLevel).UnmarshalText([]byte(cfg.Logging.Level))
 
 	consoleEncoder := zapcore.NewConsoleEncoder(getDefaultEncoderConfig(cfg.Logging.ConsoleColor))
 	fileEncoder := zapcore.NewConsoleEncoder(getDefaultEncoderConfig(false))

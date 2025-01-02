@@ -63,12 +63,12 @@ func checkStruct(v reflect.Value, env string, logger *zap.Logger) {
 		fieldType := t.Field(i)
 
 		securityAlertTag := fieldType.Tag.Get("security")
-		if securityAlertTag != "" && securityAlertTag == string(env) {
+		if securityAlertTag != "" && securityAlertTag == env {
 			// If the field is set (non-zero value), log a security alert
 			if !field.IsZero() {
 				logger.Info("Security Alert: Sensitive data detected in configuration",
 					zap.String("field", fieldType.Name),
-					zap.String("environment", string(env)))
+					zap.String("environment", env))
 			}
 		}
 

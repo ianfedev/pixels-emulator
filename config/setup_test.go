@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -90,4 +91,119 @@ func TestCheckStructNonStruct(t *testing.T) {
 	if buf.String() != "" {
 		t.Errorf("Expected no log output for non-struct value, got: %s", buf.String())
 	}
+}
+
+// TestCreateConfig_Success tests successful configuration loading.
+func TestCreateConfig_Success(t *testing.T) {
+	logger, _ := createTestLogger(t)
+
+	tempFile, err := os.CreateTemp("", "test_config_*.ini")
+	assert.NoError(t, err)
+
+	defer func() {
+		if err := os.Remove(tempFile.Name()); err != nil {
+			t.Logf("Error removing temp file: %v", err)
+		}
+	}()
+
+	// Write valid config content to the temporary file
+	configContent := `[server]
+ip=192.168.1.1
+port=8080
+environment=PRODUCTION
+
+[database]
+host=localhost
+port=5432
+database=test_db
+user=test_user
+password=test_password
+
+[logging]
+console_color=false
+json=true
+level=DEBUG`
+	err = os.WriteFile(tempFile.Name(), []byte(configContent), 0644)
+	if err != nil {
+		t.Logf("Error writing temp config on test: %v", err)
+		return
+	}
+
+	config, err := CreateConfig(tempFile.Name(), logger)
+	assert.NoError(t, err)
+	assert.NotNil(t, config)
+	assert.Equal(t, "192.168.1.1", config.Server.IP)
+	assert.Equal(t, "PRODUCTION", config.Server.Environment)
+	assert.Equal(t, "DEBUG", config.Logging.Level)
+}
+
+// TestCreateConfig_FileNotFound tests when the configuration file is missing.
+func TestCreateConfig_FileNotFound(t *testing.T) {
+	logger, _ := createTestLogger(t)
+	_, err := CreateConfig("nonexistent_config.ini", logger)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error reading config file")
+}
+
+// TestCreateConfig_InvalidContent tests when the configuration file has invalid content.
+func TestCreateConfig_InvalidContent(t *testing.T) {
+	logger, _ := createTestLogger(t)
+
+	tempFile, err := os.CreateTemp("", "test_config_*.ini")
+	assert.NoError(t, err)
+	defer func() {
+		if err := os.Remove(tempFile.Name()); err != nil {
+			t.Logf("Error removing temp file: %v", err)
+		}
+	}()
+
+	// Write invalid config content to the temporary file
+	err = os.WriteFile(tempFile.Name(), []byte("[invalid_section\nkey: value"), 0644)
+	if err != nil {
+		t.Logf("Error writing temp config on test: %v", err)
+		return
+	}
+
+	_, err = CreateConfig(tempFile.Name(), logger)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error reading config file")
+}
+
+// TestCreateConfigEnvOverrides tests environment variable overrides.
+func TestCreateConfigEnvOverrides(t *testing.T) {
+	logger, _ := createTestLogger(t)
+
+	tempFile, err := os.CreateTemp("", "test_config_*.ini")
+	assert.NoError(t, err)
+	defer func() {
+		if err := os.Remove(tempFile.Name()); err != nil {
+			t.Logf("Error removing temp file: %v", err)
+		}
+	}()
+
+	// Write minimal valid config
+	configContent := `[server]
+ip=192.168.1.1
+port=8080
+environment=DEVELOPMENT`
+
+	err = os.WriteFile(tempFile.Name(), []byte(configContent), 0644)
+	err = os.Setenv("SERVER_IP", "10.0.0.1")
+
+	if err != nil {
+		t.Errorf("Error setting environment for ENV testing %d", err)
+	}
+
+	defer func() {
+		if err := os.Unsetenv("SERVER_IP"); err != nil {
+			t.Logf("Error removing test environment, please clear it on your PC: %v", err)
+		}
+	}()
+
+	config, err := CreateConfig(tempFile.Name(), logger)
+	assert.NoError(t, err)
+	assert.NotNil(t, config)
+	assert.Equal(t, "10.0.0.1", config.Server.IP) // Environment variable override
+	assert.Equal(t, uint16(8080), config.Server.Port)
+	assert.Equal(t, "DEVELOPMENT", config.Server.Environment)
 }
