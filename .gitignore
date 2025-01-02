@@ -27,5 +27,7 @@ go.work.sum
 # IntelliJ IDEA
 .idea
 
-# Configuration
+# Generated files
 config.ini
+logs/*
+logs

@@ -3,6 +3,7 @@ package main
 import (
 	"go.uber.org/zap"
 	"pixels-emulator/config"
+	log2 "pixels-emulator/log"
 )
 
 func main() {
@@ -15,6 +16,8 @@ func main() {
 		panic(err)
 	}
 
-	log.Info(cfg.Server.Environment)
+	log2.SetupLogger(cfg)
+	zap.L().Info("XDE")
+	zap.L().Error("HEHE")
 
 }
