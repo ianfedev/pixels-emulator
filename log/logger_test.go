@@ -13,6 +13,7 @@ import (
 
 // cleanLogsDirectory clears the log folder at the end of the test.
 func cleanLogsDirectory(t *testing.T) {
+	t.Helper()
 	t.Cleanup(func() {
 		err := os.RemoveAll("logs")
 		assert.NoError(t, err, "Failed to clean up the logs directory")
@@ -20,7 +21,8 @@ func cleanLogsDirectory(t *testing.T) {
 }
 
 // checkValidJSON validates that the content of the given buffer is in JSON format.
-func checkValidJSON(buffer *bytes.Buffer) error {
+func checkValidJSON(t *testing.T, buffer *bytes.Buffer) error {
+	t.Helper()
 	var js map[string]interface{}
 	if err := json.NewDecoder(buffer).Decode(&js); err != nil {
 		return err
@@ -30,6 +32,8 @@ func checkValidJSON(buffer *bytes.Buffer) error {
 
 // generateTestLog setups a logger for all the corresponding tests.
 func generateTestLog(t *testing.T, color bool, json bool, environment string) (string, []*bytes.Buffer) {
+
+	t.Helper()
 
 	cfg := &config.Config{
 		Server: config.ServerConfig{
@@ -117,8 +121,8 @@ func TestSetupLogger_FilesJSON(t *testing.T) {
 	assert.NotContains(t, err, "\x1b[", "The error message should not contain color codes")
 
 	// Check that the log file is in JSON format (for both log and error files)
-	assert.Nil(t, checkValidJSON(buff[1]))
-	assert.Nil(t, checkValidJSON(buff[2]))
+	assert.Nil(t, checkValidJSON(t, buff[1]))
+	assert.Nil(t, checkValidJSON(t, buff[2]))
 }
 
 // TestSetupLogger_EmptyBuffers test if buffers provided are empty when environment is not test.

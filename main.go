@@ -18,7 +18,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg, err := config.CreateConfig("config.ini", tLog)
+	cfg, err := config.CreateConfig("config.ini", zap.L())
 
 	if err != nil {
 		tLog.Error("Error while loading configuration", zap.Error(err))
@@ -26,6 +26,6 @@ func main() {
 	}
 
 	log.SetupLogger(cfg)
-	tLog.Debug("Logger instantiated")
+	zap.L().Debug("Logger instantiated")
 
 }
