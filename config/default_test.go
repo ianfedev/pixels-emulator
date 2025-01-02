@@ -3,6 +3,9 @@ package config
 import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -104,5 +107,49 @@ func TestSetDefaults_Perform(t *testing.T) {
 	if durationMicroseconds > 100000 {
 		t.Errorf("Performance test failed: SetDefaults took %d microseconds, expected less than 100,000 microseconds", durationMicroseconds)
 	}
+
+}
+
+// TestCreateDefaultConfig checks if configuration file is created when missing.
+func TestCreateDefaultConfig(t *testing.T) {
+
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "config.ini")
+
+	logger, err := zap.NewDevelopment()
+	defer logger.Sync()
+
+	err = CreateDefaultConfig(configPath, logger)
+	if err != nil {
+		t.Fatalf("expected no error, but got %v", err)
+	}
+
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		t.Fatalf("expected config file to be created, but it does not exist")
+	}
+
+	v := viper.New()
+	v.SetConfigFile(configPath)
+	v.SetConfigType("ini")
+
+	err = v.ReadInConfig()
+	assert.Nil(t, err, "error on file parse should be nil")
+
+}
+
+// TestCreateDefaultConfig checks if the error is called correctly.
+func TestCreateDefaultConfig_Error(t *testing.T) {
+
+	logger, err := zap.NewDevelopment()
+	defer logger.Sync()
+
+	invalidPath := "/invalid/path/config.ini"
+
+	err = CreateDefaultConfig(invalidPath, logger)
+
+	assert.Error(t, err, "Expected an error when creating default config file, but got nil")
+
+	errMsg := "error creating default config file"
+	assert.Contains(t, err.Error(), errMsg, "Expected error to match creation error")
 
 }

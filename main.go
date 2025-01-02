@@ -2,22 +2,30 @@ package main
 
 import (
 	"go.uber.org/zap"
+	"os"
 	"pixels-emulator/config"
-	log2 "pixels-emulator/log"
+	"pixels-emulator/log"
 )
 
 func main() {
 
-	log, _ := zap.NewDevelopment()
+	tLog := log.CreateTempLogger()
+	tLog.Info("Starting Pixels emulator")
 
-	cfg, err := config.CreateConfig("config.ini", log)
-
+	err := config.CreateDefaultConfig("config.ini", tLog)
 	if err != nil {
-		panic(err)
+		tLog.Error("Error while loading configuration", zap.Error(err))
+		os.Exit(1)
 	}
 
-	log2.SetupLogger(cfg)
-	zap.L().Info("XDE")
-	zap.L().Error("HEHE")
+	cfg, err := config.CreateConfig("config.ini", tLog)
+
+	if err != nil {
+		tLog.Error("Error while loading configuration", zap.Error(err))
+		os.Exit(1)
+	}
+
+	log.SetupLogger(cfg)
+	tLog.Debug("Logger instantiated")
 
 }

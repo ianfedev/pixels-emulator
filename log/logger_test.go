@@ -102,6 +102,7 @@ func TestSetupLogger_Files(t *testing.T) {
 // TestSetupLogger_FilesJSON tests the SetupLogger function logging at files with JSON format.
 func TestSetupLogger_FilesJSON(t *testing.T) {
 
+	cleanLogsDirectory(t)
 	_, buff := generateTestLog(t, true, true, "TEST")
 	zap.L().Error("error msg")
 
@@ -122,6 +123,7 @@ func TestSetupLogger_FilesJSON(t *testing.T) {
 
 // TestSetupLogger_EmptyBuffers test if buffers provided are empty when environment is not test.
 func TestSetupLogger_EmptyBuffers(t *testing.T) {
+	cleanLogsDirectory(t)
 	cfg := &config.Config{
 		Server: config.ServerConfig{
 			Environment: "FOO",
