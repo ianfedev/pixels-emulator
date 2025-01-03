@@ -10,15 +10,19 @@ import (
 	"time"
 )
 
-func SetupDatabase(cfg *config.Config, log *zap.Logger) (*gorm.DB, error) {
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+func GetDSN(cfg *config.Config) string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.Database.User,
 		cfg.Database.Password,
 		cfg.Database.Host,
 		cfg.Database.Port,
 		cfg.Database.Database,
 	)
+}
+
+func SetupDatabase(cfg *config.Config, log *zap.Logger) (*gorm.DB, error) {
+
+	dsn := GetDSN(cfg)
 
 	zLog := zapgorm2.New(zap.L())
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: zLog})
