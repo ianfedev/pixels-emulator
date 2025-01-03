@@ -43,7 +43,7 @@ func TestSetDefaults_WithPrefix(t *testing.T) {
 	assert.Equal(t, "nested_value", v.GetString("prefix.nested.inner_field"))
 }
 
-// TestSetDefault_NoDefaultTags tests if empty tags are not populated.
+// TestSetDefaults_NoDefaultTags tests if empty tags are not populated.
 func TestSetDefaults_NoDefaultTags(t *testing.T) {
 	type ExampleConfig struct {
 		FieldA string `mapstructure:"field_a"`
