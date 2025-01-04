@@ -24,3 +24,7 @@ func TestGetDSN(t *testing.T) {
 		t.Errorf("Expected DSN %s, got %s", expectedDSN, actualDSN)
 	}
 }
+
+func TestLoggerSetUp(t *testing.T) {
+
+}

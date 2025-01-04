@@ -6,6 +6,8 @@ import (
 	"pixels-emulator/config"
 	"pixels-emulator/database"
 	"pixels-emulator/log"
+	"pixels-emulator/router"
+	"strconv"
 )
 
 func main() {
@@ -32,6 +34,22 @@ func main() {
 	_, err = database.SetupDatabase(cfg, zap.L())
 	if err != nil {
 		tLog.Error("Error while connecting to database", zap.Error(err))
+		os.Exit(1)
+	}
+
+	app, err := router.SetupRouter(zap.L())
+	if err != nil || app == nil {
+		tLog.Error("Error while setting up HTTP server", zap.Error(err))
+		os.Exit(1)
+	}
+
+	bind := cfg.Server.IP + ":" + strconv.Itoa(int(cfg.Server.Port))
+	zap.L().Info("Starting HTTP server",
+		zap.String("server", cfg.Server.IP), zap.Uint16("port", cfg.Server.Port))
+
+	err = app.Listen(bind)
+	if err != nil {
+		tLog.Error("Error while starting the server", zap.Error(err))
 		os.Exit(1)
 	}
 
