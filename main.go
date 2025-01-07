@@ -3,9 +3,9 @@ package main
 import (
 	"go.uber.org/zap"
 	"os"
-	"pixels-emulator/config"
-	"pixels-emulator/database"
-	"pixels-emulator/log"
+	config2 "pixels-emulator/core/config"
+	"pixels-emulator/core/database"
+	"pixels-emulator/core/log"
 	"pixels-emulator/router"
 	"strconv"
 )
@@ -15,13 +15,13 @@ func main() {
 	tLog := log.CreateTempLogger()
 	tLog.Info("Starting Pixels emulator")
 
-	err := config.CreateDefaultConfig("config.ini", tLog)
+	err := config2.CreateDefaultConfig("config.ini", tLog)
 	if err != nil {
 		tLog.Error("Error while loading configuration", zap.Error(err))
 		os.Exit(1)
 	}
 
-	cfg, err := config.CreateConfig("config.ini", zap.L())
+	cfg, err := config2.CreateConfig("config.ini", zap.L())
 
 	if err != nil {
 		tLog.Error("Error while loading configuration", zap.Error(err))

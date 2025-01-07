@@ -1,8 +1,8 @@
 package database_test
 
 import (
-	"pixels-emulator/config"
-	"pixels-emulator/database"
+	"pixels-emulator/core/config"
+	"pixels-emulator/core/database"
 	"testing"
 )
 

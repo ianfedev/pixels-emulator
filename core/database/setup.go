@@ -6,7 +6,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"moul.io/zapgorm2"
-	"pixels-emulator/config"
+	"pixels-emulator/core/config"
 	"time"
 )
 

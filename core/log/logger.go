@@ -7,7 +7,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"os"
-	"pixels-emulator/config"
+	"pixels-emulator/core/config"
 )
 
 // CreateTempLogger creates a temporary logger.

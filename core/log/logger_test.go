@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
-	"pixels-emulator/config"
+	"pixels-emulator/core/config"
 	"testing"
 )
 
