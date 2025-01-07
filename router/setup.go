@@ -26,38 +26,45 @@ func SetupRouter(logger *zap.Logger) (*fiber.App, error) {
 
 		defer func() {
 			if err := c.Close(); err != nil {
-				logger.Error("Error flushing out websocket, be aware", zap.Error(err))
+				logger.Error("Error closing WebSocket connection", zap.Error(err))
+			}
+		}()
+
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Error("Recovered from fatal error in WebSocket handler", zap.Any("panic", r))
 			}
 		}()
 
 		for {
-
 			_, msg, err := c.ReadMessage()
 			if err != nil {
-				logger.Error("Failed to read message from socket", zap.Error(err))
+				// Log the error and break the loop
+				logger.Error("Failed to read message from WebSocket", zap.Error(err))
+				break
 			}
 
 			func() {
-
 				defer func() {
 					if r := recover(); r != nil {
-						logger.Error("Recovered from fatal error deserialization", zap.Any("panic", r))
+						logger.Error("Recovered from fatal error during packet processing", zap.Any("panic", r))
 					}
 				}()
 
 				fmt.Println(msg)
 				pack, packErr := packet.FromBytes(msg)
-				logger.Debug("Packet received:", zap.Uint16("header", pack.GetHeader()))
 
 				if packErr != nil {
 					logger.Warn("Received unserializable packet", zap.Error(packErr))
-				} else {
-					// Game logic
+					return
 				}
 
+				logger.Debug("Packet received:", zap.Uint16("header", pack.GetHeader()))
+				// Game logic here
 			}()
 		}
 
+		logger.Info("WebSocket connection closed")
 	}))
 
 	return app, nil
