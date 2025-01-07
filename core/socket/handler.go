@@ -1,6 +1,7 @@
 package socket
 
 import (
+	websocket2 "github.com/fasthttp/websocket"
 	"github.com/gofiber/websocket/v2"
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
@@ -26,11 +27,15 @@ func Handle(logger *zap.Logger) func(*websocket.Conn) {
 
 		for {
 			if err := handleMessage(c, wCon, connLogger); err != nil {
-				if websocket.IsUnexpectedCloseError(err) {
-					connLogger.Warn("WebSocket connection closed unexpectedly", zap.Error(err))
+				if websocket2.IsUnexpectedCloseError(err) {
+					if websocket2.IsUnexpectedCloseError(err, websocket2.CloseGoingAway, websocket.CloseNormalClosure) {
+						connLogger.Warn("WebSocket connection closed unexpectedly", zap.Error(err))
+					}
+					connLogger.Debug("WebSocket connection closed", zap.Error(err))
 					break
+				} else {
+					connLogger.Error("Error handling WebSocket message", zap.Error(err))
 				}
-				connLogger.Error("Error handling WebSocket message", zap.Error(err))
 			}
 		}
 	}
