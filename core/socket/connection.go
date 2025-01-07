@@ -10,12 +10,15 @@ type WebConnection struct {
 
 	// Socket wraps the websocket connection.
 	Socket *websocket.Conn
+
+	// Identifier provides a unique id for the connection.
+	Identifier string
 }
 
 func (w *WebConnection) Dispose() error {
 	return w.Socket.Close()
 }
 
-func (w *WebConnection) Identifier() string {
-	return "" // TODO: Identify.
+func (w *WebConnection) GetIdentifier() string {
+	return w.Identifier
 }

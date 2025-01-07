@@ -11,6 +11,6 @@ import "pixels-emulator/core/util"
 type Connection interface {
 	util.Disposable
 
-	// Identifier provides an unique identifier of this connection.
-	Identifier() string
+	// GetIdentifier provides an unique identifier of this connection.
+	GetIdentifier() string
 }

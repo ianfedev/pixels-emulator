@@ -39,11 +39,11 @@ func TestRoute(t *testing.T) {
 	app, err := SetupRouter(logger)
 	assert.NoError(t, err)
 
-	app.Get("/", func(c *fiber.Ctx) error {
+	app.Get("/test", func(c *fiber.Ctx) error {
 		return c.SendString("OK")
 	})
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest("GET", "/test", nil)
 	resp, err := app.Test(req)
 
 	assert.NoError(t, err)

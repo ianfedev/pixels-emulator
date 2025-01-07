@@ -3,8 +3,7 @@ package protocol
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
-	"unicode/utf8"
+	"errors"
 )
 
 // RawPacket represents a data packet with a header and content
@@ -28,124 +27,91 @@ func (p *RawPacket) GetContent() []byte {
 // AddInt adds a 4-byte integer to the packet content.
 func (p *RawPacket) AddInt(value int32) {
 	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.BigEndian, value)
-	if err != nil {
-		fmt.Println("Error writing int:", err)
-		return
-	}
+	_ = binary.Write(buf, binary.BigEndian, value)
 	p.content = append(p.content, buf.Bytes()...)
 }
 
 // AddShort adds a 2-byte short integer to the packet content.
 func (p *RawPacket) AddShort(value int16) {
 	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.BigEndian, value)
-	if err != nil {
-		fmt.Println("Error writing short:", err)
-		return
-	}
+	_ = binary.Write(buf, binary.BigEndian, value)
 	p.content = append(p.content, buf.Bytes()...)
-}
-
-// ResetOffset restarts from beginning the reading offset.
-func (p *RawPacket) ResetOffset() {
-	p.offset = 0
 }
 
 // AddBoolean adds a 1-byte boolean value (true or false) to the packet content.
 func (p *RawPacket) AddBoolean(value bool) {
-	var byteValue byte
+	var b byte
 	if value {
-		byteValue = 1
+		b = 1
 	} else {
-		byteValue = 0
+		b = 0
 	}
-	p.content = append(p.content, byteValue)
+	p.content = append(p.content, b)
 }
 
 // AddString adds a UTF-8 string to the packet content, preceded by its length in bytes.
 func (p *RawPacket) AddString(value string) {
-	// Get the length of the string in bytes
-	length := int16(utf8.RuneCountInString(value))
-
-	// Convert the length to big endian short
-	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.BigEndian, length)
-	if err != nil {
-		fmt.Println("Error writing string length:", err)
-		return
-	}
-
-	// Convert the string to bytes
-	p.content = append(p.content, buf.Bytes()...)
+	length := int16(len(value))
+	p.AddShort(length)
 	p.content = append(p.content, []byte(value)...)
+}
+
+// ResetOffset restarts from the beginning the reading offset.
+func (p *RawPacket) ResetOffset() {
+	p.offset = 0
 }
 
 // ToBytes converts the packet to a byte slice, including the header and content.
 func (p *RawPacket) ToBytes() []byte {
-
-	// Create the packet by first adding the length (excluding the first 4 bytes)
-	packetLength := int32(4 + len(p.content))
 	buf := new(bytes.Buffer)
-
-	// Write packet length in Big Endian
-	err := binary.Write(buf, binary.BigEndian, packetLength)
-	if err != nil {
-		fmt.Println("Error writing packet length:", err)
-		return nil
-	}
-
-	// Write header in Big Endian
-	err = binary.Write(buf, binary.BigEndian, p.header)
-	if err != nil {
-		fmt.Println("Error writing header:", err)
-		return nil
-	}
-
-	buf.Write(p.content)
-
+	_ = binary.Write(buf, binary.BigEndian, int32(len(p.content)+2)) // Length of the packet
+	_ = binary.Write(buf, binary.BigEndian, p.header)                // Header
+	buf.Write(p.content)                                             // Content
 	return buf.Bytes()
 }
 
 // ReadInt reads a 4-byte integer from the packet content.
 func (p *RawPacket) ReadInt() (int32, error) {
 	if p.offset+4 > len(p.content) {
-		return 0, fmt.Errorf("not enough data to read int")
+		return 0, errors.New("not enough bytes to read int")
 	}
-	value := binary.BigEndian.Uint32(p.content[p.offset : p.offset+4])
+	var value int32
+	buf := bytes.NewReader(p.content[p.offset : p.offset+4])
+	_ = binary.Read(buf, binary.BigEndian, &value)
 	p.offset += 4
-	return int32(value), nil
+	return value, nil
 }
 
 // ReadShort reads a 2-byte short integer from the packet content.
 func (p *RawPacket) ReadShort() (int16, error) {
 	if p.offset+2 > len(p.content) {
-		return 0, fmt.Errorf("not enough data to read short")
+		return 0, errors.New("not enough bytes to read short")
 	}
-	value := binary.BigEndian.Uint16(p.content[p.offset : p.offset+2])
+	var value int16
+	buf := bytes.NewReader(p.content[p.offset : p.offset+2])
+	_ = binary.Read(buf, binary.BigEndian, &value)
 	p.offset += 2
-	return int16(value), nil
+	return value, nil
 }
 
 // ReadBoolean reads a 1-byte boolean from the packet content.
 func (p *RawPacket) ReadBoolean() (bool, error) {
 	if p.offset+1 > len(p.content) {
-		return false, fmt.Errorf("not enough data to read boolean")
+		return false, errors.New("not enough bytes to read boolean")
 	}
 	value := p.content[p.offset]
-	p.offset += 1
+	p.offset++
 	return value == 1, nil
 }
 
 // ReadString reads a string from the packet content. It expects the string to be preceded by a short indicating its length.
 func (p *RawPacket) ReadString() (string, error) {
-	if p.offset+2 > len(p.content) {
-		return "", fmt.Errorf("not enough data to read string length")
+	length, err := p.ReadShort()
+	if err != nil {
+		return "", err
 	}
-	length := binary.BigEndian.Uint16(p.content[p.offset : p.offset+2])
-	p.offset += 2
 	if p.offset+int(length) > len(p.content) {
-		return "", fmt.Errorf("not enough data to read string")
+		return "", errors.New("not enough bytes to read string")
 	}
 	value := string(p.content[p.offset : p.offset+int(length)])
 	p.offset += int(length)
@@ -154,33 +120,24 @@ func (p *RawPacket) ReadString() (string, error) {
 
 // FromBytes converts a byte slice into a RawPacket.
 func FromBytes(data []byte) (*RawPacket, error) {
-	if len(data) < 4 {
-		return nil, fmt.Errorf("not enough data to read packet")
+	if len(data) < 6 {
+		return nil, errors.New("data too short to be a valid packet")
 	}
-
-	packetLength := binary.BigEndian.Uint32(data[:4])
-	if len(data) < int(packetLength) {
-		return nil, fmt.Errorf("packet size mismatch")
+	buf := bytes.NewReader(data)
+	var length int32
+	_ = binary.Read(buf, binary.BigEndian, &length)
+	if int(length)+4 != len(data) {
+		return nil, errors.New("length mismatch in packet")
 	}
-
-	header := binary.BigEndian.Uint16(data[4:6])
-
-	// Ensure that content is only read if there is any.
-	var content []byte
-	if packetLength > 6 {
-		content = data[6:int(packetLength)]
-	}
-
-	return &RawPacket{
-		header:  header,
-		content: content,
-		offset:  0,
-	}, nil
+	var header uint16
+	_ = binary.Read(buf, binary.BigEndian, &header)
+	content := data[6:]
+	return &RawPacket{header: header, content: content, offset: 0}, nil
 }
 
 // NewPacket creates from scratch a packet.
-func NewPacket(header uint16) *RawPacket {
-	return &RawPacket{
+func NewPacket(header uint16) RawPacket {
+	return RawPacket{
 		header: header,
 		offset: 0,
 	}

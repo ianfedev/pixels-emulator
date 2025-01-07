@@ -10,9 +10,9 @@ import (
 // Handle manages the basic message reception from websocket.
 func Handle(logger *zap.Logger) func(*websocket.Conn) {
 	return func(c *websocket.Conn) {
-		wCon := &WebConnection{Socket: c}
 
-		connLogger := logger.With(zap.String("identifier", wCon.Identifier()))
+		wCon := &WebConnection{Socket: c, Identifier: "authenticating"}
+		connLogger := logger.With(zap.String("identifier", wCon.GetIdentifier()))
 
 		defer func() {
 			if err := recover(); err != nil {
