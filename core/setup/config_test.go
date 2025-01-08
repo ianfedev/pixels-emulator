@@ -1,4 +1,4 @@
-package config
+package setup
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
+	config2 "pixels-emulator/core/config"
 	"reflect"
 	"testing"
 )
@@ -36,13 +37,13 @@ func verifySecurityLog(t *testing.T, logOutput string, fields []string) {
 func TestCheckSecurityAlerts(t *testing.T) {
 	logger, buf := createTestLogger(t)
 
-	config := &Config{
-		Server: ServerConfig{
+	config := &config2.Config{
+		Server: config2.ServerConfig{
 			IP:          "127.0.0.1",
 			Port:        8080,
 			Environment: "PRODUCTION",
 		},
-		Database: DatabaseConfig{
+		Database: config2.DatabaseConfig{
 			Database: "prod_db",
 			Password: "prod_secret",
 			User:     "admin",
@@ -59,13 +60,13 @@ func TestCheckSecurityAlerts(t *testing.T) {
 func TestCheckStruct(t *testing.T) {
 	logger, buf := createTestLogger(t)
 
-	config := &Config{
-		Server: ServerConfig{
+	config := &config2.Config{
+		Server: config2.ServerConfig{
 			IP:          "127.0.0.1",
 			Port:        8080,
 			Environment: "PRODUCTION",
 		},
-		Database: DatabaseConfig{
+		Database: config2.DatabaseConfig{
 			Database: "prod_db",
 			Password: "prod_secret",
 			User:     "admin",
@@ -107,7 +108,7 @@ func TestCreateConfig_Success(t *testing.T) {
 	}()
 
 	// Write valid config content to the temporary file
-	configContent := `[server]
+	configContent := `[healthcheck]
 ip=192.168.1.1
 port=8080
 environment=PRODUCTION
@@ -129,7 +130,7 @@ level=DEBUG`
 		return
 	}
 
-	config, err := CreateConfig(tempFile.Name(), logger)
+	config, err := Config(tempFile.Name(), logger)
 	assert.NoError(t, err)
 	assert.NotNil(t, config)
 	assert.Equal(t, "192.168.1.1", config.Server.IP)
@@ -140,7 +141,7 @@ level=DEBUG`
 // TestCreateConfig_FileNotFound tests when the configuration file is missing.
 func TestCreateConfig_FileNotFound(t *testing.T) {
 	logger, _ := createTestLogger(t)
-	_, err := CreateConfig("nonexistent_config.ini", logger)
+	_, err := Config("nonexistent_config.ini", logger)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error reading config file")
 }
@@ -164,7 +165,7 @@ func TestCreateConfig_InvalidContent(t *testing.T) {
 		return
 	}
 
-	_, err = CreateConfig(tempFile.Name(), logger)
+	_, err = Config(tempFile.Name(), logger)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error reading config file")
 }
@@ -182,7 +183,7 @@ func TestCreateConfigEnvOverrides(t *testing.T) {
 	}()
 
 	// Write minimal valid config
-	configContent := `[server]
+	configContent := `[healthcheck]
 ip=192.168.1.1
 port=8080
 environment=DEVELOPMENT`
@@ -200,7 +201,7 @@ environment=DEVELOPMENT`
 		}
 	}()
 
-	config, err := CreateConfig(tempFile.Name(), logger)
+	config, err := Config(tempFile.Name(), logger)
 	assert.NoError(t, err)
 	assert.NotNil(t, config)
 	assert.Equal(t, "10.0.0.1", config.Server.IP) // Environment variable override

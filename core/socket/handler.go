@@ -4,15 +4,15 @@ import (
 	websocket2 "github.com/fasthttp/websocket"
 	"github.com/gofiber/websocket/v2"
 	"go.uber.org/zap"
+	"pixels-emulator/core/handler"
 	"pixels-emulator/core/protocol"
-	"pixels-emulator/core/protocol/registry"
 )
 
 // Handle manages the basic message reception from websocket.
 func Handle(
 	logger *zap.Logger,
-	pReg *registry.ProcessorRegistry,
-	hReg *registry.HandlerRegistry) func(*websocket.Conn) {
+	pReg *handler.ProcessorRegistry,
+	hReg *handler.Registry) func(*websocket.Conn) {
 	return func(c *websocket.Conn) {
 
 		wCon := &WebConnection{Socket: c, Identifier: "authenticating"}
@@ -53,8 +53,8 @@ func Handle(
 func handleMessage(
 	c *websocket.Conn,
 	wCon *WebConnection,
-	pReg *registry.ProcessorRegistry,
-	hReg *registry.HandlerRegistry,
+	pReg *handler.ProcessorRegistry,
+	hReg *handler.Registry,
 	logger *zap.Logger) error {
 	_, msg, err := c.ReadMessage()
 	if err != nil {
@@ -72,8 +72,8 @@ func handleMessage(
 func processPacket(
 	msg []byte,
 	wCon *WebConnection,
-	pReg *registry.ProcessorRegistry,
-	hReg *registry.HandlerRegistry,
+	pReg *handler.ProcessorRegistry,
+	hReg *handler.Registry,
 	logger *zap.Logger) error {
 	defer func() {
 		if r := recover(); r != nil {
@@ -92,7 +92,7 @@ func processPacket(
 		return err
 	}
 
-	err = hReg.Handle(comPacket)
+	err = hReg.Handle(comPacket, wCon)
 	if err != nil {
 		return err
 	}

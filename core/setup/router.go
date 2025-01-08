@@ -1,21 +1,21 @@
-package router
+package setup
 
 import (
 	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"go.uber.org/zap"
-	"pixels-emulator/core/protocol/registry"
+	"pixels-emulator/core/handler"
 	"pixels-emulator/core/socket"
 )
 
-// SetupRouter defines the gin server for API and
+// Router defines the gin healthcheck for API and
 // WebSocket engine as primary communication with
 // Nitro Client.
-func SetupRouter(
+func Router(
 	logger *zap.Logger,
-	registry *registry.ProcessorRegistry,
-	handlerRegistry *registry.HandlerRegistry) (*fiber.App, error) {
+	registry *handler.ProcessorRegistry,
+	handlerRegistry *handler.Registry) (*fiber.App, error) {
 
 	app := fiber.New(fiber.Config{
 		ServerHeader:          "Pixels Emulator",

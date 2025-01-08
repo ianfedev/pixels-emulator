@@ -6,8 +6,7 @@ import (
 	config2 "pixels-emulator/core/config"
 	"pixels-emulator/core/database"
 	"pixels-emulator/core/log"
-	"pixels-emulator/core/protocol/registry"
-	"pixels-emulator/router"
+	"pixels-emulator/core/setup"
 	"strconv"
 )
 
@@ -22,7 +21,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg, err := config2.CreateConfig("config.ini", zap.L())
+	cfg, err := setup.Config("config.ini", zap.L())
 
 	if err != nil {
 		tLog.Error("Error while loading configuration", zap.Error(err))
@@ -38,24 +37,25 @@ func main() {
 		os.Exit(1)
 	}
 
-	pReg, hReg := registry.SetupProcessors(), registry.SetupHandlers()
+	pReg := setup.Processors()
+	hReg := setup.Handlers(zap.L())
 
 	// As the only method of packet receiving, I will not edit this
 	// until further needs. Maybe on future this can be rewritten to
 	// support other protocols like TCP sockets or something else.
-	app, err := router.SetupRouter(zap.L(), pReg, hReg)
+	app, err := setup.Router(zap.L(), pReg, hReg)
 	if err != nil || app == nil {
-		tLog.Error("Error while setting up HTTP server", zap.Error(err))
+		tLog.Error("Error while setting up HTTP healthcheck", zap.Error(err))
 		os.Exit(1)
 	}
 
 	bind := cfg.Server.IP + ":" + strconv.Itoa(int(cfg.Server.Port))
-	zap.L().Info("Starting HTTP server",
-		zap.String("server", cfg.Server.IP), zap.Uint16("port", cfg.Server.Port))
+	zap.L().Info("Starting HTTP healthcheck",
+		zap.String("healthcheck", cfg.Server.IP), zap.Uint16("port", cfg.Server.Port))
 
 	err = app.Listen(bind)
 	if err != nil {
-		tLog.Error("Error while starting the server", zap.Error(err))
+		tLog.Error("Error while starting the healthcheck", zap.Error(err))
 		os.Exit(1)
 	}
 

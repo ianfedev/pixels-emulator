@@ -1,16 +1,17 @@
-package config
+package setup
 
 import (
 	"fmt"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"pixels-emulator/core/config"
 	"reflect"
 	"strings"
 )
 
-// CreateConfig Creates and unmarshalls the configuration from viper,
+// Config Creates and unmarshalls the configuration from viper,
 // performing security checks like non-sensitive data via file.
-func CreateConfig(path string, logger *zap.Logger) (*Config, error) {
+func Config(path string, logger *zap.Logger) (*config.Config, error) {
 
 	v := viper.New()
 	v.SetConfigFile(path)
@@ -20,7 +21,7 @@ func CreateConfig(path string, logger *zap.Logger) (*Config, error) {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
-	var tempCfg Config
+	var tempCfg config.Config
 	if err := v.Unmarshal(&tempCfg); err != nil {
 		return nil, fmt.Errorf("error unmarshaling config: %w", err)
 	}
@@ -28,9 +29,9 @@ func CreateConfig(path string, logger *zap.Logger) (*Config, error) {
 
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	SetDefaults(v, "", Config{})
+	config.SetDefaults(v, "", config.Config{})
 
-	var cfg Config
+	var cfg config.Config
 	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("error unmarshaling config: %w", err)
 	}
@@ -41,7 +42,7 @@ func CreateConfig(path string, logger *zap.Logger) (*Config, error) {
 
 // CheckSecurityAlerts recurses through the configuration structure to detect fields marked with 'security_alert' tags
 // in the specified environment. If such a field is found, it logs a security alert using the zap logger.
-func CheckSecurityAlerts(c *Config, logger *zap.Logger) {
+func CheckSecurityAlerts(c *config.Config, logger *zap.Logger) {
 	checkStruct(reflect.ValueOf(c), c.Server.Environment, logger)
 }
 
