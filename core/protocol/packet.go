@@ -14,6 +14,12 @@ type RawPacket struct {
 	offset  int    // offset indicates the actual point of buffer reading.
 }
 
+// Packet defines an already composed packet from raw protocol.
+type Packet interface {
+	// GetId provides identifier for packet.
+	GetId() uint16
+}
+
 // GetHeader obtains the header of the packet.
 func (p *RawPacket) GetHeader() uint16 {
 	return p.header

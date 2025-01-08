@@ -6,6 +6,7 @@ import (
 	config2 "pixels-emulator/core/config"
 	"pixels-emulator/core/database"
 	"pixels-emulator/core/log"
+	"pixels-emulator/core/protocol/registry"
 	"pixels-emulator/router"
 	"strconv"
 )
@@ -37,7 +38,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	app, err := router.SetupRouter(zap.L())
+	pReg, hReg := registry.SetupProcessors(), registry.SetupHandlers()
+
+	// As the only method of packet receiving, I will not edit this
+	// until further needs. Maybe on future this can be rewritten to
+	// support other protocols like TCP sockets or something else.
+	app, err := router.SetupRouter(zap.L(), pReg, hReg)
 	if err != nil || app == nil {
 		tLog.Error("Error while setting up HTTP server", zap.Error(err))
 		os.Exit(1)

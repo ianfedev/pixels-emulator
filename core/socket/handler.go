@@ -5,10 +5,14 @@ import (
 	"github.com/gofiber/websocket/v2"
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
+	"pixels-emulator/core/protocol/registry"
 )
 
 // Handle manages the basic message reception from websocket.
-func Handle(logger *zap.Logger) func(*websocket.Conn) {
+func Handle(
+	logger *zap.Logger,
+	pReg *registry.ProcessorRegistry,
+	hReg *registry.HandlerRegistry) func(*websocket.Conn) {
 	return func(c *websocket.Conn) {
 
 		wCon := &WebConnection{Socket: c, Identifier: "authenticating"}
@@ -26,7 +30,11 @@ func Handle(logger *zap.Logger) func(*websocket.Conn) {
 		}()
 
 		for {
-			if err := handleMessage(c, wCon, connLogger); err != nil {
+			if err := handleMessage(
+				c,
+				wCon,
+				pReg,
+				hReg, connLogger); err != nil {
 				if websocket2.IsUnexpectedCloseError(err) {
 					if websocket2.IsUnexpectedCloseError(err, websocket2.CloseGoingAway, websocket.CloseNormalClosure) {
 						connLogger.Warn("WebSocket connection closed unexpectedly", zap.Error(err))
@@ -42,13 +50,18 @@ func Handle(logger *zap.Logger) func(*websocket.Conn) {
 }
 
 // handleMessage processes a single WebSocket message.
-func handleMessage(c *websocket.Conn, wCon *WebConnection, logger *zap.Logger) error {
+func handleMessage(
+	c *websocket.Conn,
+	wCon *WebConnection,
+	pReg *registry.ProcessorRegistry,
+	hReg *registry.HandlerRegistry,
+	logger *zap.Logger) error {
 	_, msg, err := c.ReadMessage()
 	if err != nil {
 		return err
 	}
 
-	if err := processPacket(msg, wCon, logger); err != nil {
+	if err := processPacket(msg, wCon, pReg, hReg, logger); err != nil {
 		logger.Warn("Error processing packet", zap.Error(err))
 	}
 
@@ -56,7 +69,12 @@ func handleMessage(c *websocket.Conn, wCon *WebConnection, logger *zap.Logger) e
 }
 
 // processPacket deserializes and processes a packet.
-func processPacket(msg []byte, wCon *WebConnection, logger *zap.Logger) error {
+func processPacket(
+	msg []byte,
+	wCon *WebConnection,
+	pReg *registry.ProcessorRegistry,
+	hReg *registry.HandlerRegistry,
+	logger *zap.Logger) error {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Error("Recovered from panic during packet processing", zap.Any("panic", r))
@@ -69,6 +87,15 @@ func processPacket(msg []byte, wCon *WebConnection, logger *zap.Logger) error {
 	}
 
 	logger.Debug("Packet received", zap.Uint16("header", pack.GetHeader()))
-	// Additional handling logic here.
+	comPacket, err := pReg.Handle(*pack, wCon)
+	if err != nil {
+		return err
+	}
+
+	err = hReg.Handle(comPacket)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
