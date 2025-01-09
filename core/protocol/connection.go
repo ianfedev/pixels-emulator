@@ -11,6 +11,9 @@ import "pixels-emulator/core/util"
 type Connection interface {
 	util.Disposable
 
-	// GetIdentifier provides an unique identifier of this connection.
-	GetIdentifier() string
+	// Identifier provides an unique identifier of this connection.
+	Identifier() string
+
+	// SendPacket pings a packet to a duplex collection.
+	SendPacket(packet Packet)
 }

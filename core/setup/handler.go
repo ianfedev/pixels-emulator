@@ -2,18 +2,23 @@ package setup
 
 import (
 	"go.uber.org/zap"
-	"pixels-emulator/core/handler"
 	"pixels-emulator/core/protocol"
-	"pixels-emulator/healthcheck"
+	"pixels-emulator/core/registry"
+	"pixels-emulator/healthcheck/pong"
+
+	"pixels-emulator/healthcheck/hello"
 )
 
 // Processors generates all the raw packet processing.
-func Processors() *handler.ProcessorRegistry {
+func Processors() *registry.ProcessorRegistry {
 
-	pReg := handler.NewProcessorRegistry()
+	pReg := registry.NewProcessorRegistry()
 
-	pReg.Register(healthcheck.IncomingPingCode, func(raw protocol.RawPacket, _ protocol.Connection) (protocol.Packet, error) {
-		return healthcheck.NewPingIncoming(raw)
+	pReg.Register(hello.PacketCode, func(raw protocol.RawPacket, _ protocol.Connection) (protocol.Packet, error) {
+		return hello.NewPacket(raw)
+	})
+	pReg.Register(pong.PacketCode, func(raw protocol.RawPacket, _ protocol.Connection) (protocol.Packet, error) {
+		return pong.NewPacket(raw), nil
 	})
 
 	return pReg
@@ -21,11 +26,12 @@ func Processors() *handler.ProcessorRegistry {
 }
 
 // Handlers generates all the packet handling processing.
-func Handlers(logger *zap.Logger) *handler.Registry {
+func Handlers(logger *zap.Logger) *registry.Registry {
 
-	hReg := handler.New()
+	hReg := registry.New()
 
-	hReg.Register(healthcheck.IncomingPingCode, healthcheck.NewIncomingPingHandler(logger))
+	hReg.Register(hello.PacketCode, hello.NewPacketHandler(logger))
+	hReg.Register(pong.PacketCode, pong.NewPacketHandler(logger))
 
 	return hReg
 }

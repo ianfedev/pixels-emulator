@@ -1,12 +1,12 @@
-package handler
+package registry
 
 import (
 	"fmt"
 	"pixels-emulator/core/protocol"
 )
 
-// Handler is a generic interface that represents a handler for a specific packet type.
-// T is the type of the packet that the handler is responsible for.
+// Handler is a generic interface that represents a registry for a specific packet type.
+// T is the type of the packet that the registry is responsible for.
 type Handler[T protocol.Packet] interface {
 	// Handle processes the given packet of type T.
 	//
@@ -16,10 +16,10 @@ type Handler[T protocol.Packet] interface {
 	Handle(packet T, conn protocol.Connection)
 }
 
-// Registry holds a collection of registered handlers, where each handler is associated
+// Registry holds a collection of registered handlers, where each registry is associated
 // with a specific packet type identified by a uint16 ID.
 type Registry struct {
-	// handlers maps packet types (uint16) to their corresponding handler (Handler[protocol.Packet]).
+	// handlers maps packet types (uint16) to their corresponding registry (Handler[protocol.Packet]).
 	handlers map[uint16]Handler[protocol.Packet]
 }
 
@@ -34,18 +34,18 @@ func New() *Registry {
 	}
 }
 
-// Register adds a new handler to the registry, associating it with a specific packet type.
+// Register adds a new registry to the registry, associating it with a specific packet type.
 //
 // Parameters:
 //
-//	packetType: A uint16 identifier for the packet type that the handler will process.
-//	handler: An instance of Handler[protocol.Packet] responsible for processing packets of the specified type.
+//	packetType: A uint16 identifier for the packet type that the registry will process.
+//	registry: An instance of Handler[protocol.Packet] responsible for processing packets of the specified type.
 func (r *Registry) Register(packetType uint16, handler Handler[protocol.Packet]) {
 	r.handlers[packetType] = handler
 }
 
-// Handle processes the provided packet by finding the appropriate handler
-// based on the packet type. If no handler is found for the packet type,
+// Handle processes the provided packet by finding the appropriate registry
+// based on the packet type. If no registry is found for the packet type,
 // it returns an error.
 //
 // Parameters:
@@ -55,8 +55,8 @@ func (r *Registry) Register(packetType uint16, handler Handler[protocol.Packet])
 //
 // Returns:
 //
-//	error: An error if no handler is registered for the packet type,
-//	       or if the packet is of the wrong type for the handler.
+//	error: An error if no registry is registered for the packet type,
+//	       or if the packet is of the wrong type for the registry.
 //
 // Example:
 //
@@ -67,18 +67,18 @@ func (r *Registry) Register(packetType uint16, handler Handler[protocol.Packet])
 //	    fmt.Println("Error handling packet:", err)
 //	}
 func (r *Registry) Handle(packet protocol.Packet, conn protocol.Connection) error {
-	// Find the handler for the given packet type
-	handler, exists := r.handlers[packet.GetId()]
+	// Find the registry for the given packet type
+	handler, exists := r.handlers[packet.Id()]
 	if !exists {
-		return fmt.Errorf("no handler registered for packet type: %d", packet.GetId())
+		return fmt.Errorf("no registry registered for packet type: %d", packet.Id())
 	}
 
-	// Use reflection to handle the packet if the handler exists
+	// Use reflection to handle the packet if the registry exists
 	switch p := packet.(type) {
 	case protocol.Packet:
 		handler.Handle(p, conn)
 	default:
-		return fmt.Errorf("packet is of the wrong type for the handler")
+		return fmt.Errorf("packet is of the wrong type for the registry")
 	}
 
 	return nil

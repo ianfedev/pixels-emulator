@@ -43,10 +43,10 @@ func Config(path string, logger *zap.Logger) (*config.Config, error) {
 // CheckSecurityAlerts recurses through the configuration structure to detect fields marked with 'security_alert' tags
 // in the specified environment. If such a field is found, it logs a security alert using the zap logger.
 func CheckSecurityAlerts(c *config.Config, logger *zap.Logger) {
-	checkStruct(reflect.ValueOf(c), c.Server.Environment, logger)
+	CheckStruct(reflect.ValueOf(c), c.Server.Environment, logger)
 }
 
-func checkStruct(v reflect.Value, env string, logger *zap.Logger) {
+func CheckStruct(v reflect.Value, env string, logger *zap.Logger) {
 
 	// Handle pointers by getting the actual value they point to
 	if v.Kind() == reflect.Ptr {
@@ -75,7 +75,7 @@ func checkStruct(v reflect.Value, env string, logger *zap.Logger) {
 
 		// Recursively check nested structs
 		if field.Kind() == reflect.Struct || field.Kind() == reflect.Ptr {
-			checkStruct(field, env, logger)
+			CheckStruct(field, env, logger)
 		}
 	}
 

@@ -1,4 +1,4 @@
-package handler
+package registry
 
 import (
 	"errors"
@@ -32,7 +32,7 @@ func NewProcessorRegistry() *ProcessorRegistry {
 // Parameters:
 //
 //	code: A uint16 identifier representing the packet type.
-//	handler: A function that processes raw packets into structured packets. It takes a
+//	registry: A function that processes raw packets into structured packets. It takes a
 //	         raw packet and a connection as inputs and returns a structured packet or an error.
 func (pr *ProcessorRegistry) Register(code uint16, handler func(raw protocol.RawPacket, conn protocol.Connection) (protocol.Packet, error)) {
 	pr.processor[code] = handler

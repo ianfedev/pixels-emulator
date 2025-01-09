@@ -1,8 +1,7 @@
 package util
 
-// Disposable represents an interface which can
-// dynamically free unused resources if needed.
+// Disposable represents an interface that defines a method for freeing resources or closing connections when no longer needed.
 type Disposable interface {
-	// Dispose free the resources or closes connections.
+	// Dispose releases resources or closes connections associated with the object.
 	Dispose() error
 }

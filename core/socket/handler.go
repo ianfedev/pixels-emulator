@@ -4,23 +4,23 @@ import (
 	websocket2 "github.com/fasthttp/websocket"
 	"github.com/gofiber/websocket/v2"
 	"go.uber.org/zap"
-	"pixels-emulator/core/handler"
 	"pixels-emulator/core/protocol"
+	"pixels-emulator/core/registry"
 )
 
 // Handle manages the basic message reception from websocket.
 func Handle(
 	logger *zap.Logger,
-	pReg *handler.ProcessorRegistry,
-	hReg *handler.Registry) func(*websocket.Conn) {
+	pReg *registry.ProcessorRegistry,
+	hReg *registry.Registry) func(*websocket.Conn) {
 	return func(c *websocket.Conn) {
 
-		wCon := &WebConnection{Socket: c, Identifier: "authenticating"}
-		connLogger := logger.With(zap.String("identifier", wCon.GetIdentifier()))
+		wCon := NewWeb(c, "authenticating", logger)
+		connLogger := logger.With(zap.String("identifier", wCon.Identifier()))
 
 		defer func() {
 			if err := recover(); err != nil {
-				connLogger.Error("Recovered from fatal error in WebSocket handler", zap.Any("panic", err))
+				connLogger.Error("Recovered from fatal error in WebSocket registry", zap.Any("panic", err))
 			}
 		}()
 		defer func() {
@@ -53,8 +53,8 @@ func Handle(
 func handleMessage(
 	c *websocket.Conn,
 	wCon *WebConnection,
-	pReg *handler.ProcessorRegistry,
-	hReg *handler.Registry,
+	pReg *registry.ProcessorRegistry,
+	hReg *registry.Registry,
 	logger *zap.Logger) error {
 	_, msg, err := c.ReadMessage()
 	if err != nil {
@@ -72,8 +72,8 @@ func handleMessage(
 func processPacket(
 	msg []byte,
 	wCon *WebConnection,
-	pReg *handler.ProcessorRegistry,
-	hReg *handler.Registry,
+	pReg *registry.ProcessorRegistry,
+	hReg *registry.Registry,
 	logger *zap.Logger) error {
 	defer func() {
 		if r := recover(); r != nil {

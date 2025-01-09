@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// GetDSN constructs and returns the Data Source Name (DSN) for connecting to the database.
 func GetDSN(cfg *config.Config) string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.Database.User,
@@ -20,6 +21,8 @@ func GetDSN(cfg *config.Config) string {
 	)
 }
 
+// SetupDatabase initializes the database connection using the provided configuration and logger.
+// It sets up connection pooling parameters and returns a *gorm.DB instance for interacting with the database.
 func SetupDatabase(cfg *config.Config, log *zap.Logger) (*gorm.DB, error) {
 
 	dsn := GetDSN(cfg)

@@ -1,12 +1,14 @@
-package setup
+package setup_test
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
-	config2 "pixels-emulator/core/config"
+	"pixels-emulator/core/config"
+	"pixels-emulator/core/setup"
 	"reflect"
 	"testing"
 )
@@ -37,13 +39,13 @@ func verifySecurityLog(t *testing.T, logOutput string, fields []string) {
 func TestCheckSecurityAlerts(t *testing.T) {
 	logger, buf := createTestLogger(t)
 
-	config := &config2.Config{
-		Server: config2.ServerConfig{
+	cfg := &config.Config{
+		Server: config.ServerConfig{
 			IP:          "127.0.0.1",
 			Port:        8080,
 			Environment: "PRODUCTION",
 		},
-		Database: config2.DatabaseConfig{
+		Database: config.DatabaseConfig{
 			Database: "prod_db",
 			Password: "prod_secret",
 			User:     "admin",
@@ -52,7 +54,7 @@ func TestCheckSecurityAlerts(t *testing.T) {
 		},
 	}
 
-	CheckSecurityAlerts(config, logger)
+	setup.CheckSecurityAlerts(cfg, logger)
 	verifySecurityLog(t, buf.String(), []string{"Password", "User", "Host", "Database", "Port"})
 }
 
@@ -60,13 +62,13 @@ func TestCheckSecurityAlerts(t *testing.T) {
 func TestCheckStruct(t *testing.T) {
 	logger, buf := createTestLogger(t)
 
-	config := &config2.Config{
-		Server: config2.ServerConfig{
+	cfg := &config.Config{
+		Server: config.ServerConfig{
 			IP:          "127.0.0.1",
 			Port:        8080,
 			Environment: "PRODUCTION",
 		},
-		Database: config2.DatabaseConfig{
+		Database: config.DatabaseConfig{
 			Database: "prod_db",
 			Password: "prod_secret",
 			User:     "admin",
@@ -76,7 +78,7 @@ func TestCheckStruct(t *testing.T) {
 	}
 
 	// Run the checkStruct function directly
-	checkStruct(reflect.ValueOf(config), "PRODUCTION", logger)
+	setup.CheckStruct(reflect.ValueOf(cfg), "PRODUCTION", logger)
 	verifySecurityLog(t, buf.String(), []string{"Password", "User", "Host", "Database", "Port"})
 }
 
@@ -86,7 +88,7 @@ func TestCheckStructNonStruct(t *testing.T) {
 
 	// Pass a non-struct value, such as an integer
 	nonStructValue := 42
-	checkStruct(reflect.ValueOf(nonStructValue), "PRODUCTION", logger)
+	setup.CheckStruct(reflect.ValueOf(nonStructValue), "PRODUCTION", logger)
 
 	// Ensure that no log entries are created since it's not a struct
 	if buf.String() != "" {
@@ -108,7 +110,7 @@ func TestCreateConfig_Success(t *testing.T) {
 	}()
 
 	// Write valid config content to the temporary file
-	configContent := `[healthcheck]
+	configContent := `[server]
 ip=192.168.1.1
 port=8080
 environment=PRODUCTION
@@ -129,19 +131,18 @@ level=DEBUG`
 		t.Logf("Error writing temp config on test: %v", err)
 		return
 	}
-
-	config, err := Config(tempFile.Name(), logger)
+	cfg, err := setup.Config(tempFile.Name(), logger)
 	assert.NoError(t, err)
-	assert.NotNil(t, config)
-	assert.Equal(t, "192.168.1.1", config.Server.IP)
-	assert.Equal(t, "PRODUCTION", config.Server.Environment)
-	assert.Equal(t, "DEBUG", config.Logging.Level)
+	assert.NotNil(t, cfg)
+	assert.Equal(t, "192.168.1.1", cfg.Server.IP)
+	assert.Equal(t, "PRODUCTION", cfg.Server.Environment)
+	assert.Equal(t, "DEBUG", cfg.Logging.Level)
 }
 
 // TestCreateConfig_FileNotFound tests when the configuration file is missing.
 func TestCreateConfig_FileNotFound(t *testing.T) {
 	logger, _ := createTestLogger(t)
-	_, err := Config("nonexistent_config.ini", logger)
+	_, err := setup.Config("nonexistent_config.ini", logger)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error reading config file")
 }
@@ -165,7 +166,7 @@ func TestCreateConfig_InvalidContent(t *testing.T) {
 		return
 	}
 
-	_, err = Config(tempFile.Name(), logger)
+	_, err = setup.Config(tempFile.Name(), logger)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error reading config file")
 }
@@ -183,7 +184,7 @@ func TestCreateConfigEnvOverrides(t *testing.T) {
 	}()
 
 	// Write minimal valid config
-	configContent := `[healthcheck]
+	configContent := `[server]
 ip=192.168.1.1
 port=8080
 environment=DEVELOPMENT`
@@ -201,10 +202,11 @@ environment=DEVELOPMENT`
 		}
 	}()
 
-	config, err := Config(tempFile.Name(), logger)
+	fmt.Println()
+	cfg, err := setup.Config(tempFile.Name(), logger)
 	assert.NoError(t, err)
-	assert.NotNil(t, config)
-	assert.Equal(t, "10.0.0.1", config.Server.IP) // Environment variable override
-	assert.Equal(t, uint16(8080), config.Server.Port)
-	assert.Equal(t, "DEVELOPMENT", config.Server.Environment)
+	assert.NotNil(t, cfg)
+	assert.Equal(t, "10.0.0.1", cfg.Server.IP) // Environment variable override
+	assert.Equal(t, uint16(8080), cfg.Server.Port)
+	assert.Equal(t, "DEVELOPMENT", cfg.Server.Environment)
 }

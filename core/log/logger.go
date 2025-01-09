@@ -37,7 +37,8 @@ func getDefaultEncoderConfig(useColor bool) zapcore.EncoderConfig {
 	return cfg
 }
 
-// SetupLogger sets up the logger based on the configuration and uses buffers only in the TEST environment.
+// SetupLogger configures the logger based on the provided configuration and environment settings.
+// If the environment is "TEST", the logger will use in-memory buffers.
 func SetupLogger(cfg *config.Config) []*bytes.Buffer {
 
 	if err := os.MkdirAll("logs", 0755); err != nil {
@@ -87,7 +88,7 @@ func SetupLogger(cfg *config.Config) []*bytes.Buffer {
 
 }
 
-// getLogWriter returns a lumberjack log writer.
+// getLogWriter returns a lumberjack WriteSyncer that writes to the specified file path with rotation settings.
 func getLogWriter(path string) zapcore.WriteSyncer {
 	return zapcore.AddSync(&lumberjack.Logger{
 		Filename:   path,

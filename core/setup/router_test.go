@@ -19,7 +19,9 @@ func TestSetupRouter(t *testing.T) {
 		}
 	}()
 
-	app, err := Router(logger)
+	pReg := Processors()
+	hReg := Handlers(logger)
+	app, err := Router(logger, pReg, hReg)
 	assert.NoError(t, err)
 	assert.NotNil(t, app)
 	assert.Equal(t, app.Config().ServerHeader, "Pixels Emulator")
@@ -36,7 +38,9 @@ func TestRoute(t *testing.T) {
 		}
 	}()
 
-	app, err := Router(logger)
+	pReg := Processors()
+	hReg := Handlers(logger)
+	app, err := Router(logger, pReg, hReg)
 	assert.NoError(t, err)
 
 	app.Get("/test", func(c *fiber.Ctx) error {

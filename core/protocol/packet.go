@@ -16,8 +16,12 @@ type RawPacket struct {
 
 // Packet defines an already composed packet from raw protocol.
 type Packet interface {
-	// GetId provides identifier for packet.
-	GetId() uint16
+
+	// Id provides identifier for packet.
+	Id() uint16
+
+	// Serialize provides a raw packet version to be sent.
+	Serialize() RawPacket
 }
 
 // GetHeader obtains the header of the packet.

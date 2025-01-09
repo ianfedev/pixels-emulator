@@ -5,7 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"go.uber.org/zap"
-	"pixels-emulator/core/handler"
+	"pixels-emulator/core/registry"
 	"pixels-emulator/core/socket"
 )
 
@@ -14,8 +14,8 @@ import (
 // Nitro Client.
 func Router(
 	logger *zap.Logger,
-	registry *handler.ProcessorRegistry,
-	handlerRegistry *handler.Registry) (*fiber.App, error) {
+	registry *registry.ProcessorRegistry,
+	handlerRegistry *registry.Registry) (*fiber.App, error) {
 
 	app := fiber.New(fiber.Config{
 		ServerHeader:          "Pixels Emulator",

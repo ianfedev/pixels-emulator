@@ -28,7 +28,7 @@ type LoggingConfig struct {
 // Config defines the complete model of configuration to
 // be unmarshalled by a configuration provider.
 type Config struct {
-	Server   ServerConfig   `mapstructure:"healthcheck" default:""` // Server base configuration.
-	Database DatabaseConfig `mapstructure:"database" default:""`    // Database connection configuration.
-	Logging  LoggingConfig  `mapstructure:"logging" default:""`     // Logging configuration.
+	Server   ServerConfig   `mapstructure:"server" default:""`   // Server base configuration.
+	Database DatabaseConfig `mapstructure:"database" default:""` // Database connection configuration.
+	Logging  LoggingConfig  `mapstructure:"logging" default:""`  // Logging configuration.
 }
