@@ -22,6 +22,9 @@ type Packet interface {
 
 	// Serialize provides a raw packet version to be sent.
 	Serialize() RawPacket
+
+	// Rate provides the maximum of packets per second a connection can receive.
+	Rate() (uint16, uint16)
 }
 
 // GetHeader obtains the header of the packet.

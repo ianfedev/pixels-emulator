@@ -1,6 +1,8 @@
 package protocol
 
-import "pixels-emulator/core/util"
+import (
+	"pixels-emulator/core/util"
+)
 
 // Connection acts a generic interface which describes
 // a protocol-able connection.
@@ -16,4 +18,7 @@ type Connection interface {
 
 	// SendPacket pings a packet to a duplex collection.
 	SendPacket(packet Packet)
+
+	// RateRegistry limit rates outgoing packets.
+	RateRegistry() *RateLimiterRegistry
 }

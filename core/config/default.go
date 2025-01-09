@@ -8,8 +8,9 @@ import (
 	"reflect"
 )
 
-// SetDefaults sets the default values of a configuration struct in a specific Viper instance using reflection.
-// It recursively sets defaults for each field in the struct, based on the "default" tag in the struct fields.
+// SetDefaults recursively sets default values for the fields in the provided config structure.
+// It uses the mapstructure and default tags to determine the key-value pairs for default values.
+// The function also supports nested structs by calling itself recursively for struct fields.
 func SetDefaults(v *viper.Viper, prefix string, config interface{}) {
 	value := reflect.Indirect(reflect.ValueOf(config))
 	typeOf := value.Type()
@@ -44,9 +45,9 @@ func SetDefaults(v *viper.Viper, prefix string, config interface{}) {
 	}
 }
 
-// CreateDefaultConfig creates a default config file if it does not exist.
-// It checks if the config file exists at the given path, and if not, creates it with default values.
-// It logs the creation of the file using the provided logger.
+// CreateDefaultConfig creates a default configuration file if it doesn't exist.
+// It initializes the Viper configuration, sets defaults using the SetDefaults function,
+// and writes the configuration to a file if it doesn't already exist.
 func CreateDefaultConfig(path string, logger *zap.Logger) error {
 
 	v := viper.New()

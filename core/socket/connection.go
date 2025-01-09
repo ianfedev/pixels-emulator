@@ -18,6 +18,9 @@ type WebConnection struct {
 
 	// logger to write messages.
 	logger *zap.Logger
+
+	// limiter provides rate limiter for outgoing packets.
+	limiter *protocol.RateLimiterRegistry
 }
 
 // Dispose closes the websocket connection.
@@ -33,20 +36,35 @@ func (w *WebConnection) Identifier() string {
 // SendPacket serializes the provided packet and sends it over the websocket connection.
 // Logs an error if the sending process fails.
 func (w *WebConnection) SendPacket(packet protocol.Packet) {
+
+	conLog := w.logger.With(zap.Uint16("header", packet.Id()), zap.String("identifier", w.Identifier()))
+
+	period, rate := packet.Rate()
+	if rate > 0 {
+		limiter := w.limiter.GetLimiter(packet.Id(), period, rate)
+
+		if !limiter.Allow() {
+			w.logger.Debug("rate limit exceeded on connection")
+			return
+		}
+	}
+
 	sPacket := packet.Serialize()
 	err := w.Socket.WriteMessage(2, sPacket.ToBytes())
 	if err != nil {
-		w.logger.Error("Error while processing packet for send", zap.Error(err))
+		conLog.Error("Error while processing packet for send", zap.Error(err))
 		return
 	}
-	w.logger.Debug("Packet sent", zap.Uint16("header", packet.Id()), zap.String("identifier", w.Identifier()))
+
+	conLog.Debug("Packet sent")
 }
 
 // NewWeb creates a new WebConnection wrapper for a given websocket connection, unique id, and logger.
-func NewWeb(socket *websocket.Conn, id string, logger *zap.Logger) *WebConnection {
+func NewWeb(socket *websocket.Conn, id string, limiter *protocol.RateLimiterRegistry, logger *zap.Logger) *WebConnection {
 	return &WebConnection{
-		Socket: socket,
-		Id:     id,
-		logger: logger,
+		Socket:  socket,
+		Id:      id,
+		logger:  logger,
+		limiter: limiter,
 	}
 }

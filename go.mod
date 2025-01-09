@@ -3,9 +3,14 @@ module pixels-emulator
 go 1.23.4
 
 require (
+	github.com/fasthttp/websocket v1.5.3
+	github.com/gofiber/contrib/fiberzap/v2 v2.1.4
+	github.com/gofiber/fiber/v2 v2.52.6
+	github.com/gofiber/websocket/v2 v2.2.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
+	golang.org/x/time v0.5.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
@@ -15,14 +20,9 @@ require (
 require (
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/fasthttp/websocket v1.5.3 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
-	github.com/gofiber/contrib/fiberzap/v2 v2.1.4 // indirect
-	github.com/gofiber/fiber/v2 v2.52.6 // indirect
-	github.com/gofiber/websocket/v2 v2.2.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gookit/event v1.1.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
