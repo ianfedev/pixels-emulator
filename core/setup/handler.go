@@ -2,8 +2,10 @@ package setup
 
 import (
 	"go.uber.org/zap"
+	"pixels-emulator/core/config"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/registry"
+	"pixels-emulator/core/scheduler"
 	"pixels-emulator/healthcheck/pong"
 
 	"pixels-emulator/healthcheck/hello"
@@ -26,12 +28,12 @@ func Processors() *registry.ProcessorRegistry {
 }
 
 // Handlers generates all the packet handling processing.
-func Handlers(logger *zap.Logger) *registry.Registry {
+func Handlers(logger *zap.Logger, cfg *config.Config, scheduler *scheduler.Scheduler) *registry.Registry {
 
 	hReg := registry.New()
 
 	hReg.Register(hello.PacketCode, hello.NewPacketHandler(logger))
-	hReg.Register(pong.PacketCode, pong.NewPacketHandler(logger))
+	hReg.Register(pong.PacketCode, pong.NewPacketHandler(logger, cfg.Server.PingRate, scheduler))
 
 	return hReg
 }

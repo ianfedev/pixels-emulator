@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"go.uber.org/zap"
+	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/registry"
 	"pixels-emulator/core/socket"
 )
@@ -15,7 +16,8 @@ import (
 func Router(
 	logger *zap.Logger,
 	registry *registry.ProcessorRegistry,
-	handlerRegistry *registry.Registry) (*fiber.App, error) {
+	handlerRegistry *registry.Registry,
+	conStore *protocol.ConnectionStore) (*fiber.App, error) {
 
 	app := fiber.New(fiber.Config{
 		ServerHeader:          "Pixels Emulator",
@@ -24,7 +26,7 @@ func Router(
 	})
 
 	app.Use(fiberzap.New(fiberzap.Config{Logger: logger}))
-	app.Get("/", websocket.New(socket.Handle(logger, registry, handlerRegistry)))
+	app.Get("/", websocket.New(socket.Handle(logger, registry, handlerRegistry, conStore)))
 
 	return app, nil
 

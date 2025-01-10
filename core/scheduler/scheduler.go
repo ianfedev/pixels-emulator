@@ -34,7 +34,7 @@ type CronScheduler struct {
 }
 
 // NewCronScheduler creates a new CronScheduler instance.
-func NewCronScheduler() *CronScheduler {
+func NewCronScheduler() Scheduler {
 	return &CronScheduler{
 		cronInstance: cron.New(),
 	}

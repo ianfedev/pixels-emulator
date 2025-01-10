@@ -16,8 +16,11 @@ type Connection interface {
 	// Identifier provides an unique identifier of this connection.
 	Identifier() string
 
-	// SendPacket pings a packet to a duplex collection.
+	// SendPacket pings an outgoing packet.
 	SendPacket(packet Packet)
+
+	// SendRaw pings a raw packet with custom restriction.
+	SendRaw(packet RawPacket, period uint16, rate uint16)
 
 	// RateRegistry limit rates outgoing packets.
 	RateRegistry() *RateLimiterRegistry

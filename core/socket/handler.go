@@ -12,12 +12,14 @@ import (
 func Handle(
 	logger *zap.Logger,
 	pReg *registry.ProcessorRegistry,
-	hReg *registry.Registry) func(*websocket.Conn) {
+	hReg *registry.Registry,
+	conStore *protocol.ConnectionStore) func(*websocket.Conn) {
 	return func(c *websocket.Conn) {
 
 		rReg := protocol.NewRateLimiterRegistry()
 		wCon := NewWeb(c, "authenticating", rReg, logger)
 		connLogger := logger.With(zap.String("identifier", wCon.Identifier()))
+		conStore.AddConnection(wCon)
 
 		defer func() {
 			if err := recover(); err != nil {
@@ -31,18 +33,13 @@ func Handle(
 		}()
 
 		for {
-			if err := handleMessage(
-				c,
-				wCon,
-				pReg,
-				hReg,
-				rReg,
-				connLogger); err != nil {
+			if err := handleMessage(c, wCon, pReg, hReg, rReg, connLogger); err != nil {
 				if websocket2.IsUnexpectedCloseError(err) {
 					if websocket2.IsUnexpectedCloseError(err, websocket2.CloseGoingAway, websocket.CloseNormalClosure) {
 						connLogger.Warn("WebSocket connection closed unexpectedly", zap.Error(err))
 					}
 					connLogger.Debug("WebSocket connection closed", zap.Error(err))
+					conStore.RemoveConnection(wCon.Identifier())
 					break
 				} else {
 					connLogger.Error("Error handling WebSocket message", zap.Error(err))

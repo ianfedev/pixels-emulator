@@ -2,15 +2,16 @@ package setup
 
 import (
 	"pixels-emulator/core/config"
+	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/scheduler"
 	"pixels-emulator/healthcheck/ping"
 )
 
-func Cron(cfg *config.Config) *scheduler.CronScheduler {
+func Cron(cfg *config.Config, conStore *protocol.ConnectionStore) *scheduler.Scheduler {
 
-	s := scheduler.NewCronScheduler()
-	ping.ScheduleTask(*cfg, s)
+	sc := scheduler.NewCronScheduler()
+	ping.ScheduleTask(cfg, &sc, conStore)
 
-	return s
+	return &sc
 
 }

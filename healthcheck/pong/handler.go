@@ -4,32 +4,42 @@ import (
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/registry"
+	"pixels-emulator/core/scheduler"
 	"pixels-emulator/healthcheck/ping"
 	"time"
 )
 
 type PacketHandler struct {
-	logger *zap.Logger
+	logger    *zap.Logger
+	rate      uint16
+	scheduler *scheduler.Scheduler
 }
 
 func (h PacketHandler) Handle(packet protocol.Packet, conn protocol.Connection) {
 
-	// Attempt to cast the incoming packet to a Packet
 	_, ok := packet.(*Packet)
 	if !ok {
 		h.logger.Error("cannot cast ping packet, skipping processing")
 		return
 	}
 
-	time.AfterFunc(2*time.Second, func() {
+	if h.rate > 0 {
+		// When rate is zero, client is pinging first (Manually ping in nitro).
+		// otherwise, Pixels will be the one pinging first at cronjob.
+		return
+	}
+
+	(*h.scheduler).ScheduleTaskLater(2*time.Second, func() {
 		pingPacket := ping.NewPingPacket()
 		conn.SendPacket(pingPacket)
 	})
 
 }
 
-func NewPacketHandler(logger *zap.Logger) registry.Handler[protocol.Packet] {
+func NewPacketHandler(logger *zap.Logger, rate uint16, scheduler *scheduler.Scheduler) registry.Handler[protocol.Packet] {
 	return PacketHandler{
-		logger: logger,
+		logger:    logger,
+		rate:      rate,
+		scheduler: scheduler,
 	}
 }

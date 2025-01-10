@@ -39,7 +39,8 @@ func (r *RateLimiterRegistry) GetLimiter(id uint16, rateLimit uint16, duration u
 	}
 
 	// Create a new rate limiter with the provided rate
-	limiter := rate.NewLimiter(rate.Every(time.Duration(rateLimit)*time.Second), int(duration)) // 1 token per 'rateLimit' ticks
+	t := rate.Every(time.Duration(rateLimit) * time.Second)
+	limiter := rate.NewLimiter(t, int(duration))
 	r.limiters[id] = limiter
 	return limiter
 }

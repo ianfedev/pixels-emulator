@@ -6,6 +6,7 @@ import (
 	config2 "pixels-emulator/core/config"
 	"pixels-emulator/core/database"
 	"pixels-emulator/core/log"
+	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/setup"
 	"strconv"
 )
@@ -37,17 +38,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	conStore := protocol.NewConnectionStore()
+	cron := setup.Cron(cfg, conStore)
+	(*cron).Start()
+
 	pReg := setup.Processors()
-	hReg := setup.Handlers(zap.L())
+	hReg := setup.Handlers(zap.L(), cfg, cron)
 
 	zap.L().Info("Starting scheduler")
-	cron := setup.Cron(cfg)
-	cron.Start()
 
 	// As the only method of packet receiving, I will not edit this
 	// until further needs. Maybe on future this can be rewritten to
 	// support other protocols like TCP sockets or something else.
-	app, err := setup.Router(zap.L(), pReg, hReg)
+	app, err := setup.Router(zap.L(), pReg, hReg, conStore)
 	if err != nil || app == nil {
 		tLog.Error("Error while setting up HTTP healthcheck", zap.Error(err))
 		os.Exit(1)

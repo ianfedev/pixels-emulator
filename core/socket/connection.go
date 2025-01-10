@@ -36,12 +36,18 @@ func (w *WebConnection) Identifier() string {
 // SendPacket serializes the provided packet and sends it over the websocket connection.
 // Logs an error if the sending process fails.
 func (w *WebConnection) SendPacket(packet protocol.Packet) {
-
-	conLog := w.logger.With(zap.Uint16("header", packet.Id()), zap.String("identifier", w.Identifier()))
-
 	period, rate := packet.Rate()
+	w.SendRaw(packet.Serialize(), period, rate)
+}
+
+// SendRaw sends a packet over the websocket connection.
+// Logs an error if the sending process fails.
+func (w *WebConnection) SendRaw(packet protocol.RawPacket, period uint16, rate uint16) {
+
+	conLog := w.logger.With(zap.Uint16("header", packet.GetHeader()), zap.String("identifier", w.Identifier()))
+
 	if rate > 0 {
-		limiter := w.limiter.GetLimiter(packet.Id(), period, rate)
+		limiter := w.limiter.GetLimiter(packet.GetHeader(), period, rate)
 
 		if !limiter.Allow() {
 			w.logger.Debug("rate limit exceeded on connection")
@@ -49,8 +55,7 @@ func (w *WebConnection) SendPacket(packet protocol.Packet) {
 		}
 	}
 
-	sPacket := packet.Serialize()
-	err := w.Socket.WriteMessage(2, sPacket.ToBytes())
+	err := w.Socket.WriteMessage(2, packet.ToBytes())
 	if err != nil {
 		conLog.Error("Error while processing packet for send", zap.Error(err))
 		return
