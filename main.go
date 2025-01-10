@@ -40,6 +40,10 @@ func main() {
 	pReg := setup.Processors()
 	hReg := setup.Handlers(zap.L())
 
+	zap.L().Info("Starting scheduler")
+	cron := setup.Cron(cfg)
+	cron.Start()
+
 	// As the only method of packet receiving, I will not edit this
 	// until further needs. Maybe on future this can be rewritten to
 	// support other protocols like TCP sockets or something else.

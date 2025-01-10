@@ -6,6 +6,7 @@ type ServerConfig struct {
 	IP          string `mapstructure:"ip" default:"127.0.0.1"`            // IP address where Nitro will consume
 	Port        uint16 `mapstructure:"port" default:"3000"`               // Port where Nitro will consume
 	Environment string `mapstructure:"environment" default:"DEVELOPMENT"` // Environment of deployment
+	PingRate    uint16 `mapstructure:"ping_rate" default:"5"`             // PingRate every time a ping packet should be sent. If 0 client must ping.
 }
 
 // DatabaseConfig defines the information to establish connection
