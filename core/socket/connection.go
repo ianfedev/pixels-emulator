@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/websocket/v2"
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
+	"sync"
 )
 
 // WebConnection wraps a websocket connection and adds additional functionalities such as unique identification and packet handling.
@@ -21,6 +22,9 @@ type WebConnection struct {
 
 	// limiter provides rate limiter for outgoing packets.
 	limiter *protocol.RateLimiterRegistry
+
+	// writeMutex ensures thread-safe writes to the websocket.
+	writeMutex sync.Mutex
 }
 
 // Dispose closes the websocket connection.
@@ -43,7 +47,6 @@ func (w *WebConnection) SendPacket(packet protocol.Packet) {
 // SendRaw sends a packet over the websocket connection.
 // Logs an error if the sending process fails.
 func (w *WebConnection) SendRaw(packet protocol.RawPacket, period uint16, rate uint16) {
-
 	conLog := w.logger.With(zap.Uint16("header", packet.GetHeader()), zap.String("identifier", w.Identifier()))
 
 	if rate > 0 {
@@ -54,6 +57,9 @@ func (w *WebConnection) SendRaw(packet protocol.RawPacket, period uint16, rate u
 			return
 		}
 	}
+
+	w.writeMutex.Lock()
+	defer w.writeMutex.Unlock()
 
 	err := w.Socket.WriteMessage(2, packet.ToBytes())
 	if err != nil {
@@ -67,9 +73,10 @@ func (w *WebConnection) SendRaw(packet protocol.RawPacket, period uint16, rate u
 // NewWeb creates a new WebConnection wrapper for a given websocket connection, unique id, and logger.
 func NewWeb(socket *websocket.Conn, id string, limiter *protocol.RateLimiterRegistry, logger *zap.Logger) *WebConnection {
 	return &WebConnection{
-		Socket:  socket,
-		Id:      id,
-		logger:  logger,
-		limiter: limiter,
+		Socket:     socket,
+		Id:         id,
+		logger:     logger,
+		limiter:    limiter,
+		writeMutex: sync.Mutex{},
 	}
 }
