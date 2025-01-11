@@ -14,9 +14,9 @@ func (m *MockConnection) Identifier() string {
 	return m.id
 }
 
-func (m *MockConnection) SendPacket(packet Packet) {}
+func (m *MockConnection) SendPacket(_ Packet) {}
 
-func (m *MockConnection) SendRaw(packet RawPacket, period uint16, rate uint16) {}
+func (m *MockConnection) SendRaw(_ RawPacket, _ uint16, _ uint16) {}
 
 func (m *MockConnection) RateRegistry() *RateLimiterRegistry {
 	return nil
