@@ -30,19 +30,19 @@ type Scheduler interface {
 
 // CronScheduler implements the Scheduler interface using robfig/cron.
 type CronScheduler struct {
-	cronInstance *cron.Cron
+	CronInstance *cron.Cron
 }
 
 // NewCronScheduler creates a new CronScheduler instance.
 func NewCronScheduler() Scheduler {
 	return &CronScheduler{
-		cronInstance: cron.New(),
+		CronInstance: cron.New(),
 	}
 }
 
 // ScheduleTask schedules a recurring task using a cron expression.
 func (cs *CronScheduler) ScheduleTask(schedule string, task func()) (cron.EntryID, error) {
-	id, err := cs.cronInstance.AddFunc(schedule, task)
+	id, err := cs.CronInstance.AddFunc(schedule, task)
 	if err != nil {
 		return 0, fmt.Errorf("failed to schedule task: %w", err)
 	}
@@ -52,11 +52,11 @@ func (cs *CronScheduler) ScheduleTask(schedule string, task func()) (cron.EntryI
 // ScheduleTaskLater schedules a one-time task after a delay.
 func (cs *CronScheduler) ScheduleTaskLater(delay time.Duration, task func()) cron.EntryID {
 	var id cron.EntryID
-	id = cs.cronInstance.Schedule(
+	id = cs.CronInstance.Schedule(
 		cron.Every(delay),
 		cron.FuncJob(func() {
 			task()
-			cs.cronInstance.Remove(id)
+			cs.CronInstance.Remove(id)
 		}),
 	)
 	return id
@@ -79,16 +79,16 @@ func (cs *CronScheduler) ScheduleTasksLater(delays []time.Duration, tasks []func
 
 // ScheduleRepeatingTask schedules a task to run repeatedly with a fixed interval.
 func (cs *CronScheduler) ScheduleRepeatingTask(interval time.Duration, task func()) cron.EntryID {
-	id := cs.cronInstance.Schedule(cron.Every(interval), cron.FuncJob(task))
+	id := cs.CronInstance.Schedule(cron.Every(interval), cron.FuncJob(task))
 	return id
 }
 
 // Stop stops the scheduler and all its tasks.
 func (cs *CronScheduler) Stop() {
-	cs.cronInstance.Stop()
+	cs.CronInstance.Stop()
 }
 
 // Start starts the scheduler.
 func (cs *CronScheduler) Start() {
-	cs.cronInstance.Start()
+	cs.CronInstance.Start()
 }
