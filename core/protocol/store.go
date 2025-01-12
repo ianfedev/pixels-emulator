@@ -92,3 +92,13 @@ func (m *ConnectionStore) ConnectionCount() int {
 	defer m.mutex.Unlock()
 	return len(m.connections)
 }
+
+// CloseActive closes all active connections and clears the connection store.
+func (m *ConnectionStore) CloseActive() {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	for _, conn := range m.connections {
+		_ = (*conn).Dispose() // Assuming Close is a method on Connection that handles cleanup.
+	}
+	m.connections = nil // Clear all connections after closing them.
+}

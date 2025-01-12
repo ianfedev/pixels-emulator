@@ -1,6 +1,8 @@
 package socket
 
 import (
+	"errors"
+	websocket2 "github.com/fasthttp/websocket"
 	"github.com/gofiber/websocket/v2"
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
@@ -29,6 +31,11 @@ type WebConnection struct {
 
 // Dispose closes the websocket connection.
 func (w *WebConnection) Dispose() error {
+	w.logger.Debug("Disposing connection", zap.String("identifier", w.Identifier()))
+	cm := websocket.FormatCloseMessage(1006, "Connection forced to be closed by client")
+	if err := w.Socket.WriteMessage(websocket.CloseMessage, cm); err != nil && !errors.Is(err, websocket2.ErrCloseSent) {
+		w.logger.Error("Error while writing closure", zap.String("identifier", w.Identifier()), zap.Error(err))
+	}
 	return w.Socket.Close()
 }
 

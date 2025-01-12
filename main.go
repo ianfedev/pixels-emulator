@@ -46,6 +46,9 @@ func main() {
 	}
 
 	conStore := protocol.NewConnectionStore()
+
+	defer conStore.CloseActive() // TODO: Create server stop system.
+
 	cron := setup.Cron(cfg, conStore)
 	(*cron).Start()
 

@@ -2,11 +2,13 @@ package grant
 
 import (
 	"errors"
+	"fmt"
 	"go.uber.org/zap"
 	ok "pixels-emulator/auth/ok"
 	"pixels-emulator/core/event"
 	"pixels-emulator/core/protocol"
 	"strconv"
+	"time"
 )
 
 // OnAuthGranted performs tasks of authentication granting.
@@ -41,6 +43,13 @@ func OnAuthGranted(conStore *protocol.ConnectionStore) func(event event.Event) {
 
 		authPack := ok.NewAuthOkPacket()
 		(*con).SendPacket(authPack)
+		time.AfterFunc(5*time.Second, func() {
+			err := (*con).Dispose()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		})
 
 	}
 }
