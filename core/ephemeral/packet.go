@@ -35,6 +35,6 @@ func Handlers() {
 	hReg.Register(healthMsg.HelloCode, healthHandler.NewHello())
 	hReg.Register(healthMsg.PongCode, healthHandler.NewPong())
 
-	hReg.Register(authMsg.AuthOkCode, authHandler.NewAuthTicket())
+	hReg.Register(authMsg.AuthTicketCode, authHandler.NewAuthTicket())
 
 }

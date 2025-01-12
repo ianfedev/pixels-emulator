@@ -5,9 +5,9 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	ephemeral2 "pixels-emulator/core/ephemeral"
 	"pixels-emulator/core/server"
 	"pixels-emulator/core/setup"
-	"pixels-emulator/core/setup/ephemeral"
 	"strconv"
 	"syscall"
 )
@@ -16,26 +16,28 @@ import (
 func main() {
 
 	sv := server.GetServer()
-	ephemeral.Processors()
-	ephemeral.Handlers()
-	ephemeral.Cron()
-	ephemeral.Event()
-
-	// Bind the server and handle any errors
-	if err := bindServer(sv); err != nil {
-		sv.Logger.Error("Error while binding HTTP server", zap.Error(err))
-		os.Exit(1)
-	}
+	ephemeral2.Processors()
+	ephemeral2.Handlers()
+	ephemeral2.Cron()
+	ephemeral2.Event()
 
 	// Channel to listen for system termination signals
 	sigChannel := make(chan os.Signal, 1)
 	signal.Notify(sigChannel, syscall.SIGINT, syscall.SIGTERM)
 
-	// Wait for signal to stop the server
+	// Start server in a goroutine to avoid blocking
+	go func() {
+		if err := bindServer(sv); err != nil {
+			sv.Logger.Error("Error while binding HTTP server", zap.Error(err))
+			os.Exit(1)
+		}
+	}()
+
+	// Wait for system termination signal
 	sig := <-sigChannel
 	sv.Logger.Info("Signal to stop server received", zap.String("signal", sig.String()))
 
-	// Stop the server and handle any errors
+	// Stop the server gracefully
 	if err := sv.Stop(); err != nil {
 		sv.Logger.Error("Error while stopping server", zap.Error(err))
 	}

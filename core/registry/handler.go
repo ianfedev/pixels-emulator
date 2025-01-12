@@ -40,7 +40,7 @@ func (r *Registry) Register(packetType uint16, handler Handler[protocol.Packet])
 func (r *Registry) Handle(packet protocol.Packet, conn *protocol.Connection) error {
 	handler, exists := r.handlers[packet.Id()]
 	if !exists {
-		return fmt.Errorf("no registry registered for packet type: %d", packet.Id())
+		return fmt.Errorf("no handler registered for packet type: %d", packet.Id())
 	}
 
 	switch p := packet.(type) {
