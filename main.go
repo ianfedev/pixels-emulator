@@ -2,82 +2,54 @@ package main
 
 import (
 	"go.uber.org/zap"
+	"net"
 	"os"
-	config2 "pixels-emulator/core/config"
-	"pixels-emulator/core/database"
-	"pixels-emulator/core/event"
-	"pixels-emulator/core/log"
-	"pixels-emulator/core/protocol"
+	"os/signal"
+	"pixels-emulator/core/server"
 	"pixels-emulator/core/setup"
+	"pixels-emulator/core/setup/ephemeral"
 	"strconv"
+	"syscall"
 )
 
+// main initializes the server, binds it, and handles system signals for graceful shutdown.
 func main() {
 
-	tLog := log.CreateTempLogger()
-	tLog.Info("Starting Pixels emulator")
+	sv := server.GetServer()
+	ephemeral.Processors()
+	ephemeral.Handlers()
+	ephemeral.Cron()
+	ephemeral.Event()
 
-	err := config2.CreateDefaultConfig("config.ini", tLog)
-	if err != nil {
-		tLog.Error("Error while loading configuration", zap.Error(err))
+	// Bind the server and handle any errors
+	if err := bindServer(sv); err != nil {
+		sv.Logger.Error("Error while binding HTTP server", zap.Error(err))
 		os.Exit(1)
 	}
 
-	cfg, err := setup.Config("config.ini", zap.L())
+	// Channel to listen for system termination signals
+	sigChannel := make(chan os.Signal, 1)
+	signal.Notify(sigChannel, syscall.SIGINT, syscall.SIGTERM)
 
-	if err != nil {
-		tLog.Error("Error while loading configuration", zap.Error(err))
-		os.Exit(1)
+	// Wait for signal to stop the server
+	sig := <-sigChannel
+	sv.Logger.Info("Signal to stop server received", zap.String("signal", sig.String()))
+
+	// Stop the server and handle any errors
+	if err := sv.Stop(); err != nil {
+		sv.Logger.Error("Error while stopping server", zap.Error(err))
 	}
+	sv.Logger.Info("Server stopped gracefully")
+}
 
-	log.SetupLogger(cfg)
-	zap.L().Debug("Logger instantiated")
-
-	db, err := database.SetupDatabase(cfg, zap.L())
-	if err != nil {
-		tLog.Error("Error while connecting to database", zap.Error(err))
-		os.Exit(1)
-	}
-
-	err = setup.ModelMigration(zap.L(), db)
-	if err != nil {
-		tLog.Error("Error while generating model migrations", zap.Error(err))
-		os.Exit(1)
-	}
-
-	conStore := protocol.NewConnectionStore()
-
-	defer conStore.CloseActive() // TODO: Create server stop system.
-
-	cron := setup.Cron(cfg, conStore)
-	(*cron).Start()
-
-	pReg := setup.Processors()
-
-	em := event.NewManager()
-	setup.Event(em, conStore)
-
-	hReg := setup.Handlers(zap.L(), cfg, cron, db, conStore, em)
-
-	zap.L().Info("Starting scheduler")
-
-	// As the only method of packet receiving, I will not edit this
-	// until further needs. Maybe on future this can be rewritten to
-	// support other protocols like TCP sockets or something else.
-	app, err := setup.Router(zap.L(), pReg, hReg, conStore)
+// bindServer configures the HTTP server and starts listening on the specified IP and port.
+func bindServer(sv *server.Server) error {
+	app, err := setup.Router(zap.L(), sv.PacketProcessors, sv.PacketHandlers, sv.ConnStore)
 	if err != nil || app == nil {
-		tLog.Error("Error while setting up HTTP healthcheck", zap.Error(err))
-		os.Exit(1)
+		return err
 	}
 
-	bind := cfg.Server.IP + ":" + strconv.Itoa(int(cfg.Server.Port))
-	zap.L().Info("Starting HTTP healthcheck",
-		zap.String("healthcheck", cfg.Server.IP), zap.Uint16("port", cfg.Server.Port))
-
-	err = app.Listen(bind)
-	if err != nil {
-		tLog.Error("Error while starting the healthcheck", zap.Error(err))
-		os.Exit(1)
-	}
-
+	bind := net.JoinHostPort(sv.Config.Server.IP, strconv.Itoa(int(sv.Config.Server.Port)))
+	sv.Logger.Info("Starting HTTP server", zap.String("bind", bind))
+	return app.Listen(bind)
 }

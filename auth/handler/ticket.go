@@ -1,31 +1,36 @@
-package sso
+package handler
 
 import (
 	"errors"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
-	"pixels-emulator/auth/grant"
+	grant "pixels-emulator/auth/event"
+	"pixels-emulator/auth/message"
 	"pixels-emulator/core/config"
 	"pixels-emulator/core/database"
 	"pixels-emulator/core/event"
 	"pixels-emulator/core/model"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/registry"
+	"pixels-emulator/core/server"
 	"strconv"
 )
 
-type Handler struct {
-	logger  *zap.Logger
-	ssoSvc  *database.ModelService[model.SSOTicket]
-	userSvc *database.ModelService[model.User]
-	cs      *protocol.ConnectionStore
-	em      *event.Manager
-	debug   bool
+// AuthTicketHandler handles the authentication of tickets for users.
+type AuthTicketHandler struct {
+	logger    *zap.Logger                             // logger Logger instance for logging
+	ssoSvc    *database.ModelService[model.SSOTicket] // ssoSvc Service for handling SSO tickets
+	userSvc   *database.ModelService[model.User]      // userSvc Service for managing user data
+	connStore *protocol.ConnectionStore               // connStore Connection store for managing connections
+	em        *event.Manager                          // em Event manager for firing events
+	cfg       *config.Config                          // cfg Configuration for server settings
 }
 
-func (h Handler) Handle(packet protocol.Packet, conn *protocol.Connection) {
+// Handle processes the provided authentication ticket packet.
+// This make security checks to validate the ticket handling or enabling development mode.
+// Also, when SSO validation is successful, should broadcast a structured event.
+func (h AuthTicketHandler) Handle(packet protocol.Packet, conn *protocol.Connection) {
 
-	pack, ok := packet.(*Packet)
+	pack, ok := packet.(*message.AuthTicketPacket)
 	if !ok {
 		h.logger.Error("cannot cast packet, skipping processing")
 		return
@@ -43,8 +48,9 @@ func (h Handler) Handle(packet protocol.Packet, conn *protocol.Connection) {
 	}()
 
 	var assignedUser uint
+	debug := h.cfg.Server.Environment == "DEVELOPMENT"
 
-	if h.debug {
+	if debug {
 		uVal, err := strconv.ParseUint(pack.Ticket, 10, 32)
 		if err != nil {
 			closeConn = err
@@ -86,7 +92,7 @@ func (h Handler) Handle(packet protocol.Packet, conn *protocol.Connection) {
 	h.logger.Debug("Connection upgraded", zap.String("identifier", (*conn).Identifier()))
 	ev := grant.NewEvent(int(userRes.Entity.ID), 0, make(map[string]string))
 
-	err := h.em.Fire(grant.AuthEventName, ev)
+	err := h.em.Fire(grant.AuthGrantEventName, ev)
 	if err != nil {
 		closeConn = userRes.Error
 		return
@@ -94,18 +100,18 @@ func (h Handler) Handle(packet protocol.Packet, conn *protocol.Connection) {
 
 }
 
-func NewSSOTicketHandler(
-	logger *zap.Logger,
-	db *gorm.DB,
-	cs *protocol.ConnectionStore,
-	cfg *config.Config,
-	em *event.Manager) registry.Handler[protocol.Packet] {
-	return Handler{
-		logger:  logger,
-		ssoSvc:  &database.ModelService[model.SSOTicket]{DB: db},
-		userSvc: &database.ModelService[model.User]{DB: db},
-		cs:      cs,
-		em:      em,
-		debug:   cfg.Server.Environment == "DEVELOPMENT",
+// NewAuthTicket creates a new AuthTicketHandler with necessary dependencies.
+func NewAuthTicket() registry.Handler[protocol.Packet] {
+
+	sv := server.GetServer()
+	db := sv.Database
+
+	return AuthTicketHandler{
+		logger:    sv.Logger,
+		ssoSvc:    &database.ModelService[model.SSOTicket]{DB: db},
+		userSvc:   &database.ModelService[model.User]{DB: db},
+		connStore: sv.ConnStore,
+		em:        sv.EventManager,
+		cfg:       sv.Config,
 	}
 }

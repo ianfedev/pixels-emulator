@@ -1,27 +1,27 @@
-package grant
+package event
 
 import (
 	em "pixels-emulator/core/event"
 )
 
-const AuthEventName = "auth.grant"
+const AuthGrantEventName = "auth.grant"
 
-// AuthEvent represents an event containing a user ID and metadata.
-type AuthEvent struct {
+// AuthGrantEvent represents an event containing a user ID and metadata.
+type AuthGrantEvent struct {
 	*em.CancellableEvent     // CancellableEvent extends functionality.
 	userID               int // userID defines the associated with the event.
 }
 
-// NewEvent creates a new AuthEvent with the provided userID, owner, and metadata.
-func NewEvent(userID int, owner uint16, metadata map[string]string) *AuthEvent {
+// NewEvent creates a new AuthGrantEvent with the provided userID, owner, and metadata.
+func NewEvent(userID int, owner uint16, metadata map[string]string) *AuthGrantEvent {
 	ce := em.NewCancellable(owner, metadata)
-	return &AuthEvent{
+	return &AuthGrantEvent{
 		CancellableEvent: ce.(*em.CancellableEvent),
 		userID:           userID,
 	}
 }
 
 // UserID returns the ID of the user associated with this event.
-func (e *AuthEvent) UserID() int {
+func (e *AuthGrantEvent) UserID() int {
 	return e.userID
 }

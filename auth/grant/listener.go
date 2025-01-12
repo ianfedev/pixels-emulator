@@ -3,14 +3,20 @@ package grant
 import (
 	"errors"
 	"go.uber.org/zap"
-	ok "pixels-emulator/auth/ok"
+	event2 "pixels-emulator/auth/event"
+	ok "pixels-emulator/auth/message"
 	"pixels-emulator/core/event"
-	"pixels-emulator/core/protocol"
+	"pixels-emulator/core/server"
 	"strconv"
 )
 
 // OnAuthGranted performs tasks of authentication granting.
-func OnAuthGranted(conStore *protocol.ConnectionStore) func(event event.Event) {
+// It should handle the event emitted by the server at low priority to execute login operations.
+// This can be cancelled from other sources and prevent the user from login.
+func OnAuthGranted() func(event event.Event) {
+
+	connStore := server.GetServer().ConnStore
+
 	return func(ev event.Event) {
 
 		var err error
@@ -20,14 +26,14 @@ func OnAuthGranted(conStore *protocol.ConnectionStore) func(event event.Event) {
 			}
 		}()
 
-		authEv, valid := ev.(*AuthEvent)
+		authEv, valid := ev.(*event2.AuthGrantEvent)
 		if !valid {
 			err = errors.New("event proportioned was not authentication")
 			return
 		}
 
 		id := strconv.Itoa(authEv.UserID())
-		con, ex := conStore.GetConnection(id)
+		con, ex := connStore.GetConnection(id)
 
 		if !ex {
 			err = errors.New("connection not found")
@@ -35,6 +41,7 @@ func OnAuthGranted(conStore *protocol.ConnectionStore) func(event event.Event) {
 		}
 
 		if authEv.CancellableEvent.IsCancelled() {
+			_ = (*con).Dispose()
 			err = errors.New("connection cancelled by external listener")
 			return
 		}
@@ -43,4 +50,5 @@ func OnAuthGranted(conStore *protocol.ConnectionStore) func(event event.Event) {
 		(*con).SendPacket(authPack)
 
 	}
+
 }

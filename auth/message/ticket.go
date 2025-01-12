@@ -1,13 +1,13 @@
-package sso
+package message
 
 import (
 	"pixels-emulator/core/protocol"
 )
 
-// PacketCode represents the packet code for the SSO Auth.
-const PacketCode = 2419
+// AuthTicketCode represents the packet code for the SSO Auth.
+const AuthTicketCode = 2419
 
-type Packet struct {
+type AuthTicketPacket struct {
 	protocol.Packet // Embeds the base protocol.Packet interface.
 
 	// Ticket is the SSO auth ticket generated.
@@ -18,17 +18,17 @@ type Packet struct {
 }
 
 // Id returns the packet code for the Pong packet.
-func (p Packet) Id() uint16 {
-	return PacketCode
+func (p AuthTicketPacket) Id() uint16 {
+	return AuthTicketCode
 }
 
 // Rate returns the rate limit for the Pong packet.
-func (p Packet) Rate() (uint16, uint16) {
+func (p AuthTicketPacket) Rate() (uint16, uint16) {
 	return 10, 5
 }
 
-// NewPacket creates a new instance of the Pong packet.
-func NewPacket(pack protocol.RawPacket) (*Packet, error) {
+// ComposeTicket creates a new instance of the ticket packet.
+func ComposeTicket(pack protocol.RawPacket) (*AuthTicketPacket, error) {
 
 	ticket, err := pack.ReadString()
 	if err != nil {
@@ -40,7 +40,7 @@ func NewPacket(pack protocol.RawPacket) (*Packet, error) {
 		return nil, err
 	}
 
-	return &Packet{
+	return &AuthTicketPacket{
 		Ticket: ticket,
 		Time:   int(time),
 	}, err
