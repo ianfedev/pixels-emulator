@@ -37,6 +37,13 @@ func (w *WebConnection) Identifier() string {
 	return w.Id
 }
 
+// GrantIdentifier provides a new identifier for connection.
+func (w *WebConnection) GrantIdentifier(id string) {
+	if w.Id == "processing" {
+		w.Id = id
+	}
+}
+
 // SendPacket serializes the provided packet and sends it over the websocket connection.
 // Logs an error if the sending process fails.
 func (w *WebConnection) SendPacket(packet protocol.Packet) {
@@ -71,7 +78,7 @@ func (w *WebConnection) SendRaw(packet protocol.RawPacket, period uint16, rate u
 }
 
 // NewWeb creates a new WebConnection wrapper for a given websocket connection, unique id, and logger.
-func NewWeb(socket *websocket.Conn, id string, limiter *protocol.RateLimiterRegistry, logger *zap.Logger) *WebConnection {
+func NewWeb(socket *websocket.Conn, id string, limiter *protocol.RateLimiterRegistry, logger *zap.Logger) protocol.Connection {
 	return &WebConnection{
 		Socket:     socket,
 		Id:         id,

@@ -5,6 +5,7 @@ import (
 	"os"
 	config2 "pixels-emulator/core/config"
 	"pixels-emulator/core/database"
+	"pixels-emulator/core/event"
 	"pixels-emulator/core/log"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/setup"
@@ -32,9 +33,15 @@ func main() {
 	log.SetupLogger(cfg)
 	zap.L().Debug("Logger instantiated")
 
-	_, err = database.SetupDatabase(cfg, zap.L())
+	db, err := database.SetupDatabase(cfg, zap.L())
 	if err != nil {
 		tLog.Error("Error while connecting to database", zap.Error(err))
+		os.Exit(1)
+	}
+
+	err = setup.ModelMigration(zap.L(), db)
+	if err != nil {
+		tLog.Error("Error while generating model migrations", zap.Error(err))
 		os.Exit(1)
 	}
 
@@ -43,7 +50,11 @@ func main() {
 	(*cron).Start()
 
 	pReg := setup.Processors()
-	hReg := setup.Handlers(zap.L(), cfg, cron)
+
+	em := event.NewManager()
+	setup.Event(em, conStore)
+
+	hReg := setup.Handlers(zap.L(), cfg, cron, db, conStore, em)
 
 	zap.L().Info("Starting scheduler")
 

@@ -15,7 +15,7 @@ type PacketHandler struct {
 	scheduler *scheduler.Scheduler
 }
 
-func (h PacketHandler) Handle(packet protocol.Packet, conn protocol.Connection) {
+func (h PacketHandler) Handle(packet protocol.Packet, conn *protocol.Connection) {
 
 	_, ok := packet.(*Packet)
 	if !ok {
@@ -31,7 +31,7 @@ func (h PacketHandler) Handle(packet protocol.Packet, conn protocol.Connection) 
 
 	(*h.scheduler).ScheduleTaskLater(2*time.Second, func() {
 		pingPacket := ping.NewPingPacket()
-		conn.SendPacket(pingPacket)
+		(*conn).SendPacket(pingPacket)
 	})
 
 }

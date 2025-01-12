@@ -2,7 +2,6 @@ package setup_test
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -202,7 +201,6 @@ environment=DEVELOPMENT`
 		}
 	}()
 
-	fmt.Println()
 	cfg, err := setup.Config(tempFile.Name(), logger)
 	assert.NoError(t, err)
 	assert.NotNil(t, cfg)

@@ -17,32 +17,32 @@ func Handle(
 	return func(c *websocket.Conn) {
 
 		rReg := protocol.NewRateLimiterRegistry()
-		wCon := NewWeb(c, "authenticating", rReg, logger)
-		connLogger := logger.With(zap.String("identifier", wCon.Identifier()))
-		conStore.AddConnection(wCon)
+		wCon := NewWeb(c, "processing", rReg, logger)
+		conStore.AddConnection(&wCon)
+		logger.Debug("Added new connection", zap.Int("active", conStore.ConnectionCount()))
 
 		defer func() {
 			if err := recover(); err != nil {
-				connLogger.Error("Recovered from fatal error in WebSocket registry", zap.Any("panic", err))
+				logger.Error("Recovered from fatal error in WebSocket registry", zap.Any("panic", err), zap.String("id", wCon.Identifier()))
 			}
 		}()
 		defer func() {
 			if err := wCon.Dispose(); err != nil {
-				connLogger.Error("Error closing WebSocket connection", zap.Error(err))
+				logger.Error("Error closing WebSocket connection", zap.Error(err), zap.String("id", wCon.Identifier()))
 			}
 		}()
 
 		for {
-			if err := handleMessage(c, wCon, pReg, hReg, rReg, connLogger); err != nil {
+			if err := handleMessage(c, &wCon, pReg, hReg, rReg, logger); err != nil {
 				if websocket2.IsUnexpectedCloseError(err) {
 					if websocket2.IsUnexpectedCloseError(err, websocket2.CloseGoingAway, websocket.CloseNormalClosure) {
-						connLogger.Warn("WebSocket connection closed unexpectedly", zap.Error(err))
+						logger.Warn("WebSocket connection closed unexpectedly", zap.Error(err), zap.String("id", wCon.Identifier()))
 					}
-					connLogger.Debug("WebSocket connection closed", zap.Error(err))
+					logger.Debug("WebSocket connection closed", zap.Error(err), zap.String("id", wCon.Identifier()))
 					conStore.RemoveConnection(wCon.Identifier())
 					break
 				} else {
-					connLogger.Error("Error handling WebSocket message", zap.Error(err))
+					logger.Error("Error handling WebSocket message", zap.Error(err), zap.String("id", wCon.Identifier()))
 				}
 			}
 		}
@@ -52,17 +52,20 @@ func Handle(
 // handleMessage processes a single WebSocket message.
 func handleMessage(
 	c *websocket.Conn,
-	wCon *WebConnection,
+	wCon *protocol.Connection,
 	pReg *registry.ProcessorRegistry,
 	hReg *registry.Registry,
 	rReg *protocol.RateLimiterRegistry,
 	logger *zap.Logger) error {
+
 	_, msg, err := c.ReadMessage()
 	if err != nil {
 		return err
 	}
 
-	if err := processPacket(msg, wCon, pReg, hReg, rReg, logger); err != nil {
+	conLog := logger.With(zap.String("id", (*wCon).Identifier()))
+
+	if err := processPacket(msg, wCon, pReg, hReg, rReg, conLog); err != nil {
 		logger.Warn("Error processing packet", zap.Error(err))
 	}
 
@@ -72,14 +75,15 @@ func handleMessage(
 // processPacket deserializes and processes a packet.
 func processPacket(
 	msg []byte,
-	wCon *WebConnection,
+	wCon *protocol.Connection,
 	pReg *registry.ProcessorRegistry,
 	hReg *registry.Registry,
 	rReg *protocol.RateLimiterRegistry,
 	logger *zap.Logger) error {
+
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error("Recovered from panic during packet processing", zap.Any("panic", r))
+			logger.Error("Recovered from panic during packet processing", zap.Any("panic", r), zap.String("id", (*wCon).Identifier()))
 		}
 	}()
 
@@ -101,7 +105,7 @@ func processPacket(
 		limiter := rReg.GetLimiter(comPacket.Id(), period, rate)
 
 		if !limiter.Allow() {
-			logger.Debug("rate limit exceeded on connection", zap.Uint16("header", pack.GetHeader()))
+			logger.Debug("rate limit exceeded on connection", zap.Uint16("header", pack.GetHeader()), zap.String("id", (*wCon).Identifier()))
 			return nil
 		}
 	}

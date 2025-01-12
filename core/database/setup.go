@@ -28,6 +28,7 @@ func SetupDatabase(cfg *config.Config, log *zap.Logger) (*gorm.DB, error) {
 	dsn := GetDSN(cfg)
 
 	zLog := zapgorm2.New(zap.L())
+	zLog.LogMode(4)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: zLog})
 	if err != nil {
 		return nil, err

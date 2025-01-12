@@ -16,6 +16,9 @@ type Connection interface {
 	// Identifier provides an unique identifier of this connection.
 	Identifier() string
 
+	// GrantIdentifier provides a new identifier for connection.
+	GrantIdentifier(identifier string)
+
 	// SendPacket pings an outgoing packet.
 	SendPacket(packet Packet)
 

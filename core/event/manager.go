@@ -1,7 +1,6 @@
 package event
 
 import (
-	"fmt"
 	gEvent "github.com/gookit/event"
 )
 
@@ -22,7 +21,6 @@ func (em *Manager) Fire(eventName string, event Event) error {
 
 // AddListener registers a listener for the specified event name.
 func (em *Manager) AddListener(eventName string, listener func(event Event), priority int) {
-	fmt.Println("added listener")
 	em.NativeRegistry.On(eventName, gEvent.ListenerFunc(func(e gEvent.Event) error {
 		if customEvent, ok := e.Get("origin").(Event); ok {
 			listener(customEvent)

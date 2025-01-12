@@ -13,7 +13,7 @@ type Handler[T protocol.Packet] interface {
 	// Parameters:
 	//   packet: The packet of type T to be handled.
 	//   conn: The connection instance representing the sender of the packet.
-	Handle(packet T, conn protocol.Connection)
+	Handle(packet T, conn *protocol.Connection)
 }
 
 // Registry holds a collection of registered handlers, where each registry is associated
@@ -37,7 +37,7 @@ func (r *Registry) Register(packetType uint16, handler Handler[protocol.Packet])
 
 // Handle processes a given packet, invoking the appropriate handler for its type.
 // If no handler is found, an error is returned.
-func (r *Registry) Handle(packet protocol.Packet, conn protocol.Connection) error {
+func (r *Registry) Handle(packet protocol.Packet, conn *protocol.Connection) error {
 	handler, exists := r.handlers[packet.Id()]
 	if !exists {
 		return fmt.Errorf("no registry registered for packet type: %d", packet.Id())

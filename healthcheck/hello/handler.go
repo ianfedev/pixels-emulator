@@ -16,7 +16,7 @@ type PacketHandler struct {
 //
 // If the packet is of the expected type (*Packet), the handler will log the version of the client that sent the packet.
 // If the packet cannot be cast to the expected type, an error will be logged.
-func (h PacketHandler) Handle(packet protocol.Packet, _ protocol.Connection) {
+func (h PacketHandler) Handle(packet protocol.Packet, _ *protocol.Connection) {
 	incPacket, ok := packet.(*Packet)
 	if !ok {
 		h.logger.Error("cannot cast ping packet, skipping processing")
