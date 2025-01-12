@@ -3,6 +3,7 @@ package registry
 import (
 	"errors"
 	"pixels-emulator/core/protocol"
+	"strconv"
 )
 
 // ProcessorRegistry is a registry that maps packet headers (uint16 codes)
@@ -33,7 +34,7 @@ func (pr *ProcessorRegistry) Register(code uint16, handler func(raw protocol.Raw
 func (pr *ProcessorRegistry) Handle(raw protocol.RawPacket, conn *protocol.Connection) (protocol.Packet, error) {
 	handler, exists := pr.processor[raw.GetHeader()]
 	if !exists {
-		return nil, errors.New("unprocessable packet received")
+		return nil, errors.New("unprocessable packet received " + strconv.Itoa(int(raw.GetHeader())))
 	}
 	return handler(raw, conn)
 }
