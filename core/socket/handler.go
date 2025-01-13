@@ -11,9 +11,9 @@ import (
 // Handle manages the basic message reception from websocket.
 func Handle(
 	logger *zap.Logger,
-	pReg *registry.ProcessorRegistry,
-	hReg *registry.Registry,
-	conStore *protocol.ConnectionStore) func(*websocket.Conn) {
+	pReg registry.ProcessorRegistry,
+	hReg registry.HandlerRegistry,
+	conStore protocol.ConnectionManager) func(*websocket.Conn) {
 	return func(c *websocket.Conn) {
 
 		rReg := protocol.NewRateLimiterRegistry()
@@ -53,8 +53,8 @@ func Handle(
 func handleMessage(
 	c *websocket.Conn,
 	wCon *protocol.Connection,
-	pReg *registry.ProcessorRegistry,
-	hReg *registry.Registry,
+	pReg registry.ProcessorRegistry,
+	hReg registry.HandlerRegistry,
 	rReg *protocol.RateLimiterRegistry,
 	logger *zap.Logger) error {
 
@@ -76,8 +76,8 @@ func handleMessage(
 func processPacket(
 	msg []byte,
 	wCon *protocol.Connection,
-	pReg *registry.ProcessorRegistry,
-	hReg *registry.Registry,
+	pReg registry.ProcessorRegistry,
+	hReg registry.HandlerRegistry,
 	rReg *protocol.RateLimiterRegistry,
 	logger *zap.Logger) error {
 

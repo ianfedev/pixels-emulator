@@ -24,6 +24,6 @@ func SchedulePing() {
 		connStore.BroadcastPacket(ping)
 	}
 
-	(*sv.Scheduler).ScheduleRepeatingTask(time.Duration(rate)*time.Second, task)
+	sv.Scheduler.ScheduleRepeatingTask(time.Duration(rate)*time.Second, task)
 
 }

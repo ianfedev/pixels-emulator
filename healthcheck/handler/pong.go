@@ -15,7 +15,7 @@ import (
 // It should be used when pinging is in charge of client.
 type PongHandler struct {
 	logger    *zap.Logger
-	scheduler *scheduler.Scheduler
+	scheduler scheduler.Scheduler
 	cfg       *config.Config
 }
 
@@ -36,7 +36,7 @@ func (h PongHandler) Handle(packet protocol.Packet, conn *protocol.Connection) {
 		return
 	}
 
-	(*h.scheduler).ScheduleTaskLater(2*time.Second, func() {
+	h.scheduler.ScheduleTaskLater(2*time.Second, func() {
 		pingPacket := message.ComposePing()
 		(*conn).SendPacket(pingPacket)
 	})

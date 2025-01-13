@@ -32,14 +32,14 @@ func GetServer() *Server {
 // Server defines a single instance of server which can be accessed to get the
 // global state of the Pixels Emulator.
 type Server struct {
-	Config           *config.Config              // Config provides the loaded configuration from file.
-	Logger           *zap.Logger                 // Logger provides the server logger.
-	ConnStore        *protocol.ConnectionStore   // ConnStore provides all the active connections on the server.
-	Scheduler        *scheduler.Scheduler        // Schedule provides the scheduler instance.
-	PacketProcessors *registry.ProcessorRegistry // PacketProcessors provides all the packets available to be processed.
-	PacketHandlers   *registry.Registry          // PacketHandlers provides the handlers of the packets processed.
-	EventManager     *event.Manager              // EventManager provides the event management system global instance.
-	Database         *gorm.DB                    // Database provides a connection for ORM.
+	Config           *config.Config             // Config provides the loaded configuration from file.
+	Logger           *zap.Logger                // Logger provides the server logger.
+	ConnStore        protocol.ConnectionManager // ConnStore provides all the active connections on the server.
+	Scheduler        scheduler.Scheduler        // Schedule provides the scheduler instance.
+	PacketProcessors registry.ProcessorRegistry // PacketProcessors provides all the packets available to be processed.
+	PacketHandlers   registry.HandlerRegistry   // PacketHandlers provides the handlers of the packets processed.
+	EventManager     event.Manager              // EventManager provides the event management system global instance.
+	Database         *gorm.DB                   // Database provides a connection for ORM.
 }
 
 // Reload performs the reloading of processors, handlers, cron jobs, and events.
@@ -111,7 +111,7 @@ func setupServer() *Server {
 	connStore := protocol.NewConnectionStore()
 
 	hReg := registry.New()
-	pReg := registry.NewProcessorRegistry()
+	pReg := registry.NewProcessor()
 
 	em := event.NewManager()
 	logger.Info("Started event broadcasting")
@@ -123,7 +123,7 @@ func setupServer() *Server {
 		Config:           cfg,
 		Logger:           logger,
 		ConnStore:        connStore,
-		Scheduler:        &sc,
+		Scheduler:        sc,
 		PacketProcessors: pReg,
 		PacketHandlers:   hReg,
 		EventManager:     em,

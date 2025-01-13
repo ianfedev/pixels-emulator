@@ -4,6 +4,17 @@ import (
 	"sync"
 )
 
+// ConnectionManager defines a manager which can thread-safely manage active connections.
+type ConnectionManager interface {
+	AddConnection(conn *Connection)                      // AddConnection adds a new connection to the manager.
+	RemoveConnection(identifier string)                  // RemoveConnection removes a connection from the manager by its identifier.
+	GetConnection(identifier string) (*Connection, bool) // GetConnection retrieves a connection by its identifier.
+	BroadcastPacket(packet Packet)                       // BroadcastPacket sends a packet to all active connections.
+	BroadcastPacketToIDs(packet Packet, ids []string)    // BroadcastPacketToIDs sends a packet to a subset of connections identified by their IDs.
+	ConnectionCount() int                                // ConnectionCount returns the total number of active connections.
+	CloseActive()                                        // CloseActive closes all active connections and clears the connection store.
+}
+
 // ConnectionStore centralizes all active connections and provides thread-safe access.
 type ConnectionStore struct {
 	connections []*Connection // Stores all active connections.
@@ -11,7 +22,7 @@ type ConnectionStore struct {
 }
 
 // NewConnectionStore creates a new connection manager instance.
-func NewConnectionStore() *ConnectionStore {
+func NewConnectionStore() ConnectionManager {
 	return &ConnectionStore{}
 }
 

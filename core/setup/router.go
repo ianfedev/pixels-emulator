@@ -15,9 +15,9 @@ import (
 // Nitro Client.
 func Router(
 	logger *zap.Logger,
-	registry *registry.ProcessorRegistry,
-	handlerRegistry *registry.Registry,
-	conStore *protocol.ConnectionStore) (*fiber.App, error) {
+	registry registry.ProcessorRegistry,
+	handlerRegistry registry.HandlerRegistry,
+	conStore protocol.ConnectionManager) (*fiber.App, error) {
 
 	app := fiber.New(fiber.Config{
 		ServerHeader:          "Pixels Emulator",

@@ -20,15 +20,15 @@ type AuthTicketHandler struct {
 	logger    *zap.Logger                             // logger Logger instance for logging
 	ssoSvc    *database.ModelService[model.SSOTicket] // ssoSvc Service for handling SSO tickets
 	userSvc   *database.ModelService[model.User]      // userSvc Service for managing user data
-	connStore *protocol.ConnectionStore               // connStore Connection store for managing connections
-	em        *event.Manager                          // em Event manager for firing events
+	connStore protocol.ConnectionManager              // connStore Connection store for managing connections
+	em        event.Manager                           // em Event manager for firing events
 	cfg       *config.Config                          // cfg Configuration for server settings
 }
 
 // Handle processes the provided authentication ticket packet.
 // This make security checks to validate the ticket handling or enabling development mode.
 // Also, when SSO validation is successful, should broadcast a structured event.
-func (h AuthTicketHandler) Handle(packet protocol.Packet, conn *protocol.Connection) {
+func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn *protocol.Connection) {
 
 	pack, ok := packet.(*message.AuthTicketPacket)
 	if !ok {
@@ -106,7 +106,7 @@ func NewAuthTicket() registry.Handler[protocol.Packet] {
 	sv := server.GetServer()
 	db := sv.Database
 
-	return AuthTicketHandler{
+	return &AuthTicketHandler{
 		logger:    sv.Logger,
 		ssoSvc:    &database.ModelService[model.SSOTicket]{DB: db},
 		userSvc:   &database.ModelService[model.User]{DB: db},
