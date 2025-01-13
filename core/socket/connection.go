@@ -23,7 +23,7 @@ type WebConnection struct {
 	logger *zap.Logger
 
 	// limiter provides rate limiter for outgoing packets.
-	limiter *protocol.RateLimiterRegistry
+	limiter protocol.RateLimiter
 
 	// writeMutex ensures thread-safe writes to the websocket.
 	writeMutex sync.Mutex
@@ -85,7 +85,7 @@ func (w *WebConnection) SendRaw(packet protocol.RawPacket, period uint16, rate u
 }
 
 // NewWeb creates a new WebConnection wrapper for a given websocket connection, unique id, and logger.
-func NewWeb(socket *websocket.Conn, id string, limiter *protocol.RateLimiterRegistry, logger *zap.Logger) protocol.Connection {
+func NewWeb(socket *websocket.Conn, id string, limiter protocol.RateLimiter, logger *zap.Logger) protocol.Connection {
 	return &WebConnection{
 		Socket:     socket,
 		Id:         id,

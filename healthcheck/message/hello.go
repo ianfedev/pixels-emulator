@@ -13,12 +13,12 @@ type HelloPacket struct {
 }
 
 // Id returns the unique identifier of the Packet type.
-func (p HelloPacket) Id() uint16 {
+func (p *HelloPacket) Id() uint16 {
 	return HelloCode
 }
 
 // Rate returns the rate limit for the Pong packet.
-func (p HelloPacket) Rate() (uint16, uint16) {
+func (p *HelloPacket) Rate() (uint16, uint16) {
 	return 300, 1
 }
 

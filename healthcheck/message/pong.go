@@ -11,12 +11,12 @@ type PongPacket struct {
 }
 
 // Id returns the packet code for the Pong packet.
-func (p PongPacket) Id() uint16 {
+func (p *PongPacket) Id() uint16 {
 	return PongCode
 }
 
 // Rate returns the rate limit for the Pong packet.
-func (p PongPacket) Rate() (uint16, uint16) {
+func (p *PongPacket) Rate() (uint16, uint16) {
 	return 10, 5
 }
 

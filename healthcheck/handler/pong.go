@@ -20,7 +20,7 @@ type PongHandler struct {
 }
 
 // Handle executes the packet processing, responding with a ping 2 seconds after sent if no ping rate is set, assuming client will handle it.
-func (h PongHandler) Handle(packet protocol.Packet, conn *protocol.Connection) {
+func (h *PongHandler) Handle(packet protocol.Packet, conn protocol.Connection) {
 
 	rate := h.cfg.Server.PingRate
 
@@ -38,7 +38,7 @@ func (h PongHandler) Handle(packet protocol.Packet, conn *protocol.Connection) {
 
 	h.scheduler.ScheduleTaskLater(2*time.Second, func() {
 		pingPacket := message.ComposePing()
-		(*conn).SendPacket(pingPacket)
+		conn.SendPacket(pingPacket)
 	})
 
 }
@@ -46,9 +46,9 @@ func (h PongHandler) Handle(packet protocol.Packet, conn *protocol.Connection) {
 // NewPong creates a new instance of pong handler.
 func NewPong() registry.Handler[protocol.Packet] {
 	sv := server.GetServer()
-	return PongHandler{
-		logger:    sv.Logger,
-		cfg:       sv.Config,
-		scheduler: sv.Scheduler,
+	return &PongHandler{
+		logger:    sv.Logger(),
+		cfg:       sv.Config(),
+		scheduler: sv.Scheduler(),
 	}
 }

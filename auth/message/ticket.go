@@ -18,12 +18,12 @@ type AuthTicketPacket struct {
 }
 
 // Id returns the packet code for the Pong packet.
-func (p AuthTicketPacket) Id() uint16 {
+func (p *AuthTicketPacket) Id() uint16 {
 	return AuthTicketCode
 }
 
 // Rate returns the rate limit for the Pong packet.
-func (p AuthTicketPacket) Rate() (uint16, uint16) {
+func (p *AuthTicketPacket) Rate() (uint16, uint16) {
 	return 10, 5
 }
 

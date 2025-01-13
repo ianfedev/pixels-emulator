@@ -15,7 +15,7 @@ import (
 // This can be cancelled from other sources and prevent the user from login.
 func OnAuthGranted() func(event event.Event) {
 
-	connStore := server.GetServer().ConnStore
+	connStore := server.GetServer().ConnStore()
 
 	return func(ev event.Event) {
 
@@ -41,13 +41,13 @@ func OnAuthGranted() func(event event.Event) {
 		}
 
 		if authEv.CancellableEvent.IsCancelled() {
-			_ = (*con).Dispose()
+			_ = con.Dispose()
 			err = errors.New("connection cancelled by external listener")
 			return
 		}
 
 		authPack := ok.NewAuthOkPacket()
-		(*con).SendPacket(authPack)
+		con.SendPacket(authPack)
 
 	}
 

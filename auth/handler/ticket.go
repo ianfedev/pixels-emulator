@@ -28,7 +28,7 @@ type AuthTicketHandler struct {
 // Handle processes the provided authentication ticket packet.
 // This make security checks to validate the ticket handling or enabling development mode.
 // Also, when SSO validation is successful, should broadcast a structured event.
-func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn *protocol.Connection) {
+func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn protocol.Connection) {
 
 	pack, ok := packet.(*message.AuthTicketPacket)
 	if !ok {
@@ -41,7 +41,7 @@ func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn *protocol.Connec
 	defer func() {
 		if closeConn != nil {
 			hLog.Warn("Error while authenticating SSO ticket", zap.Error(closeConn))
-			if err := (*conn).Dispose(); err != nil {
+			if err := conn.Dispose(); err != nil {
 				hLog.Error("Error while disposing connection")
 			}
 		}
@@ -88,8 +88,8 @@ func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn *protocol.Connec
 	}
 
 	id := strconv.Itoa(int(userRes.Entity.ID))
-	(*conn).GrantIdentifier(id)
-	h.logger.Debug("Connection upgraded", zap.String("identifier", (*conn).Identifier()))
+	conn.GrantIdentifier(id)
+	h.logger.Debug("Connection upgraded", zap.String("identifier", conn.Identifier()))
 	ev := grant.NewEvent(int(userRes.Entity.ID), 0, make(map[string]string))
 
 	err := h.em.Fire(grant.AuthGrantEventName, ev)
@@ -104,14 +104,14 @@ func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn *protocol.Connec
 func NewAuthTicket() registry.Handler[protocol.Packet] {
 
 	sv := server.GetServer()
-	db := sv.Database
+	db := sv.Database()
 
 	return &AuthTicketHandler{
-		logger:    sv.Logger,
+		logger:    sv.Logger(),
 		ssoSvc:    &database.ModelService[model.SSOTicket]{DB: db},
 		userSvc:   &database.ModelService[model.User]{DB: db},
-		connStore: sv.ConnStore,
-		em:        sv.EventManager,
-		cfg:       sv.Config,
+		connStore: sv.ConnStore(),
+		em:        sv.EventManager(),
+		cfg:       sv.Config(),
 	}
 }
