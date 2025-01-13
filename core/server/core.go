@@ -36,9 +36,17 @@ var (
 // GetServer provides the only server instance.
 func GetServer() Server {
 	once.Do(func() {
-		instance = setupServer()
+		if instance == nil {
+			UpdateInstance(setupServer())
+		}
 	})
 	return instance
+}
+
+func UpdateInstance(server Server) {
+	if instance == nil {
+		instance = server
+	}
 }
 
 // Reload performs the reloading of processors, handlers, cron jobs, and events.

@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	ephemeral2 "pixels-emulator/core/ephemeral"
+	"pixels-emulator/core/ephemeral"
 	"pixels-emulator/core/server"
 	"pixels-emulator/core/setup"
 	"strconv"
@@ -16,10 +16,10 @@ import (
 func main() {
 
 	sv := server.GetServer()
-	ephemeral2.Processors()
-	ephemeral2.Handlers()
-	ephemeral2.Cron()
-	ephemeral2.Event()
+	ephemeral.Processors()
+	ephemeral.Handlers()
+	ephemeral.Cron()
+	ephemeral.Event()
 
 	// Channel to listen for system termination signals
 	sigChannel := make(chan os.Signal, 1)

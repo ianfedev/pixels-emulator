@@ -3,7 +3,7 @@ package grant
 import (
 	"errors"
 	"go.uber.org/zap"
-	event2 "pixels-emulator/auth/event"
+	authEvent "pixels-emulator/auth/event"
 	ok "pixels-emulator/auth/message"
 	"pixels-emulator/core/event"
 	"pixels-emulator/core/server"
@@ -26,7 +26,7 @@ func OnAuthGranted() func(event event.Event) {
 			}
 		}()
 
-		authEv, valid := ev.(*event2.AuthGrantEvent)
+		authEv, valid := ev.(*authEvent.AuthGrantEvent)
 		if !valid {
 			err = errors.New("event proportioned was not authentication")
 			return

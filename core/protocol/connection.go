@@ -26,5 +26,5 @@ type Connection interface {
 	SendRaw(packet RawPacket, period uint16, rate uint16)
 
 	// RateRegistry limit rates outgoing packets.
-	RateRegistry() *RateLimiterRegistry
+	RateRegistry() RateLimiter
 }
