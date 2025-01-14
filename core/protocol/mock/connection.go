@@ -1,15 +1,14 @@
 package protocol_test
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/mock"
 	"pixels-emulator/core/protocol"
-	"pixels-emulator/core/util"
 )
 
 // MockConnection is a mock of the Connection interface.
 type MockConnection struct {
 	mock.Mock
-	util.Disposable
 }
 
 // Identifier provides an unique identifier of this connection.
@@ -42,6 +41,7 @@ func (m *MockConnection) RateRegistry() protocol.RateLimiter {
 
 // Dispose releases resources or closes connections associated with the object.
 func (m *MockConnection) Dispose() error {
+	fmt.Println("ADIOSAMOR")
 	args := m.Called()
 	return args.Error(0)
 }
