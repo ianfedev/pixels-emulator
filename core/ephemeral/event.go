@@ -8,5 +8,5 @@ import (
 
 func Event() {
 	em := server.GetServer().EventManager()
-	em.AddListener(event.AuthGrantEventName, grant.OnAuthGranted(), 10)
+	em.AddListener(event.AuthGrantEventName, grant.ProvideAuth(), 10)
 }
