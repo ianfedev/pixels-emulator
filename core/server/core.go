@@ -49,6 +49,10 @@ func UpdateInstance(server Server) {
 	}
 }
 
+func ResetInstance() {
+	instance = nil
+}
+
 // Reload performs the reloading of processors, handlers, cron jobs, and events.
 // It logs the duration of the reload process and alerts if any issues occur.
 func (s *MainServer) Reload(log bool) {

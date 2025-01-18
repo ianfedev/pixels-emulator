@@ -7,7 +7,6 @@ import (
 	ok "pixels-emulator/auth/message"
 	"pixels-emulator/core/event"
 	"pixels-emulator/core/server"
-	userEvent "pixels-emulator/user/event"
 	"strconv"
 )
 
@@ -26,12 +25,11 @@ func ProvideAuth() func(event event.Event) {
 func OnAuthGrantEvent(ev event.Event) {
 
 	connStore := server.GetServer().ConnStore()
-	em := server.GetServer().EventManager()
 
 	var err error
 	defer func() {
 		if err != nil {
-			zap.L().Error("error during authentication handle", zap.Error(err))
+			server.GetServer().Logger().Error("error during authentication handle", zap.Error(err))
 		}
 	}()
 
@@ -50,8 +48,7 @@ func OnAuthGrantEvent(ev event.Event) {
 	}
 
 	if authEv.CancellableEvent.IsCancelled() {
-		userEv := userEvent.NewEvent(con, userEvent.SECURITY)
-		err = em.Fire(userEvent.UserDisconnectEventName, userEv)
+		err = con.Dispose()
 		err = errors.New("connection cancelled by external listener")
 		return
 	}

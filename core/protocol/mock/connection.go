@@ -1,7 +1,6 @@
 package protocol_test
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/mock"
 	"pixels-emulator/core/protocol"
 )
@@ -14,7 +13,7 @@ type MockConnection struct {
 // Identifier provides an unique identifier of this connection.
 func (m *MockConnection) Identifier() string {
 	args := m.Called()
-	return args.String(0)
+	return args.Get(0).(string)
 }
 
 // GrantIdentifier provides a new identifier for connection.
@@ -41,7 +40,6 @@ func (m *MockConnection) RateRegistry() protocol.RateLimiter {
 
 // Dispose releases resources or closes connections associated with the object.
 func (m *MockConnection) Dispose() error {
-	fmt.Println("ADIOSAMOR")
 	args := m.Called()
 	return args.Error(0)
 }
