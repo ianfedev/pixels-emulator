@@ -43,12 +43,16 @@ func createLogger() (*zap.Logger, *bytes.Buffer) {
 
 // Test_OnAuthGrantEvent tests OnAuthGrantEvent with a valid connection.
 func Test_OnAuthGrantEvent(t *testing.T) {
+
 	sv, con, _ := setupMocks(true)
+	authFunc := grant.ProvideAuth()
+
+	assert.IsType(t, func(event oEvent.Event) {}, authFunc)
 
 	con.On("SendPacket", mock.Anything).Return(nil)
 
 	server.UpdateInstance(sv)
-	grant.OnAuthGrantEvent(event.NewEvent(1, 0, nil))
+	authFunc(event.NewEvent(1, 0, nil))
 
 	con.AssertExpectations(t)
 
