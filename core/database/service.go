@@ -2,6 +2,67 @@ package database
 
 import "gorm.io/gorm"
 
+// DataService defines a generic interface for CRUD operations and transactions.
+type DataService[T any] interface {
+
+	// CreateSync adds a new record to the database synchronously.
+	CreateSync(entity *T) error
+
+	// Create adds a new record to the database asynchronously.
+	Create(entity *T) <-chan error
+
+	// GetSync retrieves a record by its primary key synchronously.
+	GetSync(id uint) (*T, error)
+
+	// Get retrieves a record by its primary key asynchronously.
+	Get(id uint) <-chan struct {
+		Entity *T
+		Error  error
+	}
+
+	// UpdateSync updates an existing record synchronously.
+	UpdateSync(entity *T) error
+
+	// Update updates an existing record asynchronously.
+	Update(entity *T) <-chan error
+
+	// DeleteSync performs a soft delete on a record synchronously.
+	DeleteSync(id uint) error
+
+	// Delete performs a soft delete on a record asynchronously.
+	Delete(id uint) <-chan error
+
+	// FindByQuerySync retrieves records based on a query synchronously.
+	FindByQuerySync(query map[string]interface{}) ([]T, error)
+
+	// FindByQuery retrieves records based on a query asynchronously.
+	FindByQuery(query map[string]interface{}) <-chan struct {
+		Entities []T
+		Error    error
+	}
+
+	// BeginTransactionSync starts a new database transaction synchronously.
+	BeginTransactionSync() (*gorm.DB, error)
+
+	// BeginTransaction starts a new database transaction asynchronously.
+	BeginTransaction() <-chan struct {
+		Tx    *gorm.DB
+		Error error
+	}
+
+	// CommitTransactionSync commits the transaction synchronously.
+	CommitTransactionSync(tx *gorm.DB) error
+
+	// CommitTransaction commits the transaction asynchronously.
+	CommitTransaction(tx *gorm.DB) <-chan error
+
+	// RollbackTransactionSync rolls back the transaction synchronously.
+	RollbackTransactionSync(tx *gorm.DB) error
+
+	// RollbackTransaction rolls back the transaction asynchronously.
+	RollbackTransaction(tx *gorm.DB) <-chan error
+}
+
 // ModelService provides CRUD operations for any GORM model.
 type ModelService[T any] struct {
 	DB *gorm.DB

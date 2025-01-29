@@ -17,12 +17,12 @@ import (
 
 // AuthTicketHandler handles the authentication of tickets for users.
 type AuthTicketHandler struct {
-	logger    *zap.Logger                             // logger Logger instance for logging
-	ssoSvc    *database.ModelService[model.SSOTicket] // ssoSvc Service for handling SSO tickets
-	userSvc   *database.ModelService[model.User]      // userSvc Service for managing user data
-	connStore protocol.ConnectionManager              // connStore Connection store for managing connections
-	em        event.Manager                           // em Event manager for firing events
-	cfg       *config.Config                          // cfg Configuration for server settings
+	logger    *zap.Logger                           // logger Logger instance for logging
+	ssoSvc    database.DataService[model.SSOTicket] // ssoSvc Service for handling SSO tickets
+	userSvc   database.DataService[model.User]      // userSvc Service for managing user data
+	connStore protocol.ConnectionManager            // connStore Connection store for managing connections
+	em        event.Manager                         // em Event manager for firing events
+	cfg       *config.Config                        // cfg Configuration for server settings
 }
 
 // Handle processes the provided authentication ticket packet.
@@ -63,7 +63,7 @@ func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn protocol.Connect
 		res := <-h.ssoSvc.FindByQuery(q)
 		ssoRes, err := res.Entities, res.Error
 
-		if closeConn != nil {
+		if err != nil {
 			closeConn = err
 			return
 		}
