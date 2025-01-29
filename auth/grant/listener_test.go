@@ -5,11 +5,10 @@ import (
 	oEvent "pixels-emulator/core/event"
 	mockproto "pixels-emulator/core/protocol/mock"
 	mockserver "pixels-emulator/core/server/mock"
+	"pixels-emulator/core/util"
 
 	"bytes"
 	"github.com/stretchr/testify/mock"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"pixels-emulator/auth/event"
 	"pixels-emulator/auth/grant"
 	"pixels-emulator/core/server"
@@ -21,24 +20,13 @@ func setupMocks(exist bool) (*mockserver.Server, *mockproto.MockConnection, *byt
 	sv := &mockserver.Server{}
 	connStore := &mockproto.MockConnectionManager{}
 	con := &mockproto.MockConnection{}
-	log, buf := createLogger()
+	log, buf := util.CreateTestLogger()
 
 	connStore.On("GetConnection", mock.Anything).Return(con, exist)
 	sv.On("ConnStore").Return(connStore)
 	sv.On("Logger").Return(log)
 
 	return sv, con, buf
-}
-
-// createLogger creates a zap logger with a buffer for capturing log output.
-func createLogger() (*zap.Logger, *bytes.Buffer) {
-	var buf bytes.Buffer
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	encoder := zapcore.NewJSONEncoder(encoderConfig)
-	core := zapcore.NewCore(encoder, zapcore.AddSync(&buf), zapcore.DebugLevel)
-	logger := zap.New(core)
-	return logger, &buf
 }
 
 // Test_OnAuthGrantEvent tests OnAuthGrantEvent with a valid connection.
