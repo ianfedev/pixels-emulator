@@ -16,3 +16,24 @@ func CreateTestLogger() (*zap.Logger, *bytes.Buffer) {
 	logger := zap.New(core)
 	return logger, &buf
 }
+
+// MockAsyncResponse creates the mocking of an async response for model services.
+func MockAsyncResponse[T any](data T, err error) <-chan struct {
+	Data  T
+	Error error
+} {
+	ch := make(chan struct {
+		Data  T
+		Error error
+	}, 1)
+
+	go func() {
+		ch <- struct {
+			Data  T
+			Error error
+		}{Data: data, Error: err}
+		close(ch)
+	}()
+
+	return ch
+}

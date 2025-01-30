@@ -17,12 +17,11 @@ import (
 
 // AuthTicketHandler handles the authentication of tickets for users.
 type AuthTicketHandler struct {
-	logger    *zap.Logger                           // logger Logger instance for logging
-	ssoSvc    database.DataService[model.SSOTicket] // ssoSvc Service for handling SSO tickets
-	userSvc   database.DataService[model.User]      // userSvc Service for managing user data
-	connStore protocol.ConnectionManager            // connStore Connection store for managing connections
-	em        event.Manager                         // em Event manager for firing events
-	cfg       *config.Config                        // cfg Configuration for server settings
+	logger  *zap.Logger                           // logger Logger instance for logging
+	ssoSvc  database.DataService[model.SSOTicket] // ssoSvc Service for handling SSO tickets
+	userSvc database.DataService[model.User]      // userSvc Service for managing user data
+	em      event.Manager                         // em Event manager for firing events
+	cfg     *config.Config                        // cfg Configuration for server settings
 }
 
 // Handle processes the provided authentication ticket packet.
@@ -61,7 +60,7 @@ func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn protocol.Connect
 
 		q := map[string]interface{}{"ticket": pack.Ticket}
 		res := <-h.ssoSvc.FindByQuery(q)
-		ssoRes, err := res.Entities, res.Error
+		ssoRes, err := res.Data, res.Error
 
 		if err != nil {
 			closeConn = err
@@ -87,10 +86,10 @@ func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn protocol.Connect
 		return
 	}
 
-	id := strconv.Itoa(int(userRes.Entity.ID))
+	id := strconv.Itoa(int(userRes.Data.ID))
 	conn.GrantIdentifier(id)
 	h.logger.Debug("Connection upgraded", zap.String("identifier", conn.Identifier()))
-	ev := grant.NewEvent(int(userRes.Entity.ID), 0, make(map[string]string))
+	ev := grant.NewEvent(int(userRes.Data.ID), 0, make(map[string]string))
 
 	err := h.em.Fire(grant.AuthGrantEventName, ev)
 	if err != nil {
@@ -107,11 +106,10 @@ func NewAuthTicket() registry.Handler[protocol.Packet] {
 	db := sv.Database()
 
 	return &AuthTicketHandler{
-		logger:    sv.Logger(),
-		ssoSvc:    &database.ModelService[model.SSOTicket]{DB: db},
-		userSvc:   &database.ModelService[model.User]{DB: db},
-		connStore: sv.ConnStore(),
-		em:        sv.EventManager(),
-		cfg:       sv.Config(),
+		logger:  sv.Logger(),
+		ssoSvc:  &database.ModelService[model.SSOTicket]{DB: db},
+		userSvc: &database.ModelService[model.User]{DB: db},
+		em:      sv.EventManager(),
+		cfg:     sv.Config(),
 	}
 }

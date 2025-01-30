@@ -16,8 +16,8 @@ type DataService[T any] interface {
 
 	// Get retrieves a record by its primary key asynchronously.
 	Get(id uint) <-chan struct {
-		Entity *T
-		Error  error
+		Data  *T
+		Error error
 	}
 
 	// UpdateSync updates an existing record synchronously.
@@ -37,8 +37,8 @@ type DataService[T any] interface {
 
 	// FindByQuery retrieves records based on a query asynchronously.
 	FindByQuery(query map[string]interface{}) <-chan struct {
-		Entities []T
-		Error    error
+		Data  []T
+		Error error
 	}
 
 	// BeginTransactionSync starts a new database transaction synchronously.
@@ -94,26 +94,26 @@ func (s *ModelService[T]) GetSync(id uint) (*T, error) {
 
 // Get retrieves a record by its primary key (asynchronous).
 func (s *ModelService[T]) Get(id uint) <-chan struct {
-	Entity *T
-	Error  error
+	Data  *T
+	Error error
 } {
 	result := make(chan struct {
-		Entity *T
-		Error  error
+		Data  *T
+		Error error
 	}, 1)
 	go func() {
 		defer close(result)
 		entity := new(T)
 		if err := s.DB.First(entity, id).Error; err != nil {
 			result <- struct {
-				Entity *T
-				Error  error
+				Data  *T
+				Error error
 			}{nil, err}
 			return
 		}
 		result <- struct {
-			Entity *T
-			Error  error
+			Data  *T
+			Error error
 		}{entity, nil}
 	}()
 	return result
@@ -160,26 +160,26 @@ func (s *ModelService[T]) FindByQuerySync(query map[string]interface{}) ([]T, er
 
 // FindByQuery retrieves records based on a query (asynchronous).
 func (s *ModelService[T]) FindByQuery(query map[string]interface{}) <-chan struct {
-	Entities []T
-	Error    error
+	Data  []T
+	Error error
 } {
 	result := make(chan struct {
-		Entities []T
-		Error    error
+		Data  []T
+		Error error
 	}, 1)
 	go func() {
 		defer close(result)
 		var entities []T
 		if err := s.DB.Where(query).Find(&entities).Error; err != nil {
 			result <- struct {
-				Entities []T
-				Error    error
+				Data  []T
+				Error error
 			}{nil, err}
 			return
 		}
 		result <- struct {
-			Entities []T
-			Error    error
+			Data  []T
+			Error error
 		}{entities, nil}
 	}()
 	return result

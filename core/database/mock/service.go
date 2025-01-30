@@ -30,13 +30,13 @@ func (m *ModelServiceMock[T]) GetSync(id uint) (*T, error) {
 
 // Get mocks the Get method.
 func (m *ModelServiceMock[T]) Get(id uint) <-chan struct {
-	Entity *T
-	Error  error
+	Data  *T
+	Error error
 } {
 	args := m.Called(id)
 	return args.Get(0).(<-chan struct {
-		Entity *T
-		Error  error
+		Data  *T
+		Error error
 	})
 }
 
@@ -72,13 +72,13 @@ func (m *ModelServiceMock[T]) FindByQuerySync(query map[string]interface{}) ([]T
 
 // FindByQuery mocks the FindByQuery method.
 func (m *ModelServiceMock[T]) FindByQuery(query map[string]interface{}) <-chan struct {
-	Entities []T
-	Error    error
+	Data  []T
+	Error error
 } {
 	args := m.Called(query)
 	return args.Get(0).(<-chan struct {
-		Entities []T
-		Error    error
+		Data  []T
+		Error error
 	})
 }
 
