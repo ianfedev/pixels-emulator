@@ -93,7 +93,7 @@ func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn protocol.Connect
 
 	err := h.em.Fire(grant.AuthGrantEventName, ev)
 	if err != nil {
-		closeConn = userRes.Error
+		closeConn = err
 		return
 	}
 
