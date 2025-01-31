@@ -17,6 +17,14 @@ import (
 	"testing"
 )
 
+func setupMockConn(id string, dErr error) *mockproto.MockConnection {
+	con := &mockproto.MockConnection{}
+	con.On("GrantIdentifier", mock.Anything).Return(nil)
+	con.On("Identifier").Return(id)
+	con.On("Dispose").Return(dErr)
+	return con
+}
+
 func setupTestEnvironment(
 	t *testing.T,
 	env string,
@@ -36,10 +44,7 @@ func setupTestEnvironment(
 		},
 	}
 
-	con := &mockproto.MockConnection{}
-	con.On("GrantIdentifier", mock.Anything).Return(nil)
-	con.On("Identifier").Return(id)
-	con.On("Dispose").Return(nil)
+	con := setupMockConn(id, nil)
 
 	em := &mockevent.MockEventManager{}
 	em.On("Fire", grant.AuthGrantEventName, mock.Anything).Return(fErr)
@@ -89,6 +94,27 @@ func TestAuthTicketHandler_Handle(t *testing.T) {
 	setupTestEnvironment(t, "PRODUCTION", "1", qRes, gRes, true, true, true, nil)
 }
 
+func TestAuthTicketHandler_DisposePacketError(t *testing.T) {
+
+	idNum := 1
+	qRes := util.MockAsyncResponse([]model.SSOTicket{{UserID: uint(idNum)}}, nil)
+	gRes := util.MockAsyncResponse(&model.User{BaseModel: database.BaseModel{ID: uint(idNum)}}, nil)
+	ath, buf := setupTestEnvironment(t, "PRODUCTION", "1", qRes, gRes, true, true, true, nil)
+
+	incPck := &message.AuthOkPacket{}
+	con := setupMockConn("1", errors.New("dispose error"))
+
+	ath.Handle(incPck, con)
+	assert.Contains(t, buf.String(), "cannot cast packet, skipping processing")
+
+	pck := &message.AuthTicketPacket{
+		Ticket: "1",
+		Time:   1,
+	}
+	ath.Handle(pck, con)
+
+}
+
 func TestAuthTicketHandler_HandleDebug(t *testing.T) {
 	idNum := 1
 	qRes := util.MockAsyncResponse([]model.SSOTicket{{UserID: uint(idNum)}}, nil)
@@ -117,124 +143,22 @@ func TestAuthTicketHandler_DuplicatedSessionError(t *testing.T) {
 	idNum := 1
 	qRes := util.MockAsyncResponse([]model.SSOTicket{{}, {}}, nil)
 	gRes := util.MockAsyncResponse(&model.User{BaseModel: database.BaseModel{ID: uint(idNum)}}, nil)
-	_, buf := setupTestEnvironment(t, "DEVELOPMENT", "1", qRes, gRes, false, true, false, nil)
+	_, buf := setupTestEnvironment(t, "PRODUCTION", "1", qRes, gRes, false, true, false, nil)
 	assert.Contains(t, buf.String(), "session is being duplicated")
 }
 
-/*
-
-func TestAuthTicketHandler_DuplicatedSession(t *testing.T) {
-
-	log, buf := util.CreateTestLogger()
-	demoId := "1"
-
-	cfg := &config.Config{
-		Server: config.ServerConfig{
-			Environment: "PRODUCTION",
-		},
-	}
-
-	con := &mockproto.MockConnection{}
-	con.On("Dispose").Return(nil)
-
-	em := &mockevent.MockEventManager{}
-
-	ssoSvc := &mockdb.ModelServiceMock[model.SSOTicket]{}
-	ssoSvc.On("FindByQuery", mock.MatchedBy(func(q map[string]interface{}) bool {
-		return q["ticket"] == demoId
-	})).Return(util.MockAsyncResponse([]model.SSOTicket{{}, {}}, nil))
-
-	userSvc := &mockdb.ModelServiceMock[model.User]{}
-
-	pck := &message.AuthTicketPacket{
-		Ticket: demoId,
-		Time:   1,
-	}
-
-	handler := setupHandler(log, em, ssoSvc, userSvc, cfg)
-
-	handler.Handle(pck, con)
-	ssoSvc.AssertExpectations(t)
-	assert.Contains(t, buf.String(), "session is being duplicated")
-
-}
-
-func TestAuthTicketHandler_InvalidSession(t *testing.T) {
-
-	log, buf := util.CreateTestLogger()
-	demoId := "1"
-
-	cfg := &config.Config{
-		Server: config.ServerConfig{
-			Environment: "PRODUCTION",
-		},
-	}
-
-	con := &mockproto.MockConnection{}
-	con.On("Dispose").Return(nil)
-
-	em := &mockevent.MockEventManager{}
-
-	ssoSvc := &mockdb.ModelServiceMock[model.SSOTicket]{}
-	ssoSvc.On("FindByQuery", mock.MatchedBy(func(q map[string]interface{}) bool {
-		return q["ticket"] == demoId
-	})).Return(util.MockAsyncResponse([]model.SSOTicket{}, nil))
-
-	userSvc := &mockdb.ModelServiceMock[model.User]{}
-
-	pck := &message.AuthTicketPacket{
-		Ticket: demoId,
-		Time:   1,
-	}
-
-	handler := setupHandler(log, em, ssoSvc, userSvc, cfg)
-
-	handler.Handle(pck, con)
-	ssoSvc.AssertExpectations(t)
+func TestAuthTicketHandler_EmptySession(t *testing.T) {
+	idNum := 1
+	qRes := util.MockAsyncResponse([]model.SSOTicket{}, nil)
+	gRes := util.MockAsyncResponse(&model.User{BaseModel: database.BaseModel{ID: uint(idNum)}}, nil)
+	_, buf := setupTestEnvironment(t, "PRODUCTION", "1", qRes, gRes, false, true, false, nil)
 	assert.Contains(t, buf.String(), "session is being created with not valid ticket")
-
 }
 
 func TestAuthTicketHandler_FireError(t *testing.T) {
-
-	log, buf := util.CreateTestLogger()
-	demoId := "1"
-	idNum, _ := strconv.Atoi(demoId)
-
-	cfg := &config.Config{
-		Server: config.ServerConfig{
-			Environment: "DEVELOPMENT",
-		},
-	}
-
-	con := &mockproto.MockConnection{}
-	con.On("GrantIdentifier", mock.Anything).Return(nil)
-	con.On("Identifier").Return(demoId)
-	con.On("Dispose").Return(nil)
-
-	em := &mockevent.MockEventManager{}
-	em.On("Fire", grant.AuthGrantEventName, mock.Anything).Return(errors.New("test fire error"))
-
-	ssoSvc := &mockdb.ModelServiceMock[model.SSOTicket]{}
-
-	userSvc := &mockdb.ModelServiceMock[model.User]{}
-	userSvc.On("Get", mock.MatchedBy(func(id uint) bool {
-		return id == uint(idNum)
-	})).Return(util.MockAsyncResponse(&model.User{BaseModel: database.BaseModel{ID: uint(idNum)}}, nil))
-
-	pck := &message.AuthTicketPacket{
-		Ticket: demoId,
-		Time:   1,
-	}
-
-	handler := setupHandler(log, em, ssoSvc, userSvc, cfg)
-
-	handler.Handle(pck, con)
-	ssoSvc.AssertExpectations(t)
-	userSvc.AssertExpectations(t)
-	em.AssertExpectations(t)
-	assert.Contains(t, buf.String(), "test fire error")
-
+	idNum := 1
+	qRes := util.MockAsyncResponse([]model.SSOTicket{{}}, nil)
+	gRes := util.MockAsyncResponse(&model.User{BaseModel: database.BaseModel{ID: uint(idNum)}}, nil)
+	_, buf := setupTestEnvironment(t, "DEVELOPMENT", "1", qRes, gRes, false, false, false, errors.New("fire error"))
+	assert.Contains(t, buf.String(), "fire error")
 }
-
-*/
