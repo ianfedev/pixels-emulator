@@ -13,7 +13,7 @@ type NavigatorInitHandler struct {
 	logger *zap.Logger // logger instance for recording packet processing details.
 }
 
-func (h *NavigatorInitHandler) Handle(packet protocol.Packet, protocol protocol.Connection) {
+func (h *NavigatorInitHandler) Handle(packet protocol.Packet, conn protocol.Connection) {
 
 	_, ok := packet.(*message.NavigatorInitPacket)
 	if !ok {
@@ -21,9 +21,9 @@ func (h *NavigatorInitHandler) Handle(packet protocol.Packet, protocol protocol.
 		return
 	}
 
-	h.logger.Debug("Navigator fired by user", zap.String("identifier", protocol.Identifier()))
+	h.logger.Debug("Navigator fired by user", zap.String("identifier", conn.Identifier()))
 
-	// STANDBY: Navigation packets useless in Nitro Client.
+	// INVESTIGATION: Navigation packets useless in Nitro Client.
 	// Navigation Settings (518): Stores position of window.
 	// Navigator Metadata (3052)
 	// Navigator Lifted (3104)
@@ -34,6 +34,9 @@ func (h *NavigatorInitHandler) Handle(packet protocol.Packet, protocol protocol.
 	// It should fire both or just one? I don't know.
 	// Categories are provided via UserInfoEvent and expected to be reach only by a request...
 	// For now this will remain empty while I figure out this usage.
+
+	navCtx := []string{"official_view", "hotel_view", "roomads_view", "myworld_view"}
+	conn.SendPacket(message.NewNavigatorMetaDataPacket(navCtx...))
 
 }
 
