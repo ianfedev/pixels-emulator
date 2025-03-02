@@ -4,7 +4,7 @@ go 1.23.4
 
 require (
 	github.com/fasthttp/websocket v1.5.3
-	github.com/gofiber/contrib/fiberzap/v2 v2.1.4
+	github.com/gofiber/contrib/fiberzap/v2 v2.1.5
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/gofiber/websocket/v2 v2.2.1
 	github.com/spf13/viper v1.19.0

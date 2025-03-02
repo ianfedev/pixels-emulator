@@ -15,6 +15,8 @@ github.com/go-sql-driver/mysql v1.7.0 h1:ueSltNNllEqE3qcWBTD0iQd3IpL/6U+mJxLkazJ
 github.com/go-sql-driver/mysql v1.7.0/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=
 github.com/gofiber/contrib/fiberzap/v2 v2.1.4 h1:GCtCQnT4Cr9az4qab2Ozmqsomkxm4Ei86MfKk/1p5+0=
 github.com/gofiber/contrib/fiberzap/v2 v2.1.4/go.mod h1:PkdXgUzw+oj4m6ksfKJ0Hs3H7iPhwvhfI4b2LSA9hhA=
+github.com/gofiber/contrib/fiberzap/v2 v2.1.5 h1:mJnuTFd1gQw/DFUz1mkJlMmiwPGJ5cEfjuOxYugKmT4=
+github.com/gofiber/contrib/fiberzap/v2 v2.1.5/go.mod h1:PtrHZhZvHC8deg3jRfjzlv1tk3Mtn0cmat7db+eqA6I=
 github.com/gofiber/fiber/v2 v2.52.6 h1:Rfp+ILPiYSvvVuIPvxrBns+HJp8qGLDnLJawAu27XVI=
 github.com/gofiber/fiber/v2 v2.52.6/go.mod h1:YEcBbO/FB+5M1IZNBP9FO3J9281zgPAreiI1oqg8nDw=
 github.com/gofiber/websocket/v2 v2.2.1 h1:C9cjxvloojayOp9AovmpQrk8VqvVnT8Oao3+IUygH7w=

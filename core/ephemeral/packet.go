@@ -7,6 +7,8 @@ import (
 	"pixels-emulator/core/server"
 	healthHandler "pixels-emulator/healthcheck/handler"
 	healthMsg "pixels-emulator/healthcheck/message"
+	navigatorHandler "pixels-emulator/navigator/handler"
+	navigatorMsg "pixels-emulator/navigator/message"
 )
 
 // Processors generates all the raw packet processing.
@@ -25,6 +27,10 @@ func Processors() {
 		return authMsg.ComposeTicket(raw)
 	})
 
+	pReg.Register(navigatorMsg.NavigatorInitCode, func(raw protocol.RawPacket, conn protocol.Connection) (protocol.Packet, error) {
+		return navigatorMsg.ComposeNavigatorInit(raw), nil
+	})
+
 }
 
 // Handlers generates all the packet handling processing.
@@ -36,5 +42,7 @@ func Handlers() {
 	hReg.Register(healthMsg.PongCode, healthHandler.NewPong())
 
 	hReg.Register(authMsg.AuthTicketCode, authHandler.NewAuthTicket())
+
+	hReg.Register(navigatorMsg.NavigatorInitCode, navigatorHandler.NewNavigatorInit())
 
 }
