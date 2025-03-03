@@ -30,6 +30,9 @@ func Processors() {
 	pReg.Register(navigatorMsg.NavigatorInitCode, func(raw protocol.RawPacket, conn protocol.Connection) (protocol.Packet, error) {
 		return navigatorMsg.ComposeNavigatorInit(raw), nil
 	})
+	pReg.Register(navigatorMsg.NavigatorSearchCode, func(raw protocol.RawPacket, conn protocol.Connection) (protocol.Packet, error) {
+		return navigatorMsg.ComposeNavigatorSearch(raw)
+	})
 
 }
 
@@ -44,5 +47,6 @@ func Handlers() {
 	hReg.Register(authMsg.AuthTicketCode, authHandler.NewAuthTicket())
 
 	hReg.Register(navigatorMsg.NavigatorInitCode, navigatorHandler.NewNavigatorInit())
+	hReg.Register(navigatorMsg.NavigatorSearchCode, navigatorHandler.NewNavigatorSearch())
 
 }

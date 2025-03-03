@@ -13,6 +13,7 @@ type NavigatorInitHandler struct {
 	logger *zap.Logger // logger instance for recording packet processing details.
 }
 
+// Handle performs logic to handle the packet.
 func (h *NavigatorInitHandler) Handle(packet protocol.Packet, conn protocol.Connection) {
 
 	_, ok := packet.(*message.NavigatorInitPacket)
@@ -40,6 +41,7 @@ func (h *NavigatorInitHandler) Handle(packet protocol.Packet, conn protocol.Conn
 
 }
 
+// NewNavigatorInit creates a new handler instance.
 func NewNavigatorInit() *NavigatorInitHandler {
 	return &NavigatorInitHandler{
 		logger: server.GetServer().Logger(),
