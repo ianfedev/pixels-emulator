@@ -10,6 +10,7 @@ import (
 func ModelMigration(logger *zap.Logger, db *gorm.DB) error {
 	logger.Info("Performing database migrations")
 	return db.AutoMigrate(
+		&model.NavigatorDisplay{},
 		&model.User{},
 		&model.SSOTicket{},
 		&model.Room{},
