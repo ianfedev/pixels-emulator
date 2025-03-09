@@ -1,33 +1,51 @@
 package event_test
 
 import (
-	event2 "pixels-emulator/navigator/event"
+	"pixels-emulator/navigator/event"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+// NewNavigatorQueryEvent creates an event with a parsed query.
 func TestNewNavigatorQueryEvent(t *testing.T) {
 	realm := "test_realm"
-	query := map[string]string{"key": "value"}
+	rawQuery := "owner:John"
 	owner := uint16(123)
 	metadata := map[string]string{"meta": "data"}
-	e := event2.NewNavigatorQueryEvent(realm, query, owner, metadata)
+
+	e := event.NewNavigatorQueryEvent(realm, rawQuery, owner, metadata)
 
 	assert.NotNil(t, e)
 	assert.Equal(t, realm, e.Realm())
-	assert.Equal(t, query, e.Query())
+	assert.Equal(t, rawQuery, e.RawQuery())
+	assert.Equal(t, map[string]string{"owner": "John"}, e.Query())
 	assert.Equal(t, owner, e.Owner())
 	assert.Equal(t, metadata, e.Metadata())
 }
 
-func TestNavigatorQueryEvent_Cancel(t *testing.T) {
+// NewNavigatorQueryEvent assigns "query" as key when no key is provided.
+func TestNewNavigatorQueryEvent_SimpleQuery(t *testing.T) {
 	realm := "test_realm"
-	query := map[string]string{"key": "value"}
+	rawQuery := "hotel_view"
 	owner := uint16(123)
 	metadata := map[string]string{"meta": "data"}
 
-	e := event2.NewNavigatorQueryEvent(realm, query, owner, metadata)
+	e := event.NewNavigatorQueryEvent(realm, rawQuery, owner, metadata)
+
+	assert.NotNil(t, e)
+	assert.Equal(t, rawQuery, e.RawQuery())
+	assert.Equal(t, map[string]string{"query": "hotel_view"}, e.Query())
+}
+
+// Cancel marks the event as cancelled.
+func TestNavigatorQueryEvent_Cancel(t *testing.T) {
+	realm := "test_realm"
+	rawQuery := "owner:John"
+	owner := uint16(123)
+	metadata := map[string]string{"meta": "data"}
+
+	e := event.NewNavigatorQueryEvent(realm, rawQuery, owner, metadata)
 	e.Cancel()
 
 	assert.True(t, e.IsCancelled())
