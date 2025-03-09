@@ -1,9 +1,14 @@
 package encode
 
-import "pixels-emulator/core/protocol"
+import (
+	"pixels-emulator/core/protocol"
+	"pixels-emulator/room"
+)
 
 // RoomData represents the essential data of a room.
 type RoomData struct {
+	protocol.Encodable
+
 	// ID is the unique identifier of the room.
 	ID int32
 
@@ -19,8 +24,8 @@ type RoomData struct {
 	// IsPublic indicates whether the room is public or private.
 	IsPublic bool
 
-	// State represents the room access state (0 = open, 1 = locked, 2 = password-protected).
-	State int8
+	// State represents the room access state (0 = open, 1 = locked, 2 = password-protected, 3 = invisible).
+	State room.State
 
 	// UserCount is the current number of users in the room.
 	UserCount int16
@@ -113,4 +118,9 @@ func (r *RoomData) Encode(pck *protocol.RawPacket) {
 		pck.AddInt(r.PromotionTime)
 	}
 
+}
+
+// Decode enforces type assertion.
+func (r *RoomData) Decode(_ *protocol.RawPacket) {
+	panic("can not be decoded")
 }
