@@ -24,8 +24,7 @@ func (h *NavigatorSearchHandler) Handle(raw protocol.Packet, _ protocol.Connecti
 		return
 	}
 
-	queryParams := map[string]string{"query": pck.Query}
-	ev := navEvent.NewNavigatorQueryEvent(pck.View, queryParams, 0, nil)
+	ev := navEvent.NewNavigatorQueryEvent(pck.View, pck.Query, 0, nil)
 	err := h.em.Fire(navEvent.NavigatorQueryEventName, ev)
 
 	if err != nil {
