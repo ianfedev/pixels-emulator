@@ -1,72 +1,47 @@
-package encode
+package encode_test
 
 import (
-	"pixels-emulator/room"
+	"pixels-emulator/navigator/encode"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 	"pixels-emulator/core/protocol"
 	roomEncode "pixels-emulator/room/encode"
 )
 
-// TestSearchResultCompoundEncode ensures SearchResultCompound is correctly encoded into a RawPacket with two rooms.
-func TestSearchResultCompoundEncode(t *testing.T) {
-	// Creating two RoomData instances
-	rooms := []*roomEncode.RoomData{
-		{
-			ID:          1010,
-			Name:        "Relaxing Lounge",
-			OwnerID:     2010,
-			OwnerName:   "Alice",
-			IsPublic:    true,
-			State:       room.Open,
-			UserCount:   10,
-			UserMax:     50,
-			Description: "A place to chill and relax.",
-			Score:       80,
-			Category:    2,
-			Tags:        []string{"chill", "lounge"},
+func TestSearchResultCompoundEncodeDecode(t *testing.T) {
+	r := encode.SearchResultCompound{
+		Code:       "test_code",
+		Query:      "test_query",
+		Collapsed:  true,
+		Actionable: true,
+		Thumbnails: true,
+		Rooms: []*roomEncode.RoomData{
+			{
+				ID:        1,
+				Name:      "Room 1",
+				OwnerID:   100,
+				OwnerName: "Owner1",
+			},
+			{
+				ID:        2,
+				Name:      "Room 2",
+				OwnerID:   101,
+				OwnerName: "Owner2",
+			},
 		},
 	}
 
-	// Creating a SearchResultCompound instance
-	result := SearchResultCompound{
-		Code:       "featured",
-		Query:      "Top Featured Rooms",
-		Collapsed:  false,
-		Actionable: true,
-		Thumbnails: true,
-		Rooms:      rooms,
-	}
+	pck := protocol.NewPacket(1010)
+	r.Encode(&pck)
 
-	// Create a packet and encode the result
-	pck := protocol.NewPacket(5001)
-	result.Encode(&pck)
-	rawBytes := pck.ToBytes()
-
-}
-
-// Helper functions for reading packet data
-func mustReadInt(t *testing.T, pck *protocol.RawPacket) int32 {
-	val, err := pck.ReadInt()
-	require.NoError(t, err, "Failed to read int")
-	return val
-}
-
-func mustReadShort(t *testing.T, pck *protocol.RawPacket) int16 {
-	val, err := pck.ReadShort()
-	require.NoError(t, err, "Failed to read short")
-	return val
-}
-
-func mustReadString(t *testing.T, pck *protocol.RawPacket) string {
-	val, err := pck.ReadString()
-	require.NoError(t, err, "Failed to read string")
-	return val
-}
-
-func mustReadBool(t *testing.T, pck *protocol.RawPacket) bool {
-	val, err := pck.ReadBoolean()
-	require.NoError(t, err, "Failed to read boolean")
-	return val
+	decodedResult := encode.SearchResultCompound{}
+	err := decodedResult.Decode(&pck)
+	assert.NoError(t, err, "Decode should not return an error")
+	assert.Equal(t, r.Code, decodedResult.Code, "Code should match")
+	assert.Equal(t, r.Query, decodedResult.Query, "Query should match")
+	assert.Equal(t, r.Collapsed, decodedResult.Collapsed, "Collapsed should match")
+	assert.Equal(t, r.Actionable, decodedResult.Actionable, "Actionable should match")
+	assert.Equal(t, r.Thumbnails, decodedResult.Thumbnails, "Thumbnails should match")
+	assert.Equal(t, len(r.Rooms), len(decodedResult.Rooms), "Number of rooms should match")
 }

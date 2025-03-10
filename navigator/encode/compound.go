@@ -54,3 +54,33 @@ func (r *SearchResultCompound) Encode(pck *protocol.RawPacket) {
 		room.Encode(pck)
 	}
 }
+
+func (r *SearchResultCompound) Decode(pck *protocol.RawPacket) error {
+
+	code, err := pck.ReadString()
+	r.Code = code
+	query, err := pck.ReadString()
+	r.Query = query
+	action, err := pck.ReadInt()
+	r.Actionable = action != 0
+
+	col, err := pck.ReadBoolean()
+	r.Collapsed = col
+	thumb, err := pck.ReadInt()
+	r.Thumbnails = thumb != 0
+
+	rLen, err := pck.ReadInt()
+	rooms := make([]roomEncode.RoomData, rLen)
+	for i := 0; i < int(rLen); i++ {
+		room := roomEncode.RoomData{}
+		er := room.Decode(pck)
+		if er != nil {
+			err = er
+		} else {
+			rooms[i] = room
+		}
+	}
+
+	return err
+
+}
