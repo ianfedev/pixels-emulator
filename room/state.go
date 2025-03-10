@@ -1,11 +1,11 @@
 package room
 
-// State represents the access state of a room.
-type State int8
+// Door represents the access state of a room.
+type Door int8
 
 const (
 	// Open means the room is accessible to everyone.
-	Open State = iota
+	Open Door = iota
 
 	// Locked means the room is restricted and requires manual approval.
 	Locked
@@ -15,4 +15,7 @@ const (
 
 	// Invisible means the actual room is not being shown to default users.
 	Invisible = 3
+
+	// Noob represents newbie status on Nitro client (INVESTIGATION).
+	Noob = 4
 )
