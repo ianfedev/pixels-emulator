@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"go.uber.org/zap"
 	grant "pixels-emulator/auth/event"
 	"pixels-emulator/auth/message"
@@ -42,7 +41,6 @@ func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn protocol.Connect
 		if closeConn != nil {
 			hLog.Warn("Error while authenticating SSO ticket", zap.Error(closeConn))
 			err := conn.Dispose()
-			fmt.Println(err)
 			if err != nil {
 				hLog.Error("Error while disposing connection", zap.Error(err))
 			}

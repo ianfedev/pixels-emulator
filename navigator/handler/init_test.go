@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"pixels-emulator/core/protocol"
@@ -64,7 +63,6 @@ func Test_Handle_InvalidPacket(t *testing.T) {
 
 	handler.Handle(pck, con)
 
-	fmt.Println(buf.String())
 	assert.Contains(t, buf.String(), "cannot cast ping packet, skipping processing")
 	t.Cleanup(func() {
 		server.ResetInstance()

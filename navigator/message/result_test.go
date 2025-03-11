@@ -20,7 +20,7 @@ func TestNavigatorSearchResultPacketEncode(t *testing.T) {
 			OwnerID:     5021,
 			OwnerName:   "Juanito",
 			IsPublic:    true,
-			State:       room.Open,
+			DoorMode:    room.Open,
 			UserCount:   10,
 			UserMax:     30,
 			Description: "Welcome to my room!",
@@ -82,7 +82,7 @@ func TestNavigatorSearchResultPacketEncode(t *testing.T) {
 			assert.Equal(t, expectedRoom.Name, mustReadString(t, receivedPck), "Room Name mismatch")
 			assert.Equal(t, expectedRoom.OwnerID, mustReadInt(t, receivedPck), "Owner ID mismatch")
 			assert.Equal(t, expectedRoom.OwnerName, mustReadString(t, receivedPck), "Owner Name mismatch")
-			assert.Equal(t, int16(expectedRoom.State), mustReadShort(t, receivedPck), "State mismatch")
+			assert.Equal(t, int16(expectedRoom.DoorMode), mustReadShort(t, receivedPck), "State mismatch")
 			assert.Equal(t, expectedRoom.UserCount, mustReadShort(t, receivedPck), "UserCount mismatch")
 			assert.Equal(t, expectedRoom.UserMax, mustReadShort(t, receivedPck), "UserMax mismatch")
 			assert.Equal(t, expectedRoom.Description, mustReadString(t, receivedPck), "Description mismatch")

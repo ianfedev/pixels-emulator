@@ -1,6 +1,7 @@
 package encode
 
 import (
+	"fmt"
 	"pixels-emulator/core/protocol"
 	roomEncode "pixels-emulator/room/encode"
 )
@@ -32,6 +33,7 @@ type SearchResultCompound struct {
 }
 
 func (r *SearchResultCompound) Encode(pck *protocol.RawPacket) {
+
 	pck.AddString(r.Code)
 	pck.AddString(r.Query)
 
@@ -50,6 +52,7 @@ func (r *SearchResultCompound) Encode(pck *protocol.RawPacket) {
 	pck.AddInt(thumbnails)
 
 	pck.AddInt(int32(len(r.Rooms)))
+	fmt.Println(pck.ToBytes())
 	for _, room := range r.Rooms {
 		room.Encode(pck)
 	}
@@ -61,18 +64,19 @@ func (r *SearchResultCompound) Decode(pck *protocol.RawPacket) error {
 	r.Code = code
 	query, err := pck.ReadString()
 	r.Query = query
+
 	action, err := pck.ReadInt()
 	r.Actionable = action != 0
-
 	col, err := pck.ReadBoolean()
 	r.Collapsed = col
 	thumb, err := pck.ReadInt()
 	r.Thumbnails = thumb != 0
 
 	rLen, err := pck.ReadInt()
-	rooms := make([]roomEncode.RoomData, rLen)
+
+	rooms := make([]*roomEncode.RoomData, rLen)
 	for i := 0; i < int(rLen); i++ {
-		room := roomEncode.RoomData{}
+		room := &roomEncode.RoomData{}
 		er := room.Decode(pck)
 		if er != nil {
 			err = er
@@ -80,6 +84,7 @@ func (r *SearchResultCompound) Decode(pck *protocol.RawPacket) error {
 			rooms[i] = room
 		}
 	}
+	r.Rooms = rooms
 
 	return err
 

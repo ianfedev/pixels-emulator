@@ -2,6 +2,7 @@ package encode_test
 
 import (
 	"pixels-emulator/navigator/encode"
+	"pixels-emulator/room"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,21 +19,55 @@ func TestSearchResultCompoundEncodeDecode(t *testing.T) {
 		Thumbnails: true,
 		Rooms: []*roomEncode.RoomData{
 			{
-				ID:        1,
-				Name:      "Room 1",
-				OwnerID:   100,
-				OwnerName: "Owner1",
+				ID:                1,
+				Name:              "Test Room",
+				OwnerID:           100,
+				OwnerName:         "Owner",
+				IsPublic:          false,
+				DoorMode:          room.Door(1),
+				UserCount:         10,
+				UserMax:           50,
+				Description:       "A test room",
+				Score:             200,
+				Category:          3,
+				Tags:              []string{"fun", "game"},
+				GuildID:           2,
+				GuildName:         "Guild Name",
+				GuildBadge:        "Badge123",
+				PromotionTitle:    "Special Promo",
+				PromotionDesc:     "Limited time event",
+				PromotionTime:     120,
+				Thumbnail:         "thumbnail.png",
+				AllowPets:         true,
+				FeaturedPromotion: true,
 			},
 			{
-				ID:        2,
-				Name:      "Room 2",
-				OwnerID:   101,
-				OwnerName: "Owner2",
+				ID:                2,
+				Name:              "The promax room",
+				OwnerID:           10,
+				OwnerName:         "Owner",
+				IsPublic:          true,
+				DoorMode:          room.Door(0),
+				UserCount:         10,
+				UserMax:           50,
+				Description:       "A test room",
+				Score:             200,
+				Category:          3,
+				Tags:              []string{"fun", "game"},
+				GuildID:           2,
+				GuildName:         "Guild Name",
+				GuildBadge:        "Badge123",
+				PromotionTitle:    "Special Promo",
+				PromotionDesc:     "Limited time event",
+				PromotionTime:     120,
+				Thumbnail:         "thumbnail.png",
+				AllowPets:         true,
+				FeaturedPromotion: true,
 			},
 		},
 	}
 
-	pck := protocol.NewPacket(1010)
+	pck := protocol.NewPacket(100)
 	r.Encode(&pck)
 
 	decodedResult := encode.SearchResultCompound{}
