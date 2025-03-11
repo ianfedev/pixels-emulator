@@ -23,7 +23,7 @@ func (p *NavigatorSearchPacket) Id() uint16 {
 
 // Rate returns the rate limit for the Ping packet.
 func (p *NavigatorSearchPacket) Rate() (uint16, uint16) {
-	return 10, 5
+	return 5, 5
 }
 
 // ComposeNavigatorSearch composes a new instance of the packet.

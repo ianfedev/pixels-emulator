@@ -2,6 +2,7 @@ package event
 
 import (
 	"pixels-emulator/core/event"
+	"pixels-emulator/core/protocol"
 	"strings"
 )
 
@@ -9,14 +10,15 @@ const NavigatorQueryEventName = "navigator.query"
 
 // NavigatorQueryEvent represents a navigation search event.
 type NavigatorQueryEvent struct {
-	*event.CancellableEvent                   // Extends functionality for cancellation.
-	realm                   string            // View or category being queried.
-	query                   map[string]string // Query parameters for filtering results.
-	rawQuery                string            // rawQuery provides the query as it came from client.
+	*event.CancellableEvent                     // Extends functionality for cancellation.
+	realm                   string              // View or category being queried.
+	query                   map[string]string   // Query parameters for filtering results.
+	rawQuery                string              // rawQuery provides the query as it came from client.
+	conn                    protocol.Connection // conn provides the desired connection
 }
 
 // NewNavigatorQueryEvent creates a new NavigatorQueryEvent instance.
-func NewNavigatorQueryEvent(realm string, rawQuery string, owner uint16, metadata map[string]string) *NavigatorQueryEvent {
+func NewNavigatorQueryEvent(realm string, rawQuery string, conn protocol.Connection, owner uint16, metadata map[string]string) *NavigatorQueryEvent {
 	parsedQuery := parseQuery(rawQuery)
 	ce := event.NewCancellable(owner, metadata)
 	return &NavigatorQueryEvent{
@@ -24,6 +26,7 @@ func NewNavigatorQueryEvent(realm string, rawQuery string, owner uint16, metadat
 		realm:            realm,
 		query:            parsedQuery,
 		rawQuery:         rawQuery,
+		conn:             conn,
 	}
 }
 
@@ -40,6 +43,11 @@ func (e *NavigatorQueryEvent) RawQuery() string {
 // Query returns the query parameters for filtering.
 func (e *NavigatorQueryEvent) Query() map[string]string {
 	return e.query
+}
+
+// Conn defines the connection which is querying the navigator.
+func (e *NavigatorQueryEvent) Conn() protocol.Connection {
+	return e.conn
 }
 
 // parseQuery processes the raw query into a key-value map.

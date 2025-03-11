@@ -1,6 +1,7 @@
 package event_test
 
 import (
+	mockproto "pixels-emulator/core/protocol/mock"
 	"pixels-emulator/navigator/event"
 	"testing"
 
@@ -13,8 +14,10 @@ func TestNewNavigatorQueryEvent(t *testing.T) {
 	rawQuery := "owner:John"
 	owner := uint16(123)
 	metadata := map[string]string{"meta": "data"}
+	con := &mockproto.MockConnection{}
+	con.On("Identifier").Return(1)
 
-	e := event.NewNavigatorQueryEvent(realm, rawQuery, owner, metadata)
+	e := event.NewNavigatorQueryEvent(realm, rawQuery, con, owner, metadata)
 
 	assert.NotNil(t, e)
 	assert.Equal(t, realm, e.Realm())
@@ -30,8 +33,10 @@ func TestNewNavigatorQueryEvent_SimpleQuery(t *testing.T) {
 	rawQuery := "hotel_view"
 	owner := uint16(123)
 	metadata := map[string]string{"meta": "data"}
+	con := &mockproto.MockConnection{}
+	con.On("Identifier").Return(1)
 
-	e := event.NewNavigatorQueryEvent(realm, rawQuery, owner, metadata)
+	e := event.NewNavigatorQueryEvent(realm, rawQuery, con, owner, metadata)
 
 	assert.NotNil(t, e)
 	assert.Equal(t, rawQuery, e.RawQuery())
@@ -44,8 +49,10 @@ func TestNavigatorQueryEvent_Cancel(t *testing.T) {
 	rawQuery := "owner:John"
 	owner := uint16(123)
 	metadata := map[string]string{"meta": "data"}
+	con := &mockproto.MockConnection{}
+	con.On("Identifier").Return(1)
 
-	e := event.NewNavigatorQueryEvent(realm, rawQuery, owner, metadata)
+	e := event.NewNavigatorQueryEvent(realm, rawQuery, con, owner, metadata)
 	e.Cancel()
 
 	assert.True(t, e.IsCancelled())

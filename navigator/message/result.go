@@ -29,19 +29,23 @@ func (p *NavigatorSearchResultPacket) Id() uint16 {
 
 // Rate returns the rate limit for the packet.
 func (p *NavigatorSearchResultPacket) Rate() (uint16, uint16) {
-	return 10, 2
+	return 0, 0
 }
 
 // Serialize writes the packet data into a RawPacket.
-func (p *NavigatorSearchResultPacket) Serialize(pck *protocol.RawPacket) {
+func (p *NavigatorSearchResultPacket) Serialize() protocol.RawPacket {
+
+	pck := protocol.NewPacket(NavigatorSearchResultCode)
 	pck.AddString(p.SearchCode)
 	pck.AddString(p.SearchQuery)
 
-	pck.AddInt(int32(len(p.Results))) // Number of result blocks
+	pck.AddInt(int32(len(p.Results)))
 
 	for _, result := range p.Results {
-		result.Encode(pck) // Encode each SearchResultCompound
+		result.Encode(&pck)
 	}
+
+	return pck
 }
 
 // ComposeNavigatorSearchResult creates a new NavigatorSearchResultPacket.

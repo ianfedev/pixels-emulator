@@ -146,11 +146,10 @@ func Test_Serialize(t *testing.T) {
 		},
 	}
 
-	pck := protocol.NewPacket(10)
 	res := ComposeNavigatorSearchResult("test_code", "test_query", r)
-	res.Serialize(&pck)
-
+	pck := res.Serialize()
 	bytes := pck.ToBytes()
+
 	raw, err := protocol.FromBytes(bytes)
 	assert.NoError(t, err, "Encoding should not portray error")
 

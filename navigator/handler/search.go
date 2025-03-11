@@ -16,7 +16,7 @@ type NavigatorSearchHandler struct {
 }
 
 // Handle processes the incoming navigation search packet.
-func (h *NavigatorSearchHandler) Handle(raw protocol.Packet, _ protocol.Connection) {
+func (h *NavigatorSearchHandler) Handle(raw protocol.Packet, conn protocol.Connection) {
 
 	pck, ok := raw.(*message.NavigatorSearchPacket)
 	if !ok {
@@ -24,7 +24,7 @@ func (h *NavigatorSearchHandler) Handle(raw protocol.Packet, _ protocol.Connecti
 		return
 	}
 
-	ev := navEvent.NewNavigatorQueryEvent(pck.View, pck.Query, 0, nil)
+	ev := navEvent.NewNavigatorQueryEvent(pck.View, pck.Query, conn, 0, nil)
 	err := h.em.Fire(navEvent.NavigatorQueryEventName, ev)
 
 	if err != nil {
