@@ -1,7 +1,6 @@
 package encode
 
 import (
-	"fmt"
 	"pixels-emulator/core/protocol"
 	roomEncode "pixels-emulator/room/encode"
 )
@@ -52,7 +51,6 @@ func (r *SearchResultCompound) Encode(pck *protocol.RawPacket) {
 	pck.AddInt(thumbnails)
 
 	pck.AddInt(int32(len(r.Rooms)))
-	fmt.Println(pck.ToBytes())
 	for _, room := range r.Rooms {
 		room.Encode(pck)
 	}
