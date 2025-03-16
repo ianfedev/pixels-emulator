@@ -26,8 +26,8 @@ func (h *GetGuestRoomHandler) Handle(raw protocol.Packet, conn protocol.Connecti
 	h.logger.Debug("Guest room event", zap.Int32("room", pck.RoomId), zap.Bool("enter", pck.Enter), zap.Bool("forward", pck.Forward))
 
 	testPck := &guest.ResponseRoomPacket{
-		Enter:   true,
-		Forward: true,
+		Enter:   pck.Enter,
+		Forward: pck.Forward,
 		Room: &encode.RoomData{
 			ID:                1,
 			Name:              "Test Room",

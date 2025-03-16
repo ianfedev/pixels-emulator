@@ -30,8 +30,10 @@ func (p *GetRoomPacket) Rate() (uint16, uint16) {
 func ComposeGuestRoomPacket(pck protocol.RawPacket) (*GetRoomPacket, error) {
 
 	rId, err := pck.ReadInt()
-	enter, err := pck.ReadBoolean()
-	forward, err := pck.ReadBoolean()
+	enterRaw, err := pck.ReadInt()
+	enter := enterRaw == 1
+	forwardRaw, err := pck.ReadInt()
+	forward := forwardRaw == 1
 
 	return &GetRoomPacket{
 		RoomId:  rId,

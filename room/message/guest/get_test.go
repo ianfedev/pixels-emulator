@@ -17,8 +17,19 @@ var guestPacket = &GetRoomPacket{
 func encodeGuestNavigator(dec *GetRoomPacket) *protocol.RawPacket {
 	pck := protocol.NewPacket(GetGuestRoomCode)
 	pck.AddInt(dec.RoomId)
-	pck.AddBoolean(dec.Enter)
-	pck.AddBoolean(dec.Forward)
+
+	var enter int32 = 0
+	if dec.Enter {
+		enter = 1
+	}
+	pck.AddInt(enter)
+
+	var forward int32 = 0
+	if dec.Forward {
+		forward = 1
+	}
+	pck.AddInt(forward)
+
 	return &pck
 }
 
