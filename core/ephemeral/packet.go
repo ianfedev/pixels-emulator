@@ -10,7 +10,8 @@ import (
 	navigatorHandler "pixels-emulator/navigator/handler"
 	navigatorMsg "pixels-emulator/navigator/message"
 	roomHandler "pixels-emulator/room/handler"
-	roomMsg "pixels-emulator/room/message/guest"
+	roomMsg "pixels-emulator/room/message"
+	guestRoomMsg "pixels-emulator/room/message/guest"
 )
 
 // Processors generates all the raw packet processing.
@@ -36,8 +37,11 @@ func Processors() {
 		return navigatorMsg.ComposeNavigatorSearch(raw)
 	})
 
-	pReg.Register(roomMsg.GetGuestRoomCode, func(raw protocol.RawPacket, conn protocol.Connection) (protocol.Packet, error) {
-		return roomMsg.ComposeGuestRoomPacket(raw)
+	pReg.Register(roomMsg.RoomEnterCode, func(raw protocol.RawPacket, conn protocol.Connection) (protocol.Packet, error) {
+		return roomMsg.ComposeRoomEnterPacket(raw)
+	})
+	pReg.Register(guestRoomMsg.GetGuestRoomCode, func(raw protocol.RawPacket, conn protocol.Connection) (protocol.Packet, error) {
+		return guestRoomMsg.ComposeGuestRoomPacket(raw)
 	})
 
 }
@@ -55,6 +59,7 @@ func Handlers() {
 	hReg.Register(navigatorMsg.NavigatorInitCode, navigatorHandler.NewNavigatorInit())
 	hReg.Register(navigatorMsg.NavigatorSearchCode, navigatorHandler.NewNavigatorSearch())
 
-	hReg.Register(roomMsg.GetGuestRoomCode, roomHandler.NewNavigatorSearch())
+	hReg.Register(roomMsg.RoomEnterCode, roomHandler.NewRoomEnter())
+	hReg.Register(guestRoomMsg.GetGuestRoomCode, roomHandler.NewNavigatorSearch())
 
 }

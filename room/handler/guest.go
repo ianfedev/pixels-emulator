@@ -25,6 +25,13 @@ func (h *GetGuestRoomHandler) Handle(raw protocol.Packet, conn protocol.Connecti
 
 	h.logger.Debug("Guest room event", zap.Int32("room", pck.RoomId), zap.Bool("enter", pck.Enter), zap.Bool("forward", pck.Forward))
 
+	// This must not be handled by events due to being a mission-critical
+	// packet, which can be queried many times not only for room entering,
+	// but for information purposes. So, creating a cancellable event
+	// may create conflicts...
+	// Therefore, we decided to create cancellable events deeper in the
+	// room logic (Like room entering).
+
 	testPck := &guest.ResponseRoomPacket{
 		Enter:   pck.Enter,
 		Forward: pck.Forward,
@@ -68,9 +75,9 @@ func (h *GetGuestRoomHandler) Handle(raw protocol.Packet, conn protocol.Connecti
 			Protection: encode.FloodFilterNormal,
 		},
 	}
+	// TODO: Replace with real data.
 
 	conn.SendPacket(testPck)
-	// TODO: Add cancellable event.
 
 }
 
