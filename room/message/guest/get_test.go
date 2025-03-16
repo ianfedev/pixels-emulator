@@ -1,4 +1,4 @@
-package message
+package guest
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -7,14 +7,14 @@ import (
 )
 
 // guestPacket is the mocked packet.
-var guestPacket = &GetGuestRoomPacket{
+var guestPacket = &GetRoomPacket{
 	RoomId:  1,
 	Enter:   true,
 	Forward: true,
 }
 
 // encodeGuestNavigator generates a decoding helper function to test.
-func encodeGuestNavigator(dec *GetGuestRoomPacket) *protocol.RawPacket {
+func encodeGuestNavigator(dec *GetRoomPacket) *protocol.RawPacket {
 	pck := protocol.NewPacket(GetGuestRoomCode)
 	pck.AddInt(dec.RoomId)
 	pck.AddBoolean(dec.Enter)

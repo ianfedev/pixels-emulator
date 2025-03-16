@@ -10,7 +10,7 @@ import (
 	navigatorHandler "pixels-emulator/navigator/handler"
 	navigatorMsg "pixels-emulator/navigator/message"
 	roomHandler "pixels-emulator/room/handler"
-	roomMsg "pixels-emulator/room/message"
+	roomMsg "pixels-emulator/room/message/guest"
 )
 
 // Processors generates all the raw packet processing.
