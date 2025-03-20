@@ -57,4 +57,10 @@ func OnUserRoomJoin(ev event.Event) {
 	server.GetServer().Logger().Debug("Room", zap.Any("room", room))
 	server.GetServer().Logger().Error("Room", zap.Any("err", err))
 
+	// Doorbelling. This must change from original Arcturus implementation, room must have doorbelling ids and broadcast event
+	// This will also have a runnable of 1 minute, runnable must cancel if not in room users. After 1 minute, send message of no one answered.
+	// When user with rights join, we should send again after 3 seconds the message.
+
+	// Password: If password is incorrect, send error (Check generic error composer) or open room
+	// Fulfill error in case of none of this are correct :)
 }
