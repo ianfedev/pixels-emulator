@@ -1,4 +1,4 @@
-package room
+package encode
 
 // Door represents the access state of a room.
 type Door int8

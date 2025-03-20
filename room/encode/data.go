@@ -2,33 +2,32 @@ package encode
 
 import (
 	"pixels-emulator/core/protocol"
-	"pixels-emulator/room"
 )
 
 // RoomData represents the essential data of a room.
 type RoomData struct {
 	protocol.Encodable
-	ID                int32     // ID is the unique identifier of the room.
-	Name              string    // Name is the display name of the room.
-	OwnerID           int32     // OwnerID is the unique identifier of the room owner.
-	OwnerName         string    // OwnerName is the display name of the room owner.
-	IsPublic          bool      // IsPublic indicates whether the room is public or private.
-	DoorMode          room.Door // DoorMode represents the room access state (0 = open, 1 = locked, 2 = password-protected, 3 = invisible).
-	UserCount         int32     // UserCount is the current number of users in the room.
-	UserMax           int32     // UserMax is the maximum number of users allowed in the room.
-	Description       string    // Description is the textual description of the room.
-	Score             int32     // Score represents the popularity score of the room.
-	Category          int32     // Category is the navigation category ID of the room.
-	Tags              []string  // Tags is a list of keywords associated with the room.
-	GuildID           int32     // GuildID is the unique identifier of the associated guild, or 0 if none.
-	GuildName         string    // GuildName is the name of the associated guild, if applicable.
-	GuildBadge        string    // GuildBadge is the badge code of the associated guild, if applicable.
-	PromotionTitle    string    // PromotionTitle is the title of the active room promotion, if applicable.
-	PromotionDesc     string    // PromotionDesc is the description of the active room promotion, if applicable.
-	PromotionTime     int32     // PromotionTime is the remaining time (in minutes) for the active promotion.
-	Thumbnail         string    // Thumbnail is room has staff pick banner.
-	AllowPets         bool      // AllowPets indicates whether pets are allowed in the room.
-	FeaturedPromotion bool      // FeaturedPromotion indicates whether the room has a featured promotion.
+	ID                int32    // ID is the unique identifier of the room.
+	Name              string   // Name is the display name of the room.
+	OwnerID           int32    // OwnerID is the unique identifier of the room owner.
+	OwnerName         string   // OwnerName is the display name of the room owner.
+	IsPublic          bool     // IsPublic indicates whether the room is public or private.
+	DoorMode          Door     // DoorMode represents the room access state (0 = open, 1 = locked, 2 = password-protected, 3 = invisible).
+	UserCount         int32    // UserCount is the current number of users in the room.
+	UserMax           int32    // UserMax is the maximum number of users allowed in the room.
+	Description       string   // Description is the textual description of the room.
+	Score             int32    // Score represents the popularity score of the room.
+	Category          int32    // Category is the navigation category ID of the room.
+	Tags              []string // Tags is a list of keywords associated with the room.
+	GuildID           int32    // GuildID is the unique identifier of the associated guild, or 0 if none.
+	GuildName         string   // GuildName is the name of the associated guild, if applicable.
+	GuildBadge        string   // GuildBadge is the badge code of the associated guild, if applicable.
+	PromotionTitle    string   // PromotionTitle is the title of the active room promotion, if applicable.
+	PromotionDesc     string   // PromotionDesc is the description of the active room promotion, if applicable.
+	PromotionTime     int32    // PromotionTime is the remaining time (in minutes) for the active promotion.
+	Thumbnail         string   // Thumbnail is room has staff pick banner.
+	AllowPets         bool     // AllowPets indicates whether pets are allowed in the room.
+	FeaturedPromotion bool     // FeaturedPromotion indicates whether the room has a featured promotion.
 }
 
 // GenerateBitmask generates the bitmask for the room based on its attributes.
@@ -127,7 +126,7 @@ func (r *RoomData) Decode(pck *protocol.RawPacket) error {
 	r.OwnerName = oName
 
 	mode, err := pck.ReadInt()
-	r.DoorMode = room.Door(mode)
+	r.DoorMode = Door(mode)
 	count, err := pck.ReadInt()
 	r.UserCount = count
 	uMax, err := pck.ReadInt()

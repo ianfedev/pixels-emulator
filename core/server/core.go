@@ -12,6 +12,7 @@ import (
 	"pixels-emulator/core/registry"
 	"pixels-emulator/core/scheduler"
 	"pixels-emulator/core/setup"
+	"pixels-emulator/room"
 	"sync"
 	"time"
 )
@@ -26,6 +27,7 @@ type MainServer struct {
 	packetHandlers   registry.HandlerRegistry   // packetHandlers provides the handlers of the packets processed.
 	eventManager     event.Manager              // eventManager provides the event management system global instance.
 	database         *gorm.DB                   // database provides a connection for ORM.
+	roomStore        *room.Store                // roomStore provides an in-memory storage to control the rooms.
 }
 
 var (
@@ -122,6 +124,10 @@ func (s *MainServer) Database() *gorm.DB {
 	return s.database
 }
 
+func (s *MainServer) RoomStore() *room.Store {
+	return s.roomStore
+}
+
 func setupServer() *MainServer {
 
 	var setupErr error
@@ -180,5 +186,6 @@ func setupServer() *MainServer {
 		packetHandlers:   hReg,
 		eventManager:     em,
 		database:         db,
+		roomStore:        room.NewStore(),
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/server"
-	"pixels-emulator/room"
 	"pixels-emulator/room/encode"
 	"pixels-emulator/room/message/guest"
 )
@@ -41,7 +40,7 @@ func (h *GetGuestRoomHandler) Handle(raw protocol.Packet, conn protocol.Connecti
 			OwnerID:           100,
 			OwnerName:         "Owner",
 			IsPublic:          false,
-			DoorMode:          room.Door(1),
+			DoorMode:          encode.Door(1),
 			UserCount:         10,
 			UserMax:           50,
 			Description:       "A test room",

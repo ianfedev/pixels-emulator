@@ -8,6 +8,7 @@ import (
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/registry"
 	"pixels-emulator/core/scheduler"
+	"pixels-emulator/room"
 )
 
 // Server defines the behavior of a server instance.
@@ -41,4 +42,7 @@ type Server interface {
 
 	// Database returns the database connection of the server.
 	Database() *gorm.DB
+
+	// RoomStore provides the in-memory loaded rooms.
+	RoomStore() *room.Store
 }

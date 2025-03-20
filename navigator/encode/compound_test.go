@@ -2,7 +2,6 @@ package encode_test
 
 import (
 	"pixels-emulator/navigator/encode"
-	"pixels-emulator/room"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,7 +23,7 @@ func TestSearchResultCompoundEncodeDecode(t *testing.T) {
 				OwnerID:           100,
 				OwnerName:         "Owner",
 				IsPublic:          false,
-				DoorMode:          room.Door(1),
+				DoorMode:          roomEncode.Door(1),
 				UserCount:         10,
 				UserMax:           50,
 				Description:       "A test room",
@@ -47,7 +46,7 @@ func TestSearchResultCompoundEncodeDecode(t *testing.T) {
 				OwnerID:           10,
 				OwnerName:         "Owner",
 				IsPublic:          true,
-				DoorMode:          room.Door(0),
+				DoorMode:          roomEncode.Door(0),
 				UserCount:         10,
 				UserMax:           50,
 				Description:       "A test room",

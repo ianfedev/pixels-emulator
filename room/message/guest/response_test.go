@@ -3,7 +3,6 @@ package guest
 import (
 	"github.com/stretchr/testify/assert"
 	"pixels-emulator/core/protocol"
-	"pixels-emulator/room"
 	"pixels-emulator/room/encode"
 	"testing"
 )
@@ -17,7 +16,7 @@ var mockPacket = &ResponseRoomPacket{
 		OwnerID:           100,
 		OwnerName:         "Owner",
 		IsPublic:          false,
-		DoorMode:          room.Door(1),
+		DoorMode:          encode.Door(1),
 		UserCount:         10,
 		UserMax:           50,
 		Description:       "A test room",

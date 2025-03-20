@@ -8,7 +8,6 @@ import (
 	"pixels-emulator/navigator/encode"
 	eventNav "pixels-emulator/navigator/event"
 	"pixels-emulator/navigator/message"
-	"pixels-emulator/room"
 	roomEncode "pixels-emulator/room/encode"
 )
 
@@ -47,7 +46,7 @@ func OnNavigatorSearch(ev event.Event) {
 					OwnerID:           100,
 					OwnerName:         "Owner",
 					IsPublic:          false,
-					DoorMode:          room.Door(1),
+					DoorMode:          roomEncode.Door(1),
 					UserCount:         10,
 					UserMax:           50,
 					Description:       "A test room",
@@ -70,7 +69,7 @@ func OnNavigatorSearch(ev event.Event) {
 					OwnerID:           10,
 					OwnerName:         "Owner",
 					IsPublic:          true,
-					DoorMode:          room.Door(0),
+					DoorMode:          roomEncode.Door(0),
 					UserCount:         10,
 					UserMax:           50,
 					Description:       "A test room",
@@ -102,7 +101,7 @@ func OnNavigatorSearch(ev event.Event) {
 					OwnerID:           100,
 					OwnerName:         "Owner",
 					IsPublic:          false,
-					DoorMode:          room.Door(1),
+					DoorMode:          roomEncode.Door(1),
 					UserCount:         10,
 					UserMax:           50,
 					Description:       "A test room",
@@ -125,7 +124,7 @@ func OnNavigatorSearch(ev event.Event) {
 					OwnerID:           10,
 					OwnerName:         "Owner",
 					IsPublic:          true,
-					DoorMode:          room.Door(0),
+					DoorMode:          roomEncode.Door(0),
 					UserCount:         10,
 					UserMax:           50,
 					Description:       "A test room",
