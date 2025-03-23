@@ -33,6 +33,11 @@ func (p *ResponseRoomPacket) Rate() (uint16, uint16) {
 	return 0, 0
 }
 
+// Deadline provides the maximum time a packet can be processed in milliseconds.
+func (p *ResponseRoomPacket) Deadline() uint {
+	return 500
+}
+
 func (p *ResponseRoomPacket) Serialize() protocol.RawPacket {
 
 	pck := protocol.NewPacket(ResponseGuestRoomCode)

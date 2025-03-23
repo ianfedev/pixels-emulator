@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -77,7 +78,7 @@ func setupTestEnvironment(
 		Time:   1,
 	}
 
-	ath.Handle(pck, con)
+	ath.Handle(context.Background(), pck, con)
 
 	if aUser {
 		userSvc.AssertExpectations(t)
@@ -127,14 +128,14 @@ func TestAuthTicketHandler_DisposeError(t *testing.T) {
 	incPck := &message.AuthOkPacket{}
 	con := setupMockConn("1", errors.New("dispose error"))
 
-	ath.Handle(incPck, con)
+	ath.Handle(context.Background(), incPck, con)
 	assert.Contains(t, buf.String(), "cannot cast packet, skipping processing")
 
 	pck := &message.AuthTicketPacket{
 		Ticket: "1",
 		Time:   1,
 	}
-	ath.Handle(pck, con)
+	ath.Handle(context.Background(), pck, con)
 
 }
 

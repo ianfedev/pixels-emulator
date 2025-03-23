@@ -22,7 +22,7 @@ func Test_NavigatorSearchPacket(t *testing.T) {
 	assert.Equal(t, "popular_rooms", navSearchPacket.Query)
 
 	rateLimit, rateInterval := navSearchPacket.Rate()
-	assert.Equal(t, uint16(10), rateLimit)
+	assert.Equal(t, uint16(5), rateLimit)
 	assert.Equal(t, uint16(5), rateInterval)
 }
 

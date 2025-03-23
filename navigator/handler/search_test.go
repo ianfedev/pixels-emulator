@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	message2 "pixels-emulator/auth/message"
 	"testing"
@@ -40,7 +41,7 @@ func setupTestEnvironment(t *testing.T, query string, view string, val interface
 
 	con := setupMockConn()
 
-	h.Handle(pck, con)
+	h.Handle(context.Background(), pck, con)
 
 	em.AssertExpectations(t)
 
@@ -69,7 +70,7 @@ func TestNavigatorSearchHandler_InvalidPacket(t *testing.T) {
 	invalidPck := &message2.AuthTicketPacket{}
 	con := setupMockConn()
 
-	h.Handle(invalidPck, con)
+	h.Handle(context.Background(), invalidPck, con)
 
 	assert.Contains(t, buf.String(), "cannot cast navigator search packet, skipping processing")
 }

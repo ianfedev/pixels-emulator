@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"go.uber.org/zap"
 	"pixels-emulator/core/config"
 	"pixels-emulator/core/protocol"
@@ -20,7 +21,7 @@ type PongHandler struct {
 }
 
 // Handle executes the packet processing, responding with a ping 2 seconds after sent if no ping rate is set, assuming client will handle it.
-func (h *PongHandler) Handle(packet protocol.Packet, conn protocol.Connection) {
+func (h *PongHandler) Handle(_ context.Context, packet protocol.Packet, conn protocol.Connection) {
 
 	rate := h.cfg.Server.PingRate
 

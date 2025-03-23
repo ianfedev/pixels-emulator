@@ -1,11 +1,13 @@
 package socket
 
 import (
+	"context"
 	websocket2 "github.com/fasthttp/websocket"
 	"github.com/gofiber/websocket/v2"
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/registry"
+	"time"
 )
 
 // Handle manages the basic message reception from websocket.
@@ -100,19 +102,31 @@ func processPacket(
 	}
 
 	period, rate := comPacket.Rate()
-
 	if rate > 0 {
 		limiter := rReg.GetLimiter(comPacket.Id(), period, rate)
-
 		if !limiter.Allow() {
-			logger.Debug("rate limit exceeded on connection", zap.Uint16("header", pack.GetHeader()), zap.String("id", wCon.Identifier()))
+			logger.Debug("Rate limit exceeded on connection", zap.Uint16("header", pack.GetHeader()), zap.String("id", wCon.Identifier()))
 			return nil
 		}
 	}
 
-	err = hReg.Handle(comPacket, wCon)
-	if err != nil {
-		return err
+	timeout := time.Duration(comPacket.Deadline()) * time.Millisecond
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- hReg.Handle(ctx, comPacket, wCon)
+	}()
+
+	select {
+	case err := <-errChan:
+		if err != nil {
+			return err
+		}
+	case <-ctx.Done():
+		logger.Warn("Handler execution exceeded deadline", zap.Uint16("header", pack.GetHeader()), zap.String("id", wCon.Identifier()))
+		return ctx.Err()
 	}
 
 	return nil

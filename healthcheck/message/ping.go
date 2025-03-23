@@ -21,6 +21,11 @@ func (p *PingPacket) Rate() (uint16, uint16) {
 	return 0, 0
 }
 
+// Deadline provides the maximum time a packet can be processed in milliseconds.
+func (p *PingPacket) Deadline() uint {
+	return 10
+}
+
 // Serialize converts the Ping packet into a RawPacket that can be transmitted over the network.
 func (p *PingPacket) Serialize() protocol.RawPacket {
 	rawPack := protocol.NewPacket(PingCode)

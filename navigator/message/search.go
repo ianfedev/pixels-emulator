@@ -21,9 +21,14 @@ func (p *NavigatorSearchPacket) Id() uint16 {
 	return NavigatorSearchCode
 }
 
-// Rate returns the rate limit for the Ping packet.
+// Rate returns the rate limit for the packet.
 func (p *NavigatorSearchPacket) Rate() (uint16, uint16) {
 	return 5, 5
+}
+
+// Deadline provides the maximum time a packet can be processed in milliseconds.
+func (p *NavigatorSearchPacket) Deadline() uint {
+	return 10
 }
 
 // ComposeNavigatorSearch composes a new instance of the packet.

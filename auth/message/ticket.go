@@ -27,6 +27,11 @@ func (p *AuthTicketPacket) Rate() (uint16, uint16) {
 	return 10, 5
 }
 
+// Deadline provides the maximum time a packet can be processed in milliseconds.
+func (p *AuthTicketPacket) Deadline() uint {
+	return 100
+}
+
 // ComposeTicket creates a new instance of the ticket packet.
 func ComposeTicket(pack protocol.RawPacket) (*AuthTicketPacket, error) {
 

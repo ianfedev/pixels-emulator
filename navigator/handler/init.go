@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/server"
@@ -14,7 +15,7 @@ type NavigatorInitHandler struct {
 }
 
 // Handle performs logic to handle the packet.
-func (h *NavigatorInitHandler) Handle(packet protocol.Packet, conn protocol.Connection) {
+func (h *NavigatorInitHandler) Handle(_ context.Context, packet protocol.Packet, conn protocol.Connection) {
 
 	_, ok := packet.(*message.NavigatorInitPacket)
 	if !ok {

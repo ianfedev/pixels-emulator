@@ -22,6 +22,11 @@ func (p *HelloPacket) Rate() (uint16, uint16) {
 	return 300, 1
 }
 
+// Deadline provides the maximum time a packet can be processed in milliseconds.
+func (p *HelloPacket) Deadline() uint {
+	return 10
+}
+
 // ComposeHello creates a new instance of hello packet.
 func ComposeHello(packet protocol.RawPacket) (*HelloPacket, error) {
 	ver, err := packet.ReadString()

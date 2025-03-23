@@ -26,6 +26,11 @@ func (p *GetRoomPacket) Rate() (uint16, uint16) {
 	return 0, 0
 }
 
+// Deadline provides the maximum time a packet can be processed in milliseconds.
+func (p *GetRoomPacket) Deadline() uint {
+	return 500
+}
+
 // ComposeGuestRoomPacket composes a new instance of the packet.
 func ComposeGuestRoomPacket(pck protocol.RawPacket) (*GetRoomPacket, error) {
 

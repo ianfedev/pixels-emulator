@@ -32,6 +32,11 @@ func (p *NavigatorSearchResultPacket) Rate() (uint16, uint16) {
 	return 0, 0
 }
 
+// Deadline provides the maximum time a packet can be processed in milliseconds.
+func (p *NavigatorSearchResultPacket) Deadline() uint {
+	return 1000
+}
+
 // Serialize writes the packet data into a RawPacket.
 func (p *NavigatorSearchResultPacket) Serialize() protocol.RawPacket {
 

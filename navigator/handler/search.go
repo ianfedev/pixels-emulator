@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"go.uber.org/zap"
 	"pixels-emulator/core/event"
 	"pixels-emulator/core/protocol"
@@ -16,7 +17,7 @@ type NavigatorSearchHandler struct {
 }
 
 // Handle processes the incoming navigation search packet.
-func (h *NavigatorSearchHandler) Handle(raw protocol.Packet, conn protocol.Connection) {
+func (h *NavigatorSearchHandler) Handle(_ context.Context, raw protocol.Packet, conn protocol.Connection) {
 
 	pck, ok := raw.(*message.NavigatorSearchPacket)
 	if !ok {

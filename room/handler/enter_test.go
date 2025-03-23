@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -65,7 +66,7 @@ func TestRoomEnterHandler_Handle(t *testing.T) {
 	em := &mockevent.MockEventManager{}
 	handler, _ := setupTestEnvironment(em, "")
 	conn := setupMockConn("1", nil)
-	handler.Handle(pck, conn)
+	handler.Handle(context.Background(), pck, conn)
 	em.AssertExpectations(t)
 }
 
@@ -73,7 +74,7 @@ func TestRoomEnterHandler_HandleErr(t *testing.T) {
 	em := &mockevent.MockEventManager{}
 	handler, buff := setupTestEnvironment(em, "mock event error")
 	conn := setupMockConn("1", nil)
-	handler.Handle(pck, conn)
+	handler.Handle(context.Background(), pck, conn)
 	em.AssertExpectations(t)
 	assert.Contains(t, buff.String(), "mock event error")
 }
@@ -82,7 +83,7 @@ func TestRoomEnterHandler_HandleInvalidPacket(t *testing.T) {
 	em := &mockevent.MockEventManager{}
 	handler, buff := setupTestEnvironment(em, "")
 	conn := setupMockConn("1", nil)
-	handler.Handle(&healthMsg.HelloPacket{}, conn)
+	handler.Handle(context.Background(), &healthMsg.HelloPacket{}, conn)
 	assert.Contains(t, buff.String(), "cannot cast navigator search packet, skipping processing")
 }
 
@@ -90,6 +91,6 @@ func TestRoomEnterHandler_HandleInvalidDispose(t *testing.T) {
 	em := &mockevent.MockEventManager{}
 	handler, buff := setupTestEnvironment(em, "")
 	conn := setupMockConn("1", errors.New("dispose error"))
-	handler.Handle(&healthMsg.HelloPacket{}, conn)
+	handler.Handle(context.Background(), &healthMsg.HelloPacket{}, conn)
 	assert.Contains(t, buff.String(), "dispose error")
 }

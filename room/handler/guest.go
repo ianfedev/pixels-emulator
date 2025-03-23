@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/server"
@@ -14,7 +15,7 @@ type GetGuestRoomHandler struct {
 }
 
 // Handle processes the incoming navigation search packet.
-func (h *GetGuestRoomHandler) Handle(raw protocol.Packet, conn protocol.Connection) {
+func (h *GetGuestRoomHandler) Handle(_ context.Context, raw protocol.Packet, conn protocol.Connection) {
 
 	pck, ok := raw.(*guest.GetRoomPacket)
 	if !ok {

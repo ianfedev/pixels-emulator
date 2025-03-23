@@ -9,9 +9,10 @@ import (
 // RawPacket represents a data packet with a header and content
 // received from Nitro Client.
 type RawPacket struct {
-	header  uint16 // header is the identifier of the packet defined by Nitro messaging.
-	content []byte // content serves as raw and readable bytes from composed packets.
-	offset  int    // offset indicates the actual point of buffer reading.
+	header   uint16 // header is the identifier of the packet defined by Nitro messaging.
+	content  []byte // content serves as raw and readable bytes from composed packets.
+	offset   int    // offset indicates the actual point of buffer reading.
+	deadline uint8  // deadline indicates the maximum time a packet can be processed in seconds.
 }
 
 // Packet defines an already composed packet from raw protocol.
@@ -25,6 +26,9 @@ type Packet interface {
 
 	// Rate provides the maximum of packets per second a connection can receive.
 	Rate() (uint16, uint16)
+
+	// Deadline provides the maximum time a packet can be processed in milliseconds.
+	Deadline() uint
 }
 
 // GetHeader obtains the header of the packet.

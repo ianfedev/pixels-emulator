@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"go.uber.org/zap"
 	grant "pixels-emulator/auth/event"
@@ -27,7 +28,7 @@ type AuthTicketHandler struct {
 // Handle processes the provided authentication ticket packet.
 // This make security checks to validate the ticket handling or enabling development mode.
 // Also, when SSO validation is successful, should broadcast a structured event.
-func (h *AuthTicketHandler) Handle(packet protocol.Packet, conn protocol.Connection) {
+func (h *AuthTicketHandler) Handle(_ context.Context, packet protocol.Packet, conn protocol.Connection) {
 
 	pack, ok := packet.(*message.AuthTicketPacket)
 	if !ok {

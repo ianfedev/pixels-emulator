@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"pixels-emulator/core/protocol"
@@ -44,7 +45,7 @@ func Test_Handle_ValidPacket(t *testing.T) {
 	pck := message.ComposeNavigatorInit(protocol.RawPacket{})
 	handler := NewNavigatorInit()
 
-	handler.Handle(pck, con)
+	handler.Handle(context.Background(), pck, con)
 
 	assert.Contains(t, buf.String(), "Navigator fired by user")
 	con.AssertExpectations(t)
@@ -61,7 +62,7 @@ func Test_Handle_InvalidPacket(t *testing.T) {
 	pck := &healthMsg.HelloPacket{}
 	handler := NewNavigatorInit()
 
-	handler.Handle(pck, con)
+	handler.Handle(context.Background(), pck, con)
 
 	assert.Contains(t, buf.String(), "cannot cast ping packet, skipping processing")
 	t.Cleanup(func() {

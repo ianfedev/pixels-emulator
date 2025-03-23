@@ -21,6 +21,11 @@ func (p *AuthOkPacket) Rate() (uint16, uint16) {
 	return 0, 0
 }
 
+// Deadline provides the maximum time a packet can be processed in milliseconds.
+func (p *AuthOkPacket) Deadline() uint {
+	return 10
+}
+
 // Serialize converts the Auth OK packet into a RawPacket that can be transmitted over the network.
 func (p *AuthOkPacket) Serialize() protocol.RawPacket {
 	return protocol.NewPacket(AuthOkCode)

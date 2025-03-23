@@ -21,6 +21,11 @@ func (p *NavigatorInitPacket) Rate() (uint16, uint16) {
 	return 0, 0
 }
 
+// Deadline provides the maximum time a packet can be processed in milliseconds.
+func (p *NavigatorInitPacket) Deadline() uint {
+	return 10
+}
+
 // ComposeNavigatorInit composes a new instance of the packet.
 func ComposeNavigatorInit(_ protocol.RawPacket) *NavigatorInitPacket {
 	return &NavigatorInitPacket{}

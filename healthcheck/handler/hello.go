@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/registry"
@@ -15,7 +16,7 @@ type HelloHandler struct {
 }
 
 // Handle provides simple debug handling to the console showing the operative client version.
-func (h *HelloHandler) Handle(packet protocol.Packet, _ protocol.Connection) {
+func (h *HelloHandler) Handle(_ context.Context, packet protocol.Packet, _ protocol.Connection) {
 	incPacket, ok := packet.(*message.HelloPacket)
 	if !ok {
 		h.logger.Error("cannot cast ping packet, skipping processing")

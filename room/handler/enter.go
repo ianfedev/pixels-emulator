@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"go.uber.org/zap"
 	"pixels-emulator/core/event"
@@ -17,7 +18,7 @@ type RoomEnterHandler struct {
 }
 
 // Handle process the incoming room search handler.
-func (h *RoomEnterHandler) Handle(raw protocol.Packet, conn protocol.Connection) {
+func (h *RoomEnterHandler) Handle(_ context.Context, raw protocol.Packet, conn protocol.Connection) {
 
 	var err error
 	defer func() {

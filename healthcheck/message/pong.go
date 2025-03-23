@@ -20,6 +20,11 @@ func (p *PongPacket) Rate() (uint16, uint16) {
 	return 10, 5
 }
 
+// Deadline provides the maximum time a packet can be processed in milliseconds.
+func (p *PongPacket) Deadline() uint {
+	return 10
+}
+
 // ComposePong composes a new instance of the Pong packet.
 func ComposePong(_ protocol.RawPacket) *PongPacket {
 	return &PongPacket{}

@@ -15,5 +15,7 @@ func ModelMigration(logger *zap.Logger, db *gorm.DB) error {
 		&model.SSOTicket{},
 		&model.Room{},
 		&model.RoomConfiguration{},
+		&model.Role{},
+		&model.RolePermission{},
 	)
 }
