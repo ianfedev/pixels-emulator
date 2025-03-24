@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"github.com/go-gorm/caches/v4"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -33,6 +34,14 @@ func SetupDatabase(cfg *config.Config, log *zap.Logger) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	cache := &caches.Caches{
+		Conf: &caches.Config{
+			Easer:  true,
+			Cacher: &MemoryCache{},
+		},
+	}
+	err = db.Use(cache)
 
 	pool, err := db.DB()
 	if err != nil {

@@ -21,6 +21,7 @@ require (
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/go-gorm/caches/v4 v4.0.5 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gookit/event v1.1.2 // indirect
@@ -52,7 +53,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
