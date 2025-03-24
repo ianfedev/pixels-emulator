@@ -58,12 +58,12 @@ func setupTestEnvironment(
 	em.On("Fire", grant.AuthGrantEventName, mock.Anything).Return(fErr)
 
 	ssoSvc := &mockdb.ModelServiceMock[model.SSOTicket]{}
-	ssoSvc.On("FindByQuery", mock.MatchedBy(func(q map[string]interface{}) bool {
+	ssoSvc.On("FindByQuery", mock.Anything, mock.MatchedBy(func(q map[string]interface{}) bool {
 		return q["ticket"] == id
 	})).Return(qRes)
 
 	userSvc := &mockdb.ModelServiceMock[model.User]{}
-	userSvc.On("Get", mock.Anything).Return(gRes)
+	userSvc.On("Get", mock.Anything, mock.Anything).Return(gRes)
 
 	ath := &AuthTicketHandler{
 		logger:  log,

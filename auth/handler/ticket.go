@@ -28,8 +28,7 @@ type AuthTicketHandler struct {
 // Handle processes the provided authentication ticket packet.
 // This make security checks to validate the ticket handling or enabling development mode.
 // Also, when SSO validation is successful, should broadcast a structured event.
-func (h *AuthTicketHandler) Handle(_ context.Context, packet protocol.Packet, conn protocol.Connection) {
-
+func (h *AuthTicketHandler) Handle(ctx context.Context, packet protocol.Packet, conn protocol.Connection) {
 	pack, ok := packet.(*message.AuthTicketPacket)
 	if !ok {
 		h.logger.Error("cannot cast packet, skipping processing")
@@ -61,7 +60,7 @@ func (h *AuthTicketHandler) Handle(_ context.Context, packet protocol.Packet, co
 	} else {
 
 		q := map[string]interface{}{"ticket": pack.Ticket}
-		res := <-h.ssoSvc.FindByQuery(q)
+		res := <-h.ssoSvc.FindByQuery(ctx, q)
 		ssoRes, err := res.Data, res.Error
 
 		if err != nil {
@@ -81,7 +80,7 @@ func (h *AuthTicketHandler) Handle(_ context.Context, packet protocol.Packet, co
 
 	}
 
-	userRes := <-h.userSvc.Get(assignedUser)
+	userRes := <-h.userSvc.Get(ctx, assignedUser)
 
 	if userRes.Error != nil {
 		closeConn = userRes.Error
