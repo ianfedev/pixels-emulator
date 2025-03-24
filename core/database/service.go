@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // DataService defines a generic interface for CRUD operations and transactions.
@@ -73,7 +74,7 @@ type ModelService[T any] struct {
 
 // CreateSync adds a new record to the database (synchronous).
 func (s *ModelService[T]) CreateSync(ctx context.Context, entity *T) error {
-	return s.DB.WithContext(ctx).Create(entity).Error
+	return s.prepareLoad(ctx).Create(entity).Error
 }
 
 // Create adds a new record to the database (asynchronous).
@@ -81,7 +82,7 @@ func (s *ModelService[T]) Create(ctx context.Context, entity *T) <-chan error {
 	result := make(chan error, 1)
 	go func() {
 		defer close(result)
-		result <- s.DB.WithContext(ctx).Create(entity).Error
+		result <- s.prepareLoad(ctx).Create(entity).Error
 	}()
 	return result
 }
@@ -89,7 +90,7 @@ func (s *ModelService[T]) Create(ctx context.Context, entity *T) <-chan error {
 // GetSync retrieves a record by its primary key (synchronous).
 func (s *ModelService[T]) GetSync(ctx context.Context, id uint) (*T, error) {
 	entity := new(T)
-	if err := s.DB.WithContext(ctx).First(entity, id).Error; err != nil {
+	if err := s.prepareLoad(ctx).First(entity, id).Error; err != nil {
 		return nil, err
 	}
 	return entity, nil
@@ -107,7 +108,7 @@ func (s *ModelService[T]) Get(ctx context.Context, id uint) <-chan struct {
 	go func() {
 		defer close(result)
 		entity := new(T)
-		if err := s.DB.WithContext(ctx).First(entity, id).Error; err != nil {
+		if err := s.prepareLoad(ctx).First(entity, id).Error; err != nil {
 			result <- struct {
 				Data  *T
 				Error error
@@ -155,7 +156,7 @@ func (s *ModelService[T]) Delete(ctx context.Context, id uint) <-chan error {
 // FindByQuerySync retrieves records based on a query (synchronous).
 func (s *ModelService[T]) FindByQuerySync(ctx context.Context, query map[string]interface{}) ([]T, error) {
 	var entities []T
-	if err := s.DB.WithContext(ctx).Where(query).Find(&entities).Error; err != nil {
+	if err := s.prepareLoad(ctx).Where(query).Find(&entities).Error; err != nil {
 		return nil, err
 	}
 	return entities, nil
@@ -173,7 +174,7 @@ func (s *ModelService[T]) FindByQuery(ctx context.Context, query map[string]inte
 	go func() {
 		defer close(result)
 		var entities []T
-		if err := s.DB.WithContext(ctx).Where(query).Find(&entities).Error; err != nil {
+		if err := s.prepareLoad(ctx).Where(query).Find(&entities).Error; err != nil {
 			result <- struct {
 				Data  []T
 				Error error
@@ -247,4 +248,15 @@ func (s *ModelService[T]) RollbackTransaction(tx *gorm.DB) <-chan error {
 		result <- tx.Rollback().Error
 	}()
 	return result
+}
+
+// prepareLoad prepares defined preloads from context when complex operations are made.
+func (s *ModelService[T]) prepareLoad(ctx context.Context) *gorm.DB {
+	db := s.DB.WithContext(ctx)
+	if preloads, ok := ctx.Value("preload").([]string); ok {
+		for _, field := range preloads {
+			db = db.Preload(field)
+		}
+	}
+	return db.Preload(clause.Associations)
 }

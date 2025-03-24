@@ -31,3 +31,5 @@ go.work.sum
 config.ini
 logs/*
 logs
+
+playground/*

@@ -9,7 +9,7 @@ import (
 type BaseModel struct {
 
 	// ID is the primary key of the model.
-	ID uint `gorm:"primaryKey"`
+	ID uint `gorm:"primaryKey;autoIncrement"`
 
 	// CreatedAt is the timestamp when the model was created.
 	CreatedAt time.Time `gorm:"autoCreateTime"`
