@@ -25,6 +25,17 @@ func ProvideUserJoin() func(event event.Event) {
 	}
 }
 
+// OnUserRoomJoin validates if the user is granted to access.
+// This performs the current checks:
+//
+// - If event has override ability
+// - If user is owner of the room
+// - If user has permissions given from permissions system
+// - If user has user-given permissions
+// - If user has guild-related permissions to access (E.g: Is the guild room) and is member.
+//
+// This is also proceeded by doorbell and password behaviours, which must be handled in
+// their corresponding event listeners but primarily fired here.
 func OnUserRoomJoin(ev event.Event) {
 
 	var err error
@@ -44,9 +55,11 @@ func OnUserRoomJoin(ev event.Event) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_ := server.GetServer().RoomStore()
+	_ = server.GetServer().RoomStore()
 	rStore := &database.ModelService[model.Room]{}
 	uStore := &database.ModelService[model.User]{}
+
+	// TODO: Remove user from all the rooms.
 
 	if joinEv.IsCancelled() {
 		// TODO: Send user to main.
@@ -77,7 +90,21 @@ func OnUserRoomJoin(ev event.Event) {
 	}
 
 	if !grantAccess {
-		grantAccess = rRes.Data
+		grantAccess = rRes.Data.OwnerID == uRes.Data.ID
+	}
+
+	if !grantAccess {
+
+		q := map[string]interface{}{"room_id": rRes.Data.ID, "user_id": uRes.Data.ID}
+		pStore := &database.ModelService[model.RoomPermission]{}
+		pRes := <-pStore.FindByQuery(ctx, q)
+
+		if pRes.Error == nil {
+			err = pRes.Error
+		}
+
+		grantAccess = len(pRes.Data) > 0
+
 	}
 
 	// Check if event is cancelled and send to main
@@ -87,12 +114,11 @@ func OnUserRoomJoin(ev event.Event) {
 	// Queue removal: Must find all rooms and remove from queue.
 
 	// Let event proceed
-	// - If event has overriding
-	// - If user is owner
-	// - If user has permissions
-	// - If user has rights
+	// - If event has overriding DONE
+	// - If user is owner DONE
+	// - If user has permissions DONE
+	// - If user has rights DONE
 	// - Guild rights pending on guild system
-	server.GetServer().Logger().Debug("Room", zap.Any("room", room))
 	server.GetServer().Logger().Error("Room", zap.Any("err", err))
 
 	// Doorbelling. This must change from original Arcturus implementation, room must have doorbelling ids and broadcast event

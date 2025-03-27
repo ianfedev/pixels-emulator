@@ -31,6 +31,26 @@ type Room struct {
 	// Configuration holds the one-to-one relationship to the room's configuration settings.
 	Configuration RoomConfiguration `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
-	// TODO: Correlation Room model,owner,guild,category,votes,staff picks,mute permissions,ban permissions,poll, promotions.
+	// OwnerID represents the user who owns the room.
+	OwnerID uint `gorm:"not null"`
 
+	// Owner is the user who owns the room.
+	Owner User `gorm:"foreignKey:OwnerID"`
+
+	// TODO: Correlation Room model, owner, guild, category, votes, staff picks, mute permissions, ban permissions, poll, promotions.
+}
+
+// RoomPermission represents a user's permission to a specific room.
+type RoomPermission struct {
+	// BaseModel includes common fields for all models.
+	database.BaseModel
+
+	// RoomID is the ID of the room.
+	RoomID uint `gorm:"not null;index;constraint:OnDelete:CASCADE,OnUpdate:CASCADE;"`
+
+	// UserID is the ID of the user receiving the permission.
+	UserID uint `gorm:"not null;index;constraint:OnDelete:CASCADE,OnUpdate:CASCADE;"`
+
+	// Unique constraint to prevent duplicate entries.
+	UniqueIndex string `gorm:"uniqueIndex:room_user_unique"`
 }
