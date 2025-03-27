@@ -14,6 +14,7 @@ type RoomJoinEvent struct {
 	Id                      int32               // Id represents the id to connect
 	Conn                    protocol.Connection // Conn represents the connection which is joining the room.
 	Password                string              // Password represents the hashed password which enters to the room.
+	OverrideCheck           bool                // OverrideCheck overrides the common checks
 }
 
 // NewRoomJoinEvent creates a new instance.

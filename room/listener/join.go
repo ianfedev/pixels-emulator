@@ -4,11 +4,17 @@ import (
 	"context"
 	"errors"
 	"go.uber.org/zap"
+	"pixels-emulator/core/database"
 	"pixels-emulator/core/event"
+	"pixels-emulator/core/model"
 	"pixels-emulator/core/server"
+	"pixels-emulator/role"
 	roomEvent "pixels-emulator/room/event"
+	"strconv"
 	"time"
 )
+
+const AccessRoomPermissions = "pixels.room.access"
 
 // ProvideUserJoin perform user validation when joining a room.
 // It must handle all the corresponding logic before a user is connected
@@ -35,12 +41,44 @@ func OnUserRoomJoin(ev event.Event) {
 		return
 	}
 
-	rs := server.GetServer().RoomStore()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	room, err := rs.Read(ctx, string(joinEv.Id))
+	_ := server.GetServer().RoomStore()
+	rStore := &database.ModelService[model.Room]{}
+	uStore := &database.ModelService[model.User]{}
+
+	if joinEv.IsCancelled() {
+		// TODO: Send user to main.
+		return
+	}
+
+	uid, err := strconv.ParseInt(joinEv.Conn.Identifier(), 10, 32)
+	if err != nil {
+		return
+	}
+
+	uRes := <-uStore.Get(ctx, uint(uid))
+	if uRes.Error != nil {
+		err = uRes.Error
+		return
+	}
+
+	rRes := <-rStore.Get(ctx, uint(joinEv.Id))
+	if rRes.Error != nil {
+		err = rRes.Error
+		return
+	}
+
+	grantAccess := joinEv.OverrideCheck
+
+	if !grantAccess {
+		grantAccess = role.HasPermission(*uRes.Data, AccessRoomPermissions)
+	}
+
+	if !grantAccess {
+		grantAccess = rRes.Data
+	}
 
 	// Check if event is cancelled and send to main
 
