@@ -55,11 +55,9 @@ func OnUserRoomJoin(ev event.Event) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_ = server.GetServer().RoomStore()
-	rStore := &database.ModelService[model.Room]{}
-	uStore := &database.ModelService[model.User]{}
-
-	// TODO: Remove user from all the rooms.
+	rStore := server.GetServer().RoomStore()
+	rSvc := &database.ModelService[model.Room]{}
+	uSvc := &database.ModelService[model.User]{}
 
 	if joinEv.IsCancelled() {
 		// TODO: Send user to main.
@@ -71,13 +69,18 @@ func OnUserRoomJoin(ev event.Event) {
 		return
 	}
 
-	uRes := <-uStore.Get(ctx, uint(uid))
+	uRes := <-uSvc.Get(ctx, uint(uid))
 	if uRes.Error != nil {
 		err = uRes.Error
 		return
 	}
 
-	rRes := <-rStore.Get(ctx, uint(joinEv.Id))
+	r, err := rStore.GetAll(ctx)
+	for _, room := range r {
+		room.Queue.Remove(strconv.Itoa(int(uRes.Data.ID)))
+	}
+
+	rRes := <-rSvc.Get(ctx, uint(joinEv.Id))
 	if rRes.Error != nil {
 		err = rRes.Error
 		return

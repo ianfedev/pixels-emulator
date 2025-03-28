@@ -12,6 +12,7 @@ type AsyncStore[T any] interface {
 	Read(ctx context.Context, key string) (T, error)
 	Update(ctx context.Context, key string, value T) error
 	Delete(ctx context.Context, key string) error
+	GetAll(ctx context.Context) ([]T, error)
 }
 
 // MemoryStore is a concurrent in-memory implementation of AsyncStore
@@ -40,6 +41,33 @@ func (s *MemoryStore[T]) Create(ctx context.Context, key string, value T) error 
 		return err
 	case <-ctx.Done():
 		return ctx.Err()
+	}
+}
+
+// GetAll retrieves all values asynchronously
+func (s *MemoryStore[T]) GetAll(ctx context.Context) ([]T, error) {
+	done := make(chan struct {
+		values []T
+		err    error
+	}, 1)
+
+	go func() {
+		var values []T
+		s.data.Range(func(_, value any) bool {
+			values = append(values, value.(T))
+			return true
+		})
+		done <- struct {
+			values []T
+			err    error
+		}{values: values}
+	}()
+
+	select {
+	case result := <-done:
+		return result.values, result.err
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	}
 }
 
