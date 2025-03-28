@@ -8,7 +8,7 @@ import (
 	"pixels-emulator/core/event"
 	"pixels-emulator/core/model"
 	"pixels-emulator/core/server"
-	"pixels-emulator/role"
+	"pixels-emulator/room"
 	roomEvent "pixels-emulator/room/event"
 	"strconv"
 	"time"
@@ -56,8 +56,9 @@ func OnUserRoomJoin(ev event.Event) {
 	defer cancel()
 
 	rStore := server.GetServer().RoomStore()
-	rSvc := &database.ModelService[model.Room]{}
-	uSvc := &database.ModelService[model.User]{}
+	db := server.GetServer().Database()
+	rSvc := &database.ModelService[model.Room]{DB: db}
+	uSvc := &database.ModelService[model.User]{DB: db}
 
 	if joinEv.IsCancelled() {
 		// TODO: Send user to main.
@@ -75,9 +76,11 @@ func OnUserRoomJoin(ev event.Event) {
 		return
 	}
 
-	r, err := rStore.GetAll(ctx)
-	for _, room := range r {
-		room.Queue.Remove(strconv.Itoa(int(uRes.Data.ID)))
+	// Removes from every queue the user.
+	// TODO: Check again original event if missing behaviour
+	rl, err := rStore.GetAll(ctx)
+	for _, r := range rl {
+		r.Queue.Remove(strconv.Itoa(int(uRes.Data.ID)))
 	}
 
 	rRes := <-rSvc.Get(ctx, uint(joinEv.Id))
@@ -86,43 +89,21 @@ func OnUserRoomJoin(ev event.Event) {
 		return
 	}
 
-	grantAccess := joinEv.OverrideCheck
-
-	if !grantAccess {
-		grantAccess = role.HasPermission(*uRes.Data, AccessRoomPermissions)
+	rel, rErr := room.VerifyUserRoomRelationship(ctx, *rRes.Data, *uRes.Data)
+	if rErr != nil {
+		err = rErr
+		return
 	}
 
-	if !grantAccess {
-		grantAccess = rRes.Data.OwnerID == uRes.Data.ID
+	if rel == room.RESTRICTION {
+		// TODO: Kick user and send to home screen.
+		return
 	}
 
-	if !grantAccess {
-
-		q := map[string]interface{}{"room_id": rRes.Data.ID, "user_id": uRes.Data.ID}
-		pStore := &database.ModelService[model.RoomPermission]{}
-		pRes := <-pStore.FindByQuery(ctx, q)
-
-		if pRes.Error == nil {
-			err = pRes.Error
-		}
-
-		grantAccess = len(pRes.Data) > 0
-
+	if rel != room.GUEST || joinEv.OverrideCheck || rRes.Data.IsPublic || rRes.Data.State == "open" {
+		// TODO: Further handling
+		return
 	}
-
-	// Check if event is cancelled and send to main
-
-	//// Check if is banned and doesnt have permissions (This must differ from normal close)
-
-	// Queue removal: Must find all rooms and remove from queue.
-
-	// Let event proceed
-	// - If event has overriding DONE
-	// - If user is owner DONE
-	// - If user has permissions DONE
-	// - If user has rights DONE
-	// - Guild rights pending on guild system
-	server.GetServer().Logger().Error("Room", zap.Any("err", err))
 
 	// Doorbelling. This must change from original Arcturus implementation, room must have doorbelling ids and broadcast event
 	// This will also have a runnable of 1 minute, runnable must cancel if not in room users. After 1 minute, send message of no one answered.
@@ -130,4 +111,7 @@ func OnUserRoomJoin(ev event.Event) {
 
 	// Password: If password is incorrect, send error (Check generic error composer) or open room
 	// Fulfill error in case of none of this are correct :)
+
+	// TODO: Close connection
+
 }
