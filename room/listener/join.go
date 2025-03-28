@@ -2,7 +2,6 @@ package listener
 
 import (
 	"context"
-	"errors"
 	"go.uber.org/zap"
 	"pixels-emulator/core/database"
 	"pixels-emulator/core/event"
@@ -10,6 +9,7 @@ import (
 	"pixels-emulator/core/server"
 	"pixels-emulator/room"
 	roomEvent "pixels-emulator/room/event"
+	"pixels-emulator/room/message"
 	"strconv"
 	"time"
 )
@@ -38,19 +38,19 @@ func ProvideUserJoin() func(event event.Event) {
 // their corresponding event listeners but primarily fired here.
 func OnUserRoomJoin(ev event.Event) {
 
+	joinEv, valid := ev.(*roomEvent.RoomJoinEvent)
+	if !valid {
+		server.GetServer().Logger().Error("event proportioned was not room join, skipping")
+		return
+	}
+
 	var err error
 	defer func() {
 		if err != nil {
 			server.GetServer().Logger().Error("error during user room join", zap.Error(err))
-			// TODO: Send user to main.
+			room.CloseConnection(joinEv.Conn, message.Default, "")
 		}
 	}()
-
-	joinEv, valid := ev.(*roomEvent.RoomJoinEvent)
-	if !valid {
-		err = errors.New("event proportioned was not room join")
-		return
-	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -61,7 +61,7 @@ func OnUserRoomJoin(ev event.Event) {
 	uSvc := &database.ModelService[model.User]{DB: db}
 
 	if joinEv.IsCancelled() {
-		// TODO: Send user to main.
+		room.CloseConnection(joinEv.Conn, message.Default, "")
 		return
 	}
 
@@ -96,7 +96,7 @@ func OnUserRoomJoin(ev event.Event) {
 	}
 
 	if rel == room.Restriction {
-		// TODO: Kick user and send to home screen.
+		room.CloseConnection(joinEv.Conn, message.Banned, "")
 		return
 	}
 

@@ -7,21 +7,21 @@ import (
 // DenyRoomConnectionCode is the unique identifier for the packet
 const DenyRoomConnectionCode = 899
 
-// Type defines the connection message type to indicate Nitro which message to render.
-type Type int
+// ReasonType defines the connection message type to indicate Nitro which message to render.
+type ReasonType int
 
 const (
-	Default Type = iota
-	Full         // Full defines if room is in max capacity.
-	Closed       // Closed defines if room can not be opened.
-	Queue        // Queue defines if the error has relation with queue.
-	Banned       // Banned defines if user has a prohibition on the entry.
+	Default ReasonType = iota
+	Full               // Full defines if room is in max capacity.
+	Closed             // Closed defines if room can not be opened.
+	Queue              // Queue defines if the error has relation with queue.
+	Banned             // Banned defines if user has a prohibition on the entry.
 )
 
 // DenyRoomConnectionPacket send to the user a connection rejecting message.
 type DenyRoomConnectionPacket struct {
-	Type        Type   // Type defines the default type of the connection rejection nature.
-	QueryHolder string // QueryHolder sends a title placeholder interpreted by nitro when a custom message is given for queue errors.
+	Type        ReasonType // Type defines the default type of the connection rejection nature.
+	QueryHolder string     // QueryHolder sends a title placeholder interpreted by nitro when a custom message is given for queue errors.
 	protocol.Packet
 }
 

@@ -6,18 +6,15 @@ import (
 	"testing"
 )
 
-var testPck = &DenyRoomConnectionPacket{
-	Type:        Banned,
-	QueryHolder: "test",
+var testPck = &GenericErrorPacket{
+	Code: -10006,
 }
 
 // parse reads from raw packet to transform into denying packet.
-func parse(pck protocol.RawPacket) (*DenyRoomConnectionPacket, error) {
-	t, err := pck.ReadInt()
-	qh, err := pck.ReadString()
-	return &DenyRoomConnectionPacket{
-		Type:        ReasonType(t),
-		QueryHolder: qh,
+func parse(pck protocol.RawPacket) (*GenericErrorPacket, error) {
+	c, err := pck.ReadInt()
+	return &GenericErrorPacket{
+		Code: c,
 	}, err
 }
 
@@ -29,13 +26,12 @@ func TestDenyRoomConnectionPacket_Serialize(t *testing.T) {
 	assert.NoError(t, err)
 	denyPck, err := parse(*pck)
 	assert.NoError(t, err)
-	assert.Equal(t, denyPck.Type, testPck.Type)
-	assert.Equal(t, denyPck.QueryHolder, testPck.QueryHolder)
+	assert.Equal(t, denyPck.Code, testPck.Code)
 }
 
 // TestDenyRoomConnectionPacket check packet attributes.
 func TestDenyRoomConnectionPacket(t *testing.T) {
-	assert.Equal(t, testPck.Id(), uint16(DenyRoomConnectionCode))
+	assert.Equal(t, testPck.Id(), uint16(GenericErrorCode))
 	assert.Equal(t, testPck.Deadline(), uint(0))
 	mn, mx := testPck.Rate()
 	if mn != 0 || mx != 0 {
