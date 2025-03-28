@@ -9,6 +9,6 @@ import (
 func CloseConnection(conn protocol.Connection, reason message.ReasonType, q string) {
 	cPck := &message.CloseRoomConnectionPacket{}
 	rPck := &message.DenyRoomConnectionPacket{Type: reason, QueryHolder: q}
-	conn.SendPacket(cPck)
 	conn.SendPacket(rPck)
+	conn.SendPacket(cPck)
 }

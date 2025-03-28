@@ -7,6 +7,9 @@ import (
 // GenericErrorCode is the unique identifier for the packet
 const GenericErrorCode = 1600
 
+// WrongPasswordCode is the generic code for room access denying.
+const WrongPasswordCode = -100002
+
 // GenericErrorPacket send to the user a generic error. (Nitro did it dirty, only few codes... No customization at all)
 type GenericErrorPacket struct {
 	Code int32

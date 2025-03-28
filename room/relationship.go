@@ -33,8 +33,8 @@ func VerifyUserRoomRelationship(ctx context.Context, db *gorm.DB, room model.Roo
 	pStore := &database.ModelService[model.RoomPermission]{DB: db}
 	pRes := <-pStore.FindByQuery(ctx, q)
 
-	if pRes.Error == nil {
-		return 4, pRes.Error
+	if pRes.Error != nil {
+		return Restriction, pRes.Error
 	}
 
 	if len(pRes.Data) > 0 {

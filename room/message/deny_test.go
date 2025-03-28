@@ -29,6 +29,7 @@ func TestDenyRoomConnectionPacket_Serialize(t *testing.T) {
 	assert.NoError(t, err)
 	denyPck, err := parse(*pck)
 	assert.NoError(t, err)
+	assert.Equal(t, denyPck.Id(), uint16(DenyRoomConnectionCode))
 	assert.Equal(t, denyPck.Type, testPck.Type)
 	assert.Equal(t, denyPck.QueryHolder, testPck.QueryHolder)
 }

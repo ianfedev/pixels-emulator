@@ -42,7 +42,7 @@ func (p *DenyRoomConnectionPacket) Deadline() uint {
 
 // Serialize transforms packet in byte.
 func (p *DenyRoomConnectionPacket) Serialize() protocol.RawPacket {
-	pck := protocol.NewPacket(CloseRoomConnectionCode)
+	pck := protocol.NewPacket(DenyRoomConnectionCode)
 	pck.AddInt(int32(p.Type))
 	pck.AddString(p.QueryHolder)
 	return pck

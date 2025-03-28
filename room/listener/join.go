@@ -2,7 +2,9 @@ package listener
 
 import (
 	"context"
+	"fmt"
 	"go.uber.org/zap"
+	"pixels-emulator/core"
 	"pixels-emulator/core/database"
 	"pixels-emulator/core/event"
 	"pixels-emulator/core/model"
@@ -10,11 +12,10 @@ import (
 	"pixels-emulator/room"
 	roomEvent "pixels-emulator/room/event"
 	"pixels-emulator/room/message"
+	userMsg "pixels-emulator/user/message"
 	"strconv"
 	"time"
 )
-
-const AccessRoomPermissions = "pixels.room.access"
 
 // ProvideUserJoin perform user validation when joining a room.
 // It must handle all the corresponding logic before a user is connected
@@ -95,14 +96,33 @@ func OnUserRoomJoin(ev event.Event) {
 		return
 	}
 
+	fmt.Println(rel)
+
 	if rel == room.Restriction {
 		room.CloseConnection(joinEv.Conn, message.Banned, "")
 		return
 	}
 
-	if rel != room.Guest || joinEv.OverrideCheck || rRes.Data.IsPublic || rRes.Data.State == "open" {
+	rs := rRes.Data.State
+
+	if rel != room.Guest || joinEv.OverrideCheck || rRes.Data.IsPublic || rs == "open" {
 		// TODO: Further handling
 		return
+	}
+
+	// INVESTIGATION: Nitro client checks if room is part of a group before
+	// prompting password. So, the ideal is not to have password on guild groups.
+	if rs == "password_protected" {
+		if core.CheckPasswordHash(joinEv.Password, rRes.Data.Password) {
+			// TODO: Further handling
+		} else {
+			cPck := &message.CloseRoomConnectionPacket{}
+			ePck := &userMsg.GenericErrorPacket{Code: userMsg.WrongPasswordCode}
+			joinEv.Conn.SendPacket(cPck)
+			joinEv.Conn.SendPacket(ePck)
+			// TODO: Further spam password prevention.
+		}
+
 	}
 
 	// Doorbelling. This must change from original Arcturus implementation, room must have doorbelling ids and broadcast event
