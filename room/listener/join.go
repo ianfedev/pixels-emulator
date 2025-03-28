@@ -89,18 +89,18 @@ func OnUserRoomJoin(ev event.Event) {
 		return
 	}
 
-	rel, rErr := room.VerifyUserRoomRelationship(ctx, *rRes.Data, *uRes.Data)
+	rel, rErr := room.VerifyUserRoomRelationship(ctx, db, *rRes.Data, *uRes.Data)
 	if rErr != nil {
 		err = rErr
 		return
 	}
 
-	if rel == room.RESTRICTION {
+	if rel == room.Restriction {
 		// TODO: Kick user and send to home screen.
 		return
 	}
 
-	if rel != room.GUEST || joinEv.OverrideCheck || rRes.Data.IsPublic || rRes.Data.State == "open" {
+	if rel != room.Guest || joinEv.OverrideCheck || rRes.Data.IsPublic || rRes.Data.State == "open" {
 		// TODO: Further handling
 		return
 	}
