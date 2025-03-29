@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"go.uber.org/zap"
-	"pixels-emulator/core"
 	"pixels-emulator/core/database"
 	"pixels-emulator/core/event"
 	"pixels-emulator/core/model"
 	"pixels-emulator/core/server"
+	"pixels-emulator/core/util"
 	"pixels-emulator/room"
 	roomEvent "pixels-emulator/room/event"
 	"pixels-emulator/room/message"
@@ -112,15 +112,29 @@ func OnUserRoomJoin(ev event.Event) {
 
 	// INVESTIGATION: Nitro client checks if room is part of a group before
 	// prompting password. So, the ideal is not to have password on guild groups.
+	// Also, creating a cleaning cronjob will be cool too.
 	if rs == "password_protected" {
-		if core.CheckPasswordHash(joinEv.Password, rRes.Data.Password) {
+
+		u, r := strconv.Itoa(int(uRes.Data.ID)), strconv.Itoa(int(rRes.Data.ID))
+
+		if rStore.PassLimit.IsFrozen(u, r) {
+			room.CloseConnection(joinEv.Conn, message.Default, "exceeded")
+			return
+		}
+
+		if util.CheckPasswordHash(joinEv.Password, rRes.Data.Password) {
+			rStore.PassLimit.Unfreeze(u + ":" + r)
 			// TODO: Further handling
 		} else {
-			cPck := &message.CloseRoomConnectionPacket{}
-			ePck := &userMsg.GenericErrorPacket{Code: userMsg.WrongPasswordCode}
-			joinEv.Conn.SendPacket(cPck)
-			joinEv.Conn.SendPacket(ePck)
-			// TODO: Further spam password prevention.
+			if rStore.PassLimit.RegisterAttempt(u, r) {
+				cPck := &message.CloseRoomConnectionPacket{}
+				ePck := &userMsg.GenericErrorPacket{Code: userMsg.WrongPasswordCode}
+				joinEv.Conn.SendPacket(cPck)
+				joinEv.Conn.SendPacket(ePck)
+			} else {
+				room.CloseConnection(joinEv.Conn, message.Default, "exceeded")
+				return
+			}
 		}
 
 	}
