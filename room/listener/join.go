@@ -78,7 +78,6 @@ func OnUserRoomJoin(ev event.Event) {
 	}
 
 	// Removes from every queue the user.
-	// TODO: Check again original event if missing behaviour
 	rl, err := rStore.GetAll(ctx)
 	for _, r := range rl {
 		r.Queue.Remove(strconv.Itoa(int(uRes.Data.ID)))
@@ -139,13 +138,12 @@ func OnUserRoomJoin(ev event.Event) {
 
 	}
 
-	// Doorbelling. This must change from original Arcturus implementation, room must have doorbelling ids and broadcast event
-	// This will also have a runnable of 1 minute, runnable must cancel if not in room users. After 1 minute, send message of no one answered.
-	// When user with rights join, we should send again after 3 seconds the message.
+	if false {
+		// Doorbelling. This must change from original Arcturus implementation, room must have doorbelling ids and broadcast event
+		// This will also have a runnable of 1 minute, runnable must cancel if not in room users. After 1 minute, send message of no one answered.
+		// When user with rights join, we should send again after 3 seconds the message.
+	}
 
-	// Password: If password is incorrect, send error (Check generic error composer) or open room
-	// Fulfill error in case of none of this are correct :)
-
-	// TODO: Close connection
+	room.CloseConnection(joinEv.Conn, message.Default, "")
 
 }
