@@ -12,8 +12,8 @@ type NavigatorDisplay struct {
 	// Realm defines the category of the navigator.
 	Realm string `gorm:"type:enum('official_view','hotel_view','roomads_view','myworld_view');not null"`
 
-	// DisplayType determines how the element is displayed.
-	DisplayType string `gorm:"type:enum('list','thumbnails');not null"`
+	// DisplayType deter`gorm:"type:enum('list','thumbnails');not null"`mines how the element is displayed.
+	DisplayType string
 
 	// OrderType defines the sorting method.
 	OrderType string `gorm:"type:enum('activity','order');not null"`

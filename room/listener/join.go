@@ -2,7 +2,6 @@ package listener
 
 import (
 	"context"
-	"fmt"
 	"go.uber.org/zap"
 	"pixels-emulator/core/database"
 	"pixels-emulator/core/event"
@@ -94,8 +93,6 @@ func OnUserRoomJoin(ev event.Event) {
 		err = rErr
 		return
 	}
-
-	fmt.Println(rel)
 
 	if rel == room.Restriction {
 		room.CloseConnection(joinEv.Conn, message.Banned, "")

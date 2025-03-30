@@ -1,4 +1,4 @@
-package physic
+package path
 
 import "math"
 
@@ -70,5 +70,18 @@ func (t *Tile) RelativeHeight() int {
 	}
 
 	return t.Height() * 256
+
+}
+
+func NewTile(x, y, z int16, status Status, stack bool) *Tile {
+	return &Tile{
+		X:         x,
+		Y:         y,
+		Z:         z,
+		Units:     make([]interface{}, 0),
+		State:     status,
+		Diagonal:  false,
+		stackable: stack,
+	}
 
 }
