@@ -1,6 +1,9 @@
 package path
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 type Status int
 
@@ -12,6 +15,9 @@ const (
 	Lay            // Lay defines a tile which a unit can be laying in.
 )
 
+const AllowFalling = false    // AllowFalling detects if a unit can fall from a higher Tile. // TODO: Setup this at emulator config
+const MaxHeight float64 = 1.1 // MaxHeight defines the maximum height a user can climb a stacked tile.
+
 // Tile defines a single cell of the room map.
 type Tile struct {
 	X, Y, Z   int16         // X, Y, Z defines coordinates of the tile.
@@ -20,7 +26,6 @@ type Tile struct {
 	Diagonal  bool          // Diagonal defines if tile allow diagonal.
 	stackable bool          // stackable defines if the tile allows stack.
 	height    int           // Height defines the actual stackable height of the tile.
-	// TODO: Actual pathfinding behaviour once room layout is finished
 }
 
 // UpdateHeight updates the height according to the tile context and value.
@@ -73,11 +78,42 @@ func (t *Tile) RelativeHeight() int {
 
 }
 
+// Walkable checks if a tile can be walked on based on its state, height constraints, and presence of units.
+func (t *Tile) Walkable(canFall bool, currentAdj *Tile, isFinalDestination bool) bool {
+	// If there are units on the tile, it is not walkable.
+	if len(t.Units) > 0 {
+		return false
+	}
+
+	// Calculate height difference
+	heightDiff := float64(t.height - currentAdj.height)
+
+	// Prevent movement if the height difference is too large
+	fmt.Println(t.height)
+	fmt.Println(MaxHeight)
+	if (!canFall && heightDiff < -MaxHeight) || (heightDiff > MaxHeight) {
+		return false
+	}
+
+	// Open tiles are walkable if height allows.
+	if t.State == Open {
+		return true
+	}
+
+	// Sit and Lay are only walkable if they are the final destination.
+	if (t.State == Sit || t.State == Lay) && isFinalDestination {
+		return true
+	}
+
+	return false
+}
+
 func NewTile(x, y, z int16, status Status, stack bool) *Tile {
 	return &Tile{
 		X:         x,
 		Y:         y,
 		Z:         z,
+		height:    int(z),
 		Units:     make([]interface{}, 0),
 		State:     status,
 		Diagonal:  false,

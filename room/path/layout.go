@@ -10,11 +10,6 @@ import (
 // Layout defines the spatial grid of the room
 // composed by an array of X,Y,Z positioned Tile list
 // and a heightmap which is used for pathfinding.
-//
-// The rotation coordinates are the following:
-// 7 0 1
-// 6   2
-// 5 4 3
 type Layout struct {
 
 	// Data from database storage to prevent modification after load.
