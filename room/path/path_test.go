@@ -56,41 +56,6 @@ func makeGrid(x, y int) [][]*Tile {
 	return grid
 }
 
-// TestGetAdjacentTiles checks if GetAdjacentTiles returns correct neighbors.
-func TestGetAdjacentTiles(t *testing.T) {
-	layout := &Layout{
-		xLen: 3,
-		yLen: 3,
-		grid: [][]*Tile{
-			{NewTile(0, 0, 0, Open, true), NewTile(1, 0, 0, Open, true), NewTile(2, 0, 0, Open, true)},
-			{NewTile(0, 1, 0, Open, true), NewTile(1, 1, 0, Open, true), NewTile(2, 1, 0, Open, true)},
-			{NewTile(0, 2, 0, Open, true), NewTile(1, 2, 0, Open, true), NewTile(2, 2, 0, Open, true)},
-		},
-	}
-	tile := layout.grid[1][1]
-	adjacent := GetAdjacentTiles(layout, tile)
-	assert.Len(t, adjacent, 8, "Expected 8 adjacent tiles")
-
-	nilAdjacent := GetAdjacentTiles(nil, nil)
-	assert.Nil(t, nilAdjacent, "Expected nil result for nil inputs")
-}
-
-// TestGetAdjacentTilesEdge checks if GetAdjacentTiles handles edge cases.
-func TestGetAdjacentTilesEdge(t *testing.T) {
-	layout := &Layout{
-		xLen: 3,
-		yLen: 3,
-		grid: [][]*Tile{
-			{NewTile(0, 0, 0, Open, true), nil, NewTile(2, 0, 0, Open, true)},
-			{NewTile(0, 1, 0, Open, true), NewTile(1, 1, 0, Open, true), NewTile(2, 1, 0, Open, true)},
-			{NewTile(0, 2, 0, Open, true), NewTile(1, 2, 0, Open, true), NewTile(2, 2, 0, Open, true)},
-		},
-	}
-	tile := layout.grid[0][0]
-	adjacent := GetAdjacentTiles(layout, tile)
-	assert.Less(t, len(adjacent), 8, "Expected fewer than 8 adjacent tiles due to missing neighbors")
-}
-
 // TestCalculateCost verifies movement cost calculations in different scenarios.
 func TestCalculateCost(t *testing.T) {
 	tests := []struct {
@@ -114,4 +79,49 @@ func TestCalculateCost(t *testing.T) {
 			assert.Equal(t, tt.expectedCost, cost)
 		})
 	}
+}
+
+// TestGetAdjacentTiles check if adjacent tiling on grid is correctly implemented.
+func TestGetAdjacentTiles(t *testing.T) {
+	layout := &Layout{
+		xLen: 3,
+		yLen: 3,
+		grid: [][]*Tile{
+			{&Tile{X: 0, Y: 0}, &Tile{X: 1, Y: 0}, &Tile{X: 2, Y: 0}},
+			{&Tile{X: 0, Y: 1}, &Tile{X: 1, Y: 1}, &Tile{X: 2, Y: 1}},
+			{&Tile{X: 0, Y: 2}, &Tile{X: 1, Y: 2}, &Tile{X: 2, Y: 2}},
+		},
+	}
+
+	tile := layout.grid[1][1]
+
+	t.Run("Cardinal directions", func(t *testing.T) {
+		adjacent := GetAdjacentTiles(layout, tile, false)
+		assert.Len(t, adjacent, 4)
+	})
+
+	t.Run("Diagonal directions", func(t *testing.T) {
+		adjacent := GetAdjacentTiles(layout, tile, true)
+		assert.Len(t, adjacent, 8)
+	})
+
+	t.Run("Corner tile without diagonal", func(t *testing.T) {
+		adjacent := GetAdjacentTiles(layout, layout.grid[0][0], false)
+		assert.Len(t, adjacent, 2)
+	})
+
+	t.Run("Corner tile with diagonal", func(t *testing.T) {
+		adjacent := GetAdjacentTiles(layout, layout.grid[0][0], true)
+		assert.Len(t, adjacent, 3)
+	})
+
+	t.Run("Edge tile without diagonal", func(t *testing.T) {
+		adjacent := GetAdjacentTiles(layout, layout.grid[1][0], false)
+		assert.Len(t, adjacent, 3)
+	})
+
+	t.Run("Edge tile with diagonal", func(t *testing.T) {
+		adjacent := GetAdjacentTiles(layout, layout.grid[1][0], true)
+		assert.Len(t, adjacent, 5)
+	})
 }

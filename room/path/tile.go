@@ -1,7 +1,6 @@
 package path
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -89,8 +88,6 @@ func (t *Tile) Walkable(canFall bool, currentAdj *Tile, isFinalDestination bool)
 	heightDiff := float64(t.height - currentAdj.height)
 
 	// Prevent movement if the height difference is too large
-	fmt.Println(t.height)
-	fmt.Println(MaxHeight)
 	if (!canFall && heightDiff < -MaxHeight) || (heightDiff > MaxHeight) {
 		return false
 	}

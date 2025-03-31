@@ -1,13 +1,15 @@
 package path
 
-import "math"
+import (
+	"math"
+)
 
 const (
 	CostStraight = 10 // Cost of moving in straight directions.
 	CostDiagonal = 14 // Cost of moving diagonally.
 )
 
-// Directions for every rotation
+// Directions for every rotation (8 directions).
 var directions = [8][2]int{
 	{0, -1},  // 0 → North
 	{1, -1},  // 1 → North-east
@@ -19,34 +21,51 @@ var directions = [8][2]int{
 	{-1, -1}, // 7 → Northwest
 }
 
-// GetTileInFront obtains the Tile in the direction with an optional offset
+// Cardinal directions (4 directions: N, E, S, W)
+var cardinalDirections = [][2]int{
+	{0, -1}, // North
+	{1, 0},  // East
+	{0, 1},  // South
+	{-1, 0}, // West
+}
+
+// GetTileInFront obtains the Tile in the direction with an optional offset.
 func GetTileInFront(layout *Layout, tile *Tile, rotation Direction, offset int) *Tile {
 	if tile == nil || layout == nil || offset < 0 {
 		return nil
 	}
 
-	// Adjusts rotation from 0-7
+	// Adjusts rotation from 0-7.
 	rotation = rotation % 8
 	dx, dy := directions[rotation][0], directions[rotation][1]
 
-	// Calculate new position
+	// Calculate new position.
 	x, y := int(tile.X)+dx*offset, int(tile.Y)+dy*offset
 
-	// Prevent out-of-bounds access
+	// Prevent out-of-bounds access.
 	if x < 0 || y < 0 || x >= layout.xLen || y >= layout.yLen {
 		return nil
 	}
 	return layout.grid[x][y]
 }
 
-// GetAdjacentTiles returns all adjacent tiles in every direction.
-func GetAdjacentTiles(layout *Layout, tile *Tile) []*Tile {
+// GetAdjacentTiles returns all adjacent tiles based on the allowDiagonal parameter.
+// If allowDiagonal is true, returns neighbors in 8 directions; otherwise, only in 4 cardinal directions.
+func GetAdjacentTiles(layout *Layout, tile *Tile, allowDiagonal bool) []*Tile {
 	if tile == nil || layout == nil {
 		return nil
 	}
 
 	var adjacentTiles []*Tile
-	for _, dir := range directions {
+	var dirs [][2]int
+
+	if allowDiagonal {
+		dirs = directions[:]
+	} else {
+		dirs = cardinalDirections
+	}
+
+	for _, dir := range dirs {
 		x, y := int(tile.X)+dir[0], int(tile.Y)+dir[1]
 		if layout.TileExists(x, y) {
 			adjacentTiles = append(adjacentTiles, layout.grid[x][y])
