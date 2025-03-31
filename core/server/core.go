@@ -13,6 +13,7 @@ import (
 	"pixels-emulator/core/scheduler"
 	"pixels-emulator/core/setup"
 	"pixels-emulator/room"
+	"pixels-emulator/user"
 	"sync"
 	"time"
 )
@@ -28,6 +29,7 @@ type MainServer struct {
 	eventManager     event.Manager              // eventManager provides the event management system global instance.
 	database         *gorm.DB                   // database provides a connection for ORM.
 	roomStore        *room.Store                // roomStore provides an in-memory storage to control the rooms.
+	userStore        *user.Store                // userStore provides an in-memory storage to control the users.
 }
 
 var (
@@ -124,8 +126,14 @@ func (s *MainServer) Database() *gorm.DB {
 	return s.database
 }
 
+// RoomStore returns the room store.
 func (s *MainServer) RoomStore() *room.Store {
 	return s.roomStore
+}
+
+// UserStore returns the user store.
+func (s *MainServer) UserStore() *user.Store {
+	return s.userStore
 }
 
 func setupServer() *MainServer {
@@ -186,6 +194,7 @@ func setupServer() *MainServer {
 		packetHandlers:   hReg,
 		eventManager:     em,
 		database:         db,
-		roomStore:        room.NewStore(),
+		userStore:        user.NewUserStore(),
+		roomStore:        room.NewRoomStore(),
 	}
 }

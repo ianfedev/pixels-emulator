@@ -10,7 +10,7 @@ type Store struct {
 	store.AsyncStore[*Room]
 }
 
-func NewStore() *Store {
+func NewRoomStore() *Store {
 	return &Store{
 		PassLimit:  util.NewAttemptLimiter(),
 		AsyncStore: store.NewMemoryStore[*Room](),

@@ -9,6 +9,7 @@ import (
 	"pixels-emulator/core/registry"
 	"pixels-emulator/core/scheduler"
 	"pixels-emulator/room"
+	"pixels-emulator/user"
 )
 
 // Server defines the behavior of a server instance.
@@ -45,4 +46,7 @@ type Server interface {
 
 	// RoomStore provides the in-memory loaded rooms.
 	RoomStore() *room.Store
+
+	// UserStore provides the in-memory loaded users.
+	UserStore() *user.Store
 }

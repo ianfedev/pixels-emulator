@@ -9,7 +9,7 @@ import (
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/registry"
 	"pixels-emulator/core/scheduler"
-	"pixels-emulator/room"
+	"pixels-emulator/store"
 )
 
 // Server is a mock implementation of the Server interface.
@@ -77,7 +77,13 @@ func (m *Server) Database() *gorm.DB {
 }
 
 // RoomStore simulates the RoomStore method of the Server instance.
-func (m *Server) RoomStore() *room.Store {
+func (m *Server) RoomStore() *store.Store {
 	args := m.Called()
-	return args.Get(0).(*room.Store)
+	return args.Get(0).(*store.Store)
+}
+
+// UserStore simulates the UserStore method of the Server instance.
+func (m *Server) UserStore() *store.Store {
+	args := m.Called()
+	return args.Get(0).(*store.Store)
 }
