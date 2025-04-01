@@ -29,7 +29,7 @@ type MainServer struct {
 	eventManager     event.Manager              // eventManager provides the event management system global instance.
 	database         *gorm.DB                   // database provides a connection for ORM.
 	roomStore        *room.Store                // roomStore provides an in-memory storage to control the rooms.
-	userStore        *user.Store                // userStore provides an in-memory storage to control the users.
+	userStore        user.Store                 // userStore provides an in-memory storage to control the users.
 }
 
 var (
@@ -132,7 +132,7 @@ func (s *MainServer) RoomStore() *room.Store {
 }
 
 // UserStore returns the user store.
-func (s *MainServer) UserStore() *user.Store {
+func (s *MainServer) UserStore() user.Store {
 	return s.userStore
 }
 

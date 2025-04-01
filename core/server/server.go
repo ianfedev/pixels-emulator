@@ -48,5 +48,5 @@ type Server interface {
 	RoomStore() *room.Store
 
 	// UserStore provides the in-memory loaded users.
-	UserStore() *user.Store
+	UserStore() user.Store
 }

@@ -1,7 +1,6 @@
 package grant_test
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"pixels-emulator/core/database"
 	mockdb "pixels-emulator/core/database/mock"
@@ -9,7 +8,10 @@ import (
 	"pixels-emulator/core/model"
 	mockproto "pixels-emulator/core/protocol/mock"
 	mockserver "pixels-emulator/core/server/mock"
+	"pixels-emulator/core/store"
 	"pixels-emulator/core/util"
+	"pixels-emulator/user"
+	mockuser "pixels-emulator/user/mock"
 
 	"bytes"
 	"github.com/stretchr/testify/mock"
@@ -26,14 +28,18 @@ func setupMocks(exist bool) (*mockserver.Server, *mockproto.MockConnection, *byt
 	con := &mockproto.MockConnection{}
 	log, buf := util.CreateTestLogger()
 
+	us := &mockuser.Store{}
+	us.On("Records", mock.Anything, mock.Anything).Return(store.NewMemoryStore[*user.Player]())
+
 	grant.UserDatabaseFunc = func() database.DataService[model.User] {
-		fmt.Println("XD")
 		ssoSvc := &mockdb.ModelServiceMock[model.User]{}
-		ssoSvc.On("Get", util.MockAsyncResponse(&model.User{BaseModel: database.BaseModel{ID: 1}}, nil))
+		res := util.MockAsyncResponse(&model.User{BaseModel: database.BaseModel{ID: uint(1)}}, nil)
+		ssoSvc.On("Get", mock.Anything, mock.Anything).Return(res)
 		return ssoSvc
 	}
 
 	connStore.On("GetConnection", mock.Anything).Return(con, exist)
+	sv.On("UserStore").Return(us)
 	sv.On("ConnStore").Return(connStore)
 	sv.On("Logger").Return(log)
 
@@ -42,7 +48,6 @@ func setupMocks(exist bool) (*mockserver.Server, *mockproto.MockConnection, *byt
 
 // Test_OnAuthGrantEvent tests OnAuthGrantEvent with a valid connection.
 func Test_OnAuthGrantEvent(t *testing.T) {
-	defer func() { grant.UserDatabaseFunc = grant.GetUserDatabase }()
 	sv, con, _ := setupMocks(true)
 	authFunc := grant.ProvideAuth()
 
@@ -57,12 +62,12 @@ func Test_OnAuthGrantEvent(t *testing.T) {
 
 	t.Cleanup(func() {
 		server.ResetInstance()
+		grant.UserDatabaseFunc = grant.GetUserDatabase
 	})
 }
 
 // Test_OnAuthGrantEvent_Cancelled tests OnAuthGrantEvent when the event is cancelled.
 func Test_OnAuthGrantEvent_Cancelled(t *testing.T) {
-	defer func() { grant.UserDatabaseFunc = grant.GetUserDatabase }()
 	sv, con, _ := setupMocks(true)
 
 	con.On("Dispose").Return(nil)
@@ -77,13 +82,13 @@ func Test_OnAuthGrantEvent_Cancelled(t *testing.T) {
 
 	t.Cleanup(func() {
 		server.ResetInstance()
+		grant.UserDatabaseFunc = grant.GetUserDatabase
 	})
 }
 
 // Test_OnAuthGrantEvent_InvalidConnection tests OnAuthGrantEvent when the connection is invalid.
 func Test_OnAuthGrantEvent_InvalidConnection(t *testing.T) {
 
-	defer func() { grant.UserDatabaseFunc = grant.GetUserDatabase }()
 	sv, _, buf := setupMocks(false)
 	authEv := event.NewEvent(1, 0, nil)
 
@@ -97,13 +102,14 @@ func Test_OnAuthGrantEvent_InvalidConnection(t *testing.T) {
 
 	t.Cleanup(func() {
 		server.ResetInstance()
+		grant.UserDatabaseFunc = grant.GetUserDatabase
 	})
+
 }
 
 // Test_OnAuthGrant_Event_InvalidEvent tests OnAuthGrantEvent when an invalid event is provided.
 func Test_OnAuthGrant_Event_InvalidEvent(t *testing.T) {
 
-	defer func() { grant.UserDatabaseFunc = grant.GetUserDatabase }()
 	sv, _, buf := setupMocks(false)
 	authEv := oEvent.New(0, make(map[string]string))
 
@@ -117,6 +123,7 @@ func Test_OnAuthGrant_Event_InvalidEvent(t *testing.T) {
 
 	t.Cleanup(func() {
 		server.ResetInstance()
+		grant.UserDatabaseFunc = grant.GetUserDatabase
 	})
 }
 

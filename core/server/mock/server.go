@@ -84,7 +84,7 @@ func (m *Server) RoomStore() *room.Store {
 }
 
 // UserStore simulates the UserStore method of the Server instance.
-func (m *Server) UserStore() *user.Store {
+func (m *Server) UserStore() user.Store {
 	args := m.Called()
-	return args.Get(0).(*user.Store)
+	return args.Get(0).(user.Store)
 }

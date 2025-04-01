@@ -4,12 +4,23 @@ import (
 	"pixels-emulator/core/store"
 )
 
-type Store struct {
+// Store defines an ephemeral storage of online users
+type Store interface {
+	// Records provide the safe storage of players
+	Records() store.AsyncStore[*Player]
+}
+
+type MemoryStore struct {
 	store.AsyncStore[*Player]
 }
 
-func NewUserStore() *Store {
-	return &Store{
+// Records provide the safe storage of players
+func (m *MemoryStore) Records() store.AsyncStore[*Player] {
+	return m.AsyncStore
+}
+
+func NewUserStore() Store {
+	return &MemoryStore{
 		AsyncStore: store.NewMemoryStore[*Player](),
 	}
 }
