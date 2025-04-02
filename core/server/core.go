@@ -28,7 +28,7 @@ type MainServer struct {
 	packetHandlers   registry.HandlerRegistry   // packetHandlers provides the handlers of the packets processed.
 	eventManager     event.Manager              // eventManager provides the event management system global instance.
 	database         *gorm.DB                   // database provides a connection for ORM.
-	roomStore        *room.Store                // roomStore provides an in-memory storage to control the rooms.
+	roomStore        room.Store                 // roomStore provides an in-memory storage to control the rooms.
 	userStore        user.Store                 // userStore provides an in-memory storage to control the users.
 }
 
@@ -127,7 +127,7 @@ func (s *MainServer) Database() *gorm.DB {
 }
 
 // RoomStore returns the room store.
-func (s *MainServer) RoomStore() *room.Store {
+func (s *MainServer) RoomStore() room.Store {
 	return s.roomStore
 }
 

@@ -34,7 +34,7 @@ func (r *Room) SetStamp() {
 	r.stamp = time.Now().UnixMilli()
 }
 
-func Open(p *user.Player) {
+func (r *Room) Open(p *user.Player) {
 
 }
 

@@ -45,7 +45,7 @@ type Server interface {
 	Database() *gorm.DB
 
 	// RoomStore provides the in-memory loaded rooms.
-	RoomStore() *room.Store
+	RoomStore() room.Store
 
 	// UserStore provides the in-memory loaded users.
 	UserStore() user.Store

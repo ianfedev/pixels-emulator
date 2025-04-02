@@ -77,7 +77,7 @@ func OnUserRoomJoin(ev event.Event) {
 	}
 
 	// Removes from every queue the user.
-	rl, err := rStore.GetAll(ctx)
+	rl, err := rStore.Records().GetAll(ctx)
 	for _, r := range rl {
 		r.Queue.Remove(strconv.Itoa(int(uRes.Data.ID)))
 	}
@@ -100,9 +100,10 @@ func OnUserRoomJoin(ev event.Event) {
 	}
 
 	rs := rRes.Data.State
+	accEv := roomEvent.NewRoomAccessGrantEvent(joinEv.Conn, uint(joinEv.Id), rel, 0, make(map[string]string))
 
 	if rel != room.Guest || joinEv.OverrideCheck || rRes.Data.IsPublic || rs == "open" {
-		// TODO: Further handling
+		err = server.GetServer().EventManager().Fire(roomEvent.RoomAccessGrantEventName, accEv)
 		return
 	}
 
@@ -113,20 +114,22 @@ func OnUserRoomJoin(ev event.Event) {
 
 		u, r := strconv.Itoa(int(uRes.Data.ID)), strconv.Itoa(int(rRes.Data.ID))
 
-		if rStore.PassLimit.IsFrozen(u, r) {
+		if rStore.Limits().IsFrozen(u, r) {
 			room.CloseConnection(joinEv.Conn, message.Default, "exceeded")
 			return
 		}
 
 		if util.CheckPasswordHash(joinEv.Password, rRes.Data.Password) {
-			rStore.PassLimit.Unfreeze(u + ":" + r)
-			// TODO: Further handling
+			rStore.Limits().Unfreeze(u + ":" + r)
+			err = server.GetServer().EventManager().Fire(roomEvent.RoomAccessGrantEventName, accEv)
+			return
 		} else {
-			if rStore.PassLimit.RegisterAttempt(u, r) {
+			if rStore.Limits().RegisterAttempt(u, r) {
 				cPck := &message.CloseRoomConnectionPacket{}
 				ePck := &userMsg.GenericErrorPacket{Code: userMsg.WrongPasswordCode}
 				joinEv.Conn.SendPacket(cPck)
 				joinEv.Conn.SendPacket(ePck)
+				return
 			} else {
 				room.CloseConnection(joinEv.Conn, message.Default, "exceeded")
 				return
