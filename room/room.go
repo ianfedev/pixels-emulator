@@ -14,8 +14,8 @@ type Room struct {
 	cycle.Cycleable                    // Cycleable as the room need to tick every certain amount of time.
 	Id              uint               // Id is the identifier of the room
 	Queue           *util.Queue[int32] // Queue of users pending to enter
-	stamp           int64              // stamp is the last timestamp from cycle.
-	ready           bool               // ready defines if room finished loading cycle.
+	stamp           int64              // stamp is the last timestamp from cycle
+	ready           bool               // ready defines if room finished loading cycle
 }
 
 func (r *Room) Cycle() {

@@ -100,7 +100,7 @@ func OnUserRoomJoin(ev event.Event) {
 	}
 
 	rs := rRes.Data.State
-	accEv := roomEvent.NewRoomAccessGrantEvent(joinEv.Conn, uint(joinEv.Id), rel, 0, make(map[string]string))
+	accEv := roomEvent.NewRoomAccessGrantEvent(joinEv.Conn, uint(joinEv.Id), 0, make(map[string]string))
 
 	if rel != room.Guest || joinEv.OverrideCheck || rRes.Data.IsPublic || rs == "open" {
 		err = server.GetServer().EventManager().Fire(roomEvent.RoomAccessGrantEventName, accEv)
