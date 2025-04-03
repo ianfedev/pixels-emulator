@@ -34,6 +34,10 @@ func (r *Room) SetStamp() {
 	r.stamp = time.Now().UnixMilli()
 }
 
+func (r *Room) Ready() bool {
+	return r.ready
+}
+
 func (r *Room) Open(p *user.Player) {
 
 }

@@ -5,21 +5,21 @@ import (
 	"pixels-emulator/core/protocol"
 )
 
-// RoomAccessGrantEventName is the identifiable name of the event for handler registry.
-const RoomAccessGrantEventName = "room_access"
+// RoomLoadRequestEventName is the identifiable name of the event for handler registry.
+const RoomLoadRequestEventName = "room_load"
 
-// RoomAccessGrantEvent must be fired when a user is validated internally or externally
-// to be allowed to join a room lifecycle.
-type RoomAccessGrantEvent struct {
+// RoomLoadRequestEvent must be fired when a user is validated internally or externally
+// to be allowed to join a room lifecycle, and the room must be loaded.
+type RoomLoadRequestEvent struct {
 	*event.BaseEvent
 	Conn protocol.Connection // Conn represents the connection which is joining the room.
 	Room uint                // Room where the access is granted.
 }
 
-// NewRoomAccessGrantEvent creates a new instance.
-func NewRoomAccessGrantEvent(conn protocol.Connection, id uint, owner uint16, metadata map[string]string) *RoomAccessGrantEvent {
+// NewRoomLoadRequestEvent creates a new instance.
+func NewRoomLoadRequestEvent(conn protocol.Connection, id uint, owner uint16, metadata map[string]string) *RoomLoadRequestEvent {
 	e := event.New(owner, metadata)
-	return &RoomAccessGrantEvent{
+	return &RoomLoadRequestEvent{
 		BaseEvent: e.(*event.BaseEvent),
 		Conn:      conn,
 		Room:      id,

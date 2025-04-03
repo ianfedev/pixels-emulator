@@ -100,10 +100,10 @@ func OnUserRoomJoin(ev event.Event) {
 	}
 
 	rs := rRes.Data.State
-	accEv := roomEvent.NewRoomAccessGrantEvent(joinEv.Conn, uint(joinEv.Id), 0, make(map[string]string))
+	accEv := roomEvent.NewRoomLoadRequestEvent(joinEv.Conn, uint(joinEv.Id), 0, make(map[string]string))
 
 	if rel != room.Guest || joinEv.OverrideCheck || rRes.Data.IsPublic || rs == "open" {
-		err = server.GetServer().EventManager().Fire(roomEvent.RoomAccessGrantEventName, accEv)
+		err = server.GetServer().EventManager().Fire(roomEvent.RoomLoadRequestEventName, accEv)
 		return
 	}
 
@@ -121,7 +121,7 @@ func OnUserRoomJoin(ev event.Event) {
 
 		if util.CheckPasswordHash(joinEv.Password, rRes.Data.Password) {
 			rStore.Limits().Unfreeze(u + ":" + r)
-			err = server.GetServer().EventManager().Fire(roomEvent.RoomAccessGrantEventName, accEv)
+			err = server.GetServer().EventManager().Fire(roomEvent.RoomLoadRequestEventName, accEv)
 			return
 		} else {
 			if rStore.Limits().RegisterAttempt(u, r) {

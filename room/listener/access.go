@@ -15,21 +15,19 @@ import (
 	"time"
 )
 
-// ProvideUserAccess handles the room loading event when a
-// player has been granted to access a room, including room
-// loading and any involved action like queue awaiting.
-func ProvideUserAccess() func(event event.Event) {
+// ProvideRoomLoadRequest encapsulates the room provisioning
+// for users which have granted access.
+func ProvideRoomLoadRequest() func(event event.Event) {
 	return func(event event.Event) {
 		OnUserRoomJoin(event)
 	}
 }
 
-// OnUserRoomAccess handles the room loading event when a
-// // player has been granted to access a room, including room
-// // loading and any involved action like queue awaiting.
-func OnUserRoomAccess(ev event.Event) {
+// OnRoomLoadRequest encapsulates the room provisioning
+// for users which have granted access.
+func OnRoomLoadRequest(ev event.Event) {
 
-	accEv, valid := ev.(*roomEvent.RoomAccessGrantEvent)
+	accEv, valid := ev.(*roomEvent.RoomLoadRequestEvent)
 	if !valid {
 		server.GetServer().Logger().Error("event proportioned was not room access, skipping")
 		return
@@ -43,6 +41,11 @@ func OnUserRoomAccess(ev event.Event) {
 		}
 	}()
 
+	id, err := strconv.Atoi(accEv.Conn.Identifier())
+	if err != nil {
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -55,6 +58,13 @@ func OnUserRoomAccess(ev event.Event) {
 		return
 	}
 
+	pStore := server.GetServer().UserStore()
+	p, pErr := pStore.Records().Read(ctx, accEv.Conn.Identifier())
+	if pErr == nil {
+		err = pErr
+		return
+	}
+
 	r, lErr := rStore.Records().Read(ctx, strconv.Itoa(int(accEv.Room)))
 	if lErr != nil {
 
@@ -64,6 +74,13 @@ func OnUserRoomAccess(ev event.Event) {
 		}
 
 		r = room.Load(rRes.Data)
+
 	}
+
+	if !r.Ready() {
+		r.Queue.Enqueue(accEv.Conn.Identifier(), int32(id))
+	}
+
+	r.Open(p)
 
 }
