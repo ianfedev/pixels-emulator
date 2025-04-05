@@ -48,6 +48,8 @@ func (r *Room) Open(p *user.Player) {
 		return
 	}
 
+	// TODO: If enqueued, prevent opening and send to queue.
+
 }
 
 func Load(room *model.Room) *Room {
