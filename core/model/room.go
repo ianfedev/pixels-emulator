@@ -37,6 +37,12 @@ type Room struct {
 	// Owner is the user who owns the room.
 	Owner User `gorm:"foreignKey:OwnerID"`
 
+	// LayoutID represents the heightmap id corresponding to the room.
+	LayoutId uint `gorm:"foreignKey:LayoutID"`
+
+	// Layout is the height map corresponding to the room.
+	Layout HeightMap `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+
 	// TODO: Correlation Room model, owner, guild, category, votes, staff picks, mute permissions, ban permissions, poll, promotions.
 }
 

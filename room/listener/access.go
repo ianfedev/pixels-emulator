@@ -68,7 +68,7 @@ func OnRoomLoadRequest(ev event.Event) {
 			return
 		}
 
-		r = room.Load(rRes.Data)
+		r = room.Load(rRes.Data, server.GetServer().EventManager())
 
 	}
 
