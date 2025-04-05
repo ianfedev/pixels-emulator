@@ -19,7 +19,7 @@ import (
 // for users which have granted access.
 func ProvideRoomLoadRequest() func(event event.Event) {
 	return func(event event.Event) {
-		OnUserRoomJoin(event)
+		OnRoomLoadRequest(event)
 	}
 }
 
@@ -41,11 +41,6 @@ func OnRoomLoadRequest(ev event.Event) {
 		}
 	}()
 
-	id, err := strconv.Atoi(accEv.Conn.Identifier())
-	if err != nil {
-		return
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -60,7 +55,7 @@ func OnRoomLoadRequest(ev event.Event) {
 
 	pStore := server.GetServer().UserStore()
 	p, pErr := pStore.Records().Read(ctx, accEv.Conn.Identifier())
-	if pErr == nil {
+	if pErr != nil {
 		err = pErr
 		return
 	}
@@ -68,17 +63,13 @@ func OnRoomLoadRequest(ev event.Event) {
 	r, lErr := rStore.Records().Read(ctx, strconv.Itoa(int(accEv.Room)))
 	if lErr != nil {
 
-		if !strings.Contains(err.Error(), "key not found") {
+		if !strings.Contains(lErr.Error(), "key not found") {
 			err = lErr
 			return
 		}
 
 		r = room.Load(rRes.Data)
 
-	}
-
-	if !r.Ready() {
-		r.Queue.Enqueue(accEv.Conn.Identifier(), int32(id))
 	}
 
 	r.Open(p)

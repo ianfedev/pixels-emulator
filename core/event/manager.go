@@ -7,7 +7,7 @@ import (
 // Manager defines the interface for managing event dispatching and listener registration.
 type Manager interface {
 	// Fire triggers an event with the given name and event data.
-	Fire(eventName string, event Event) error
+	Fire(eventName string, event Event)
 
 	// AddListener registers a listener for the specified event name.
 	AddListener(eventName string, listener func(event Event), priority int)
@@ -23,13 +23,13 @@ type GookitManager struct {
 }
 
 // Fire triggers an event with the given name and event data.
-func (gm *GookitManager) Fire(eventName string, event Event) error {
+func (gm *GookitManager) Fire(eventName string, event Event) {
 	ev := gEvent.NewBasic(eventName, map[string]interface{}{
 		"owner":    event.Owner(),
 		"metadata": event.Metadata(),
 		"origin":   event,
 	})
-	return gm.NativeRegistry.FireEvent(ev)
+	gm.NativeRegistry.AsyncFire(ev)
 }
 
 // AddListener registers a listener for the specified event name.

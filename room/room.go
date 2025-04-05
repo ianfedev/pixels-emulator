@@ -1,10 +1,12 @@
 package room
 
 import (
+	"fmt"
 	"pixels-emulator/core/cycle"
 	"pixels-emulator/core/model"
 	"pixels-emulator/core/util"
 	"pixels-emulator/user"
+	"strconv"
 	"time"
 )
 
@@ -40,16 +42,32 @@ func (r *Room) Ready() bool {
 
 func (r *Room) Open(p *user.Player) {
 
+	fmt.Println("LOGGED")
+	if !r.ready {
+		r.Queue.Enqueue(strconv.Itoa(int(p.Id)), int32(p.Id))
+		return
+	}
+
 }
 
 func Load(room *model.Room) *Room {
 
 	q := util.NewQueue[int32]()
-	return &Room{
+
+	r := &Room{
 		Id:    room.ID,
 		Queue: q,
 		stamp: time.Now().UnixMilli(),
 		ready: false,
 	}
+
+	go func() {
+		// Async load simulation
+		time.Sleep(10 * time.Second)
+		fmt.Println("WAHAHA")
+		r.ready = true
+	}()
+
+	return r
 
 }

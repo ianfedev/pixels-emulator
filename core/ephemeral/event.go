@@ -15,4 +15,5 @@ func Event() {
 	em.AddListener(authEvent.AuthGrantEventName, authListener.ProvideAuth(), 10)
 	em.AddListener(navEvent.NavigatorQueryEventName, navListener.ProvideSearch(), 10)
 	em.AddListener(roomEvent.RoomJoinEventName, roomListener.ProvideUserJoin(), 10)
+	em.AddListener(roomEvent.RoomLoadRequestEventName, roomListener.ProvideRoomLoadRequest(), 10)
 }

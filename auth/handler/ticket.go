@@ -91,12 +91,7 @@ func (h *AuthTicketHandler) Handle(ctx context.Context, packet protocol.Packet, 
 	conn.GrantIdentifier(id)
 	h.logger.Debug("Connection upgraded", zap.String("identifier", conn.Identifier()))
 	ev := grant.NewEvent(int(userRes.Data.ID), 0, make(map[string]string))
-
-	err := h.em.Fire(grant.AuthGrantEventName, ev)
-	if err != nil {
-		closeConn = err
-		return
-	}
+	h.em.Fire(grant.AuthGrantEventName, ev)
 
 }
 

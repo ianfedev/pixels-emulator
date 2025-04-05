@@ -6,7 +6,7 @@ import (
 )
 
 // RoomLoadRequestEventName is the identifiable name of the event for handler registry.
-const RoomLoadRequestEventName = "room_load"
+const RoomLoadRequestEventName = "room.load"
 
 // RoomLoadRequestEvent must be fired when a user is validated internally or externally
 // to be allowed to join a room lifecycle, and the room must be loaded.

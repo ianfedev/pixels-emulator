@@ -11,9 +11,8 @@ type MockEventManager struct {
 }
 
 // Fire simulates the Fire method of the Manager interface.
-func (m *MockEventManager) Fire(eventName string, event event.Event) error {
-	args := m.Called(eventName, event)
-	return args.Error(0)
+func (m *MockEventManager) Fire(eventName string, event event.Event) {
+	m.Called(eventName, event)
 }
 
 // AddListener simulates the AddListener method of the Manager interface.

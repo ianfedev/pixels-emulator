@@ -70,15 +70,6 @@ func TestRoomEnterHandler_Handle(t *testing.T) {
 	em.AssertExpectations(t)
 }
 
-func TestRoomEnterHandler_HandleErr(t *testing.T) {
-	em := &mockevent.MockEventManager{}
-	handler, buff := setupTestEnvironment(em, "mock event error")
-	conn := setupMockConn("1", nil)
-	handler.Handle(context.Background(), pck, conn)
-	em.AssertExpectations(t)
-	assert.Contains(t, buff.String(), "mock event error")
-}
-
 func TestRoomEnterHandler_HandleInvalidPacket(t *testing.T) {
 	em := &mockevent.MockEventManager{}
 	handler, buff := setupTestEnvironment(em, "")

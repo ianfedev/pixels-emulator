@@ -103,7 +103,7 @@ func OnUserRoomJoin(ev event.Event) {
 	accEv := roomEvent.NewRoomLoadRequestEvent(joinEv.Conn, uint(joinEv.Id), 0, make(map[string]string))
 
 	if rel != room.Guest || joinEv.OverrideCheck || rRes.Data.IsPublic || rs == "open" {
-		err = server.GetServer().EventManager().Fire(roomEvent.RoomLoadRequestEventName, accEv)
+		server.GetServer().EventManager().Fire(roomEvent.RoomLoadRequestEventName, accEv)
 		return
 	}
 
@@ -121,20 +121,20 @@ func OnUserRoomJoin(ev event.Event) {
 
 		if util.CheckPasswordHash(joinEv.Password, rRes.Data.Password) {
 			rStore.Limits().Unfreeze(u + ":" + r)
-			err = server.GetServer().EventManager().Fire(roomEvent.RoomLoadRequestEventName, accEv)
+			server.GetServer().EventManager().Fire(roomEvent.RoomLoadRequestEventName, accEv)
 			return
-		} else {
-			if rStore.Limits().RegisterAttempt(u, r) {
-				cPck := &message.CloseRoomConnectionPacket{}
-				ePck := &userMsg.GenericErrorPacket{Code: userMsg.WrongPasswordCode}
-				joinEv.Conn.SendPacket(cPck)
-				joinEv.Conn.SendPacket(ePck)
-				return
-			} else {
-				room.CloseConnection(joinEv.Conn, message.Default, "exceeded")
-				return
-			}
 		}
+
+		if rStore.Limits().RegisterAttempt(u, r) {
+			cPck := &message.CloseRoomConnectionPacket{}
+			ePck := &userMsg.GenericErrorPacket{Code: userMsg.WrongPasswordCode}
+			joinEv.Conn.SendPacket(cPck)
+			joinEv.Conn.SendPacket(ePck)
+			return
+		}
+
+		room.CloseConnection(joinEv.Conn, message.Default, "exceeded")
+		return
 
 	}
 

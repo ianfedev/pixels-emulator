@@ -26,11 +26,7 @@ func (h *NavigatorSearchHandler) Handle(_ context.Context, raw protocol.Packet, 
 	}
 
 	ev := navEvent.NewNavigatorQueryEvent(pck.View, pck.Query, conn, 0, nil)
-	err := h.em.Fire(navEvent.NavigatorQueryEventName, ev)
-
-	if err != nil {
-		h.logger.Error("error while broadcasting navigation event", zap.Error(err))
-	}
+	h.em.Fire(navEvent.NavigatorQueryEventName, ev)
 
 }
 

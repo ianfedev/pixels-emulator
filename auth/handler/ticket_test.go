@@ -185,15 +185,6 @@ func TestAuthTicketHandler_EmptySession(t *testing.T) {
 	assert.Contains(t, buf.String(), "session is being created with not valid ticket")
 }
 
-// TestAuthTicketHandler_FireError checks if event firing error is logged and handled.
-func TestAuthTicketHandler_FireError(t *testing.T) {
-	idNum := 1
-	qRes := util.MockAsyncResponse([]model.SSOTicket{{}}, nil)
-	gRes := util.MockAsyncResponse(&model.User{BaseModel: database.BaseModel{ID: uint(idNum)}}, nil)
-	_, buf := setupTestEnvironment(t, "DEVELOPMENT", "1", qRes, gRes, false, false, false, errors.New("fire error"))
-	assert.Contains(t, buf.String(), "fire error")
-}
-
 // TestAuthTicketHandler_ParseError checks if id error parsing is logged and handled.
 func TestAuthTicketHandler_ParseError(t *testing.T) {
 	idNum := 1

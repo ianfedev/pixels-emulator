@@ -37,11 +37,9 @@ func (h *RoomEnterHandler) Handle(_ context.Context, raw protocol.Packet, conn p
 	}
 
 	h.logger.Debug("Room enter event", zap.Int32("room", pck.RoomId), zap.Bool("password", pck.Password != ""))
+	e := roomEvent.NewRoomJoinEvent(conn, pck.RoomId, pck.Password, 0, make(map[string]string))
 
-	fErr := h.em.Fire(roomEvent.RoomJoinEventName, roomEvent.NewRoomJoinEvent(conn, pck.RoomId, pck.Password, 0, make(map[string]string)))
-	if fErr != nil {
-		err = fErr
-	}
+	h.em.Fire(roomEvent.RoomJoinEventName, e)
 
 }
 

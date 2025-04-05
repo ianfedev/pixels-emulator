@@ -5,7 +5,7 @@ import (
 	"pixels-emulator/core/protocol"
 )
 
-const RoomJoinEventName = "room_join"
+const RoomJoinEventName = "room.join"
 
 // RoomJoinEvent represents the action when a connection
 // queries to log the room.

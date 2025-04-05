@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"context"
-	"errors"
 	message2 "pixels-emulator/auth/message"
 	"testing"
 
@@ -51,12 +50,6 @@ func setupTestEnvironment(t *testing.T, query string, view string, val interface
 // TestNavigatorSearchHandler_Fire checks if event firing error is logged and handled.
 func TestNavigatorSearchHandler_Fire(t *testing.T) {
 	setupTestEnvironment(t, "error query", "private", nil)
-}
-
-// TestNavigatorSearchHandler_FireError checks if event firing error is logged and handled.
-func TestNavigatorSearchHandler_FireError(t *testing.T) {
-	_, buf := setupTestEnvironment(t, "error query", "private", errors.New("fire error"))
-	assert.Contains(t, buf.String(), "fire error")
 }
 
 // TestNavigatorSearchHandler_InvalidPacket checks if invalid packet type is handled correctly.

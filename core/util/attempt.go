@@ -2,7 +2,6 @@ package util
 
 import (
 	"sync"
-	"time"
 )
 
 // AttemptLimiter controls attempt limits and temporary bans.
@@ -49,7 +48,6 @@ func (al *AttemptLimiter) IsFrozen(issuer, target string) bool {
 
 // Unfreeze resets the attempt count and unfreezes attempts after a delay.
 func (al *AttemptLimiter) Unfreeze(key string) {
-	time.Sleep(30 * time.Second)
 	al.mu.Lock()
 	defer al.mu.Unlock()
 	al.frozen[key] = false
