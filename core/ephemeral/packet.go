@@ -40,6 +40,9 @@ func Processors() {
 	pReg.Register(roomMsg.RoomEnterCode, func(raw protocol.RawPacket, conn protocol.Connection) (protocol.Packet, error) {
 		return roomMsg.ComposeRoomEnterPacket(raw)
 	})
+	pReg.Register(roomMsg.RoomFurnitureAliasCode, func(raw protocol.RawPacket, conn protocol.Connection) (protocol.Packet, error) {
+		return roomMsg.ComposeRoomFurnitureAliasPacket(raw)
+	})
 	pReg.Register(guestRoomMsg.GetGuestRoomCode, func(raw protocol.RawPacket, conn protocol.Connection) (protocol.Packet, error) {
 		return guestRoomMsg.ComposeGuestRoomPacket(raw)
 	})
@@ -60,6 +63,7 @@ func Handlers() {
 	hReg.Register(navigatorMsg.NavigatorSearchCode, navigatorHandler.NewNavigatorSearch())
 
 	hReg.Register(roomMsg.RoomEnterCode, roomHandler.NewRoomEnter())
+	hReg.Register(roomMsg.RoomFurnitureAliasCode, roomHandler.NewFurnitureRequest())
 	hReg.Register(guestRoomMsg.GetGuestRoomCode, roomHandler.NewNavigatorSearch())
 
 }

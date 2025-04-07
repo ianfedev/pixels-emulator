@@ -8,20 +8,21 @@ import (
 	"pixels-emulator/core/util"
 	"pixels-emulator/room/message"
 	"pixels-emulator/user"
-	"strconv"
 	"time"
 )
 
 // Room defines an ephemeral room which will be
 // stored in memory for in-game modifications.
 type Room struct {
-	cycle.Cycleable                    // Cycleable as the room need to tick every certain amount of time.
-	Id              uint               // Id is the identifier of the room
-	Queue           *util.Queue[int32] // Queue of users pending to enter
-	l               model.HeightMap    // l defines the room layout.
-	stamp           int64              // stamp is the last timestamp from cycle
-	ready           bool               // ready defines if room finished loading cycle
-	em              event.Manager      // em is an event manager to handle further events.
+	cycle.Cycleable                         // Cycleable as the room need to tick every certain amount of time.
+	Id              uint                    // Id is the identifier of the room
+	Transitioning   map[string]*user.Player // Transitioning is the map of users in process of room rendering.
+	Players         map[string]*user.Player // Players are the connected players in-game.
+	Queue           *util.Queue[string]     // Queue of users pending to enter
+	l               model.HeightMap         // l defines the room layout.
+	stamp           int64                   // stamp is the last timestamp from cycle
+	ready           bool                    // ready defines if room finished loading cycle
+	em              event.Manager           // em is an event manager to handle further events.
 }
 
 func (r *Room) Cycle() {
@@ -44,15 +45,26 @@ func (r *Room) Ready() bool {
 	return r.ready
 }
 
+func (r *Room) IsOnline(player *user.Player) bool {
+	_, ex := r.Players[player.Id]
+	return ex
+}
+
+func (r *Room) IsTransitioning(player *user.Player) bool {
+	_, ex := r.Transitioning[player.Id]
+	return ex
+}
+
 func (r *Room) Open(p *user.Player) {
 
 	fmt.Println("LOGGED")
 	r.ready = true
 	if !r.ready {
-		r.Queue.Enqueue(strconv.Itoa(int(p.Id)), int32(p.Id))
+		r.Transitioning[p.Id] = p
 		return
 	}
 
+	r.Players[p.Id] = p
 	p.Conn().SendPacket(&message.RoomReadyPacket{Room: int32(r.Id), Layout: r.l.Heightmap})
 	// TODO: If enqueued, prevent opening and send to queue.
 
@@ -60,15 +72,17 @@ func (r *Room) Open(p *user.Player) {
 
 func Load(room *model.Room, em event.Manager) *Room {
 
-	q := util.NewQueue[int32]()
+	q := util.NewQueue[string]()
 
 	r := &Room{
-		Id:    room.ID,
-		Queue: q,
-		stamp: time.Now().UnixMilli(),
-		ready: false,
-		em:    em,
-		l:     room.Layout,
+		Id:            room.ID,
+		Queue:         q,
+		stamp:         time.Now().UnixMilli(),
+		ready:         false,
+		em:            em,
+		l:             room.Layout,
+		Transitioning: make(map[string]*user.Player),
+		Players:       make(map[string]*user.Player),
 	}
 
 	go func() {
