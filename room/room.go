@@ -7,6 +7,7 @@ import (
 	"pixels-emulator/core/model"
 	"pixels-emulator/core/util"
 	"pixels-emulator/room/message"
+	"pixels-emulator/room/path"
 	"pixels-emulator/user"
 	"time"
 )
@@ -17,9 +18,11 @@ type Room struct {
 	cycle.Cycleable                         // Cycleable as the room need to tick every certain amount of time.
 	Id              uint                    // Id is the identifier of the room
 	Transitioning   map[string]*user.Player // Transitioning is the map of users in process of room rendering.
+	Data            model.Room              // Data of retrieved from the database when room was loaded.
 	Players         map[string]*user.Player // Players are the connected players in-game.
 	Queue           *util.Queue[string]     // Queue of users pending to enter
-	l               model.HeightMap         // l defines the room layout.
+	lData           model.HeightMap         // lData defines the room layout data on load.
+	l               path.Layout             // l defines the generated ephemeral layout.
 	stamp           int64                   // stamp is the last timestamp from cycle
 	ready           bool                    // ready defines if room finished loading cycle
 	em              event.Manager           // em is an event manager to handle further events.
@@ -55,6 +58,10 @@ func (r *Room) IsTransitioning(player *user.Player) bool {
 	return ex
 }
 
+func (r *Room) Layout() *path.Layout {
+	return &r.l
+}
+
 func (r *Room) Open(p *user.Player) {
 
 	fmt.Println("LOGGED")
@@ -65,7 +72,7 @@ func (r *Room) Open(p *user.Player) {
 	}
 
 	r.Players[p.Id] = p
-	p.Conn().SendPacket(&message.RoomReadyPacket{Room: int32(r.Id), Layout: r.l.Heightmap})
+	p.Conn().SendPacket(&message.RoomReadyPacket{Room: int32(r.Id), Layout: r.Layout().Slug()})
 	// TODO: If enqueued, prevent opening and send to queue.
 
 }
@@ -73,14 +80,16 @@ func (r *Room) Open(p *user.Player) {
 func Load(room *model.Room, em event.Manager) *Room {
 
 	q := util.NewQueue[string]()
+	cRoom := *room
 
 	r := &Room{
 		Id:            room.ID,
 		Queue:         q,
+		Data:          cRoom,
 		stamp:         time.Now().UnixMilli(),
 		ready:         false,
 		em:            em,
-		l:             room.Layout,
+		lData:         room.Layout,
 		Transitioning: make(map[string]*user.Player),
 		Players:       make(map[string]*user.Player),
 	}

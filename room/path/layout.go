@@ -39,6 +39,11 @@ func (l *Layout) GetSizes() (int, int, int) {
 	return l.size, l.xLen, l.yLen
 }
 
+// RawMap provides the heightmap in raw state.
+func (l *Layout) RawMap() string {
+	return l.hMap
+}
+
 // generateGrid creates a set of Tile from the heightmap provided.
 func (l *Layout) generateGrid() {
 
@@ -105,6 +110,11 @@ func (l *Layout) TileExists(x, y int) bool {
 		return false
 	}
 	return l.grid[x][y] != nil
+}
+
+// GetTile provides a tile at an specific coordinate.
+func (l *Layout) GetTile(x, y int) *Tile {
+	return l.grid[x][y]
 }
 
 // DoorTile obtains the door tile of the layout.

@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"go.uber.org/zap"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/server"
@@ -64,7 +63,7 @@ func (h *FurnitureRequestHandler) Handle(ctx context.Context, raw protocol.Packe
 		return
 	}
 
-	fmt.Println(r.Id)
+	room.SendHeightMapPackets(conn, int32(r.Data.Configuration.WallHeight), r.Layout())
 
 }
 

@@ -4,7 +4,9 @@ import (
 	"context"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/room/message"
+	"pixels-emulator/room/path"
 	"pixels-emulator/user"
+	"strings"
 )
 
 // CloseConnection is an aux function to send disconnection packets.
@@ -40,5 +42,24 @@ func GetUserRoom(ctx context.Context, rs Store, p *user.Player) (*Room, error) {
 	}
 
 	return nil, nil
+
+}
+
+func SendHeightMapPackets(conn protocol.Connection, h int32, l *path.Layout) {
+
+	s, _, y := l.GetSizes()
+
+	fPck := &message.FloorHeightMapRequestPacket{
+		WallHeight:  h,
+		RelativeMap: strings.ReplaceAll(l.RawMap(), "\r\n", "\r"),
+	}
+	hPck := &message.HeightMapRequestPacket{
+		Width:   int32(y),
+		Total:   int32(s),
+		Heights: path.GetFlatHeights(l),
+	}
+
+	conn.SendPacket(fPck)
+	conn.SendPacket(hPck)
 
 }
