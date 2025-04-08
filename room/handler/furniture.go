@@ -64,6 +64,7 @@ func (h *FurnitureRequestHandler) Handle(ctx context.Context, raw protocol.Packe
 	}
 
 	room.SendHeightMapPackets(conn, int32(r.Data.Configuration.WallHeight), r.Layout())
+	conn.SendPacket(&message.OpenRoomConnectionPacket{})
 
 }
 
