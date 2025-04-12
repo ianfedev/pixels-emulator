@@ -7,7 +7,9 @@ import (
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/server"
 	"pixels-emulator/room"
+	"pixels-emulator/room/encode"
 	"pixels-emulator/room/message"
+	"pixels-emulator/room/message/guest"
 	"pixels-emulator/user"
 )
 
@@ -65,6 +67,23 @@ func (h *FurnitureRequestHandler) Handle(ctx context.Context, raw protocol.Packe
 
 	room.SendHeightMapPackets(conn, int32(r.Data.Configuration.WallHeight), r.Layout())
 	conn.SendPacket(&message.OpenRoomConnectionPacket{})
+
+	upPck := &guest.ResponseRoomPacket{
+		Enter:         true,
+		Forward:       false,
+		Room:          encode.RoomToEncodable(&r.Data, r),
+		StaffPick:     false, // TODO: Make this work, create full response packet on utility
+		GuildMember:   false,
+		GlobalMute:    false,
+		CanGlobalMute: false,
+		Moderation: &encode.ModerationRights{
+			Mute: encode.Administrator,
+			Kick: encode.Administrator,
+			Ban:  encode.Administrator,
+		},
+		Settings: encode.SettingsToEncodable(&r.Data.Configuration),
+	}
+	conn.SendPacket(upPck)
 
 }
 

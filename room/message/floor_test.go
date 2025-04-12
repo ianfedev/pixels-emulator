@@ -7,19 +7,22 @@ import (
 )
 
 var fPck = &FloorHeightMapRequestPacket{
-	WallHeight:  3,
-	RelativeMap: "xxxx\nx22x\nx00x\nxxxx",
+	WallHeight: 3,
+	Scale:      false,
+	Layout:     "xxxx\r\nx22x\r\nx00x\r\nxxxx",
 }
 
 // parseFloor reads from raw packet to transform into floor heightmap request packet.
 func parseFloor(pck protocol.RawPacket) (*FloorHeightMapRequestPacket, error) {
 
+	s, err := pck.ReadBoolean()
 	h, err := pck.ReadInt()
-	rm, err := pck.ReadString()
+	l, err := pck.ReadString()
 
 	return &FloorHeightMapRequestPacket{
-		WallHeight:  h,
-		RelativeMap: rm,
+		Scale:      s,
+		WallHeight: h,
+		Layout:     l,
 	}, err
 
 }
@@ -33,7 +36,8 @@ func TestFloorHeightMapRequestPacket_Serialize(t *testing.T) {
 	floorPck, err := parseFloor(*pck)
 	assert.NoError(t, err)
 	assert.Equal(t, floorPck.WallHeight, fPck.WallHeight)
-	assert.Equal(t, floorPck.RelativeMap, fPck.RelativeMap)
+	assert.Equal(t, floorPck.Scale, fPck.Scale)
+	assert.Equal(t, floorPck.Layout, fPck.Layout)
 }
 
 // TestFloorHeightMapRequestPacket check packet integrity.

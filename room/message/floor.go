@@ -8,8 +8,9 @@ import (
 const FloorHeightMapPacketCode = 1301
 
 type FloorHeightMapRequestPacket struct {
-	WallHeight  int32  // WallHeight provides the configured wall height for a room.
-	RelativeMap string // RelativeMap provides the heightmap for a wall.
+	Scale      bool   // Scale defines if model should be 32 or 64 scaling.
+	WallHeight int32  // WallHeight provides the configured wall height for a room.
+	Layout     string // Layout defines the model of the room.
 }
 
 // Id returns the unique identifier of the Packet type.
@@ -30,7 +31,8 @@ func (p *FloorHeightMapRequestPacket) Deadline() uint {
 // Serialize transforms the packet into protocol RawPacket.
 func (p *FloorHeightMapRequestPacket) Serialize() protocol.RawPacket {
 	pck := protocol.NewPacket(FloorHeightMapPacketCode)
+	pck.AddBoolean(p.Scale)
 	pck.AddInt(p.WallHeight)
-	pck.AddString(p.RelativeMap)
+	pck.AddString(p.Layout)
 	return pck
 }

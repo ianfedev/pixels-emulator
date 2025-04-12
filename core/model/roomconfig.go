@@ -42,20 +42,20 @@ type RoomConfiguration struct {
 	// MoveDiagonally indicates whether diagonal movement is allowed in the room.
 	MoveDiagonally bool `gorm:"not null;default:false"`
 
-	// ChatMode represents the mode of chat in the room (e.g., "free", "moderated", "silent").
-	ChatMode string `gorm:"type:varchar(50);not null"`
+	// ChatMode represents the mode of chat in the room. (0: FreeFlow, 0: 1: One by one)
+	ChatMode int `gorm:"type:varchar(50);not null;default:0"`
 
-	// ChatWeight specifies the priority or weight assigned to the chat.
+	// ChatWeight specifies the priority or weight assigned to the chat. (0: Wide, 1: Normal, 2: Thin)
 	ChatWeight int `gorm:"not null;default:1"`
 
-	// ChatSpeed indicates the speed at which chat messages are transmitted.
-	ChatSpeed float64 `gorm:"not null;default:1.0"`
+	// ChatSpeed indicates the speed at which chat messages are transmitted. (0: Fast, 1: Normal, 2: Slow)
+	ChatSpeed int `gorm:"not null;default:1"`
 
 	// ChatHearingDistance indicates the distance at which chat can be heard.
 	ChatHearingDistance int `gorm:"not null;default:10"`
 
-	// ChatProtection indicates whether chat protection (such as moderation) is enabled.
-	ChatProtection bool `gorm:"not null;default:false"`
+	// ChatProtection indicates whether chat protection (such as moderation) is enabled. (0: Strict, 1: Normal, 2: Loose)
+	ChatProtection int `gorm:"not null;default:1"`
 
 	// RollerSpeed indicates the speed of moving objects (rollers) in the room.
 	RollerSpeed float64 `gorm:"not null;default:1.0"`

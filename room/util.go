@@ -50,8 +50,9 @@ func SendHeightMapPackets(conn protocol.Connection, h int32, l *path.Layout) {
 	s, _, y := l.GetSizes()
 
 	fPck := &message.FloorHeightMapRequestPacket{
-		WallHeight:  h,
-		RelativeMap: strings.ReplaceAll(l.RawMap(), "\r\n", "\r"),
+		Scale:      true, // INVESTIGATION: What does this scale really means?
+		WallHeight: h,
+		Layout:     strings.ReplaceAll(l.RawMap(), "\r\n", "\r"),
 	}
 	hPck := &message.HeightMapRequestPacket{
 		Width:   int32(y),
