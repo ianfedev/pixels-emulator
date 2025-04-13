@@ -2,6 +2,7 @@ package room
 
 import (
 	"context"
+	"fmt"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/room/message"
 	"pixels-emulator/room/path"
@@ -49,6 +50,7 @@ func SendHeightMapPackets(conn protocol.Connection, h int32, l *path.Layout) {
 
 	s, _, y := l.GetSizes()
 
+	fmt.Println(l.RawMap())
 	fPck := &message.FloorHeightMapRequestPacket{
 		Scale:      true, // INVESTIGATION: What does this scale really means?
 		WallHeight: h,

@@ -10,6 +10,7 @@ import (
 	"pixels-emulator/room/encode"
 	"pixels-emulator/room/message"
 	"pixels-emulator/room/message/guest"
+	"pixels-emulator/room/message/misc"
 	"pixels-emulator/user"
 )
 
@@ -84,6 +85,13 @@ func (h *FurnitureRequestHandler) Handle(ctx context.Context, raw protocol.Packe
 		Settings: encode.SettingsToEncodable(&r.Data.Configuration),
 	}
 	conn.SendPacket(upPck)
+
+	vis := &misc.RoomVisualizationSettingsPacket{
+		FloorSize: int32(r.Data.Configuration.FloorThickness),
+		WallSize:  int32(r.Data.Configuration.WallThickness),
+		HideWall:  r.Data.Configuration.AllowHideWall,
+	}
+	conn.SendPacket(vis)
 
 }
 

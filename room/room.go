@@ -22,7 +22,7 @@ type Room struct {
 	Players         map[string]*user.Player // Players are the connected players in-game.
 	Queue           *util.Queue[string]     // Queue of users pending to enter
 	lData           model.HeightMap         // lData defines the room layout data on load.
-	l               path.Layout             // l defines the generated ephemeral layout.
+	l               *path.Layout            // l defines the generated ephemeral layout.
 	stamp           int64                   // stamp is the last timestamp from cycle
 	ready           bool                    // ready defines if room finished loading cycle
 	em              event.Manager           // em is an event manager to handle further events.
@@ -59,7 +59,7 @@ func (r *Room) IsTransitioning(player *user.Player) bool {
 }
 
 func (r *Room) Layout() *path.Layout {
-	return &r.l
+	return r.l
 }
 
 func (r *Room) Open(p *user.Player) {
@@ -81,6 +81,7 @@ func Load(room *model.Room, em event.Manager) *Room {
 
 	q := util.NewQueue[string]()
 	cRoom := *room
+	l := path.NewLayout(&room.Layout)
 
 	r := &Room{
 		Id:            room.ID,
@@ -90,6 +91,7 @@ func Load(room *model.Room, em event.Manager) *Room {
 		ready:         false,
 		em:            em,
 		lData:         room.Layout,
+		l:             l,
 		Transitioning: make(map[string]*user.Player),
 		Players:       make(map[string]*user.Player),
 	}
