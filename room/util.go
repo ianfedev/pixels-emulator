@@ -49,12 +49,14 @@ func GetUserRoom(ctx context.Context, rs Store, p *user.Player) (*Room, error) {
 func SendHeightMapPackets(conn protocol.Connection, h int32, l *path.Layout) {
 
 	s, _, y := l.GetSizes()
+	rl := strings.ReplaceAll(l.RawMap(), "\\r\\n", "\r")
+	fmt.Println(rl)
+	fmt.Println(h)
 
-	fmt.Println(l.RawMap())
 	fPck := &message.FloorHeightMapRequestPacket{
 		Scale:      true, // INVESTIGATION: What does this scale really means?
 		WallHeight: h,
-		Layout:     strings.ReplaceAll(l.RawMap(), "\r\n", "\r"),
+		Layout:     rl,
 	}
 	hPck := &message.HeightMapRequestPacket{
 		Width:   int32(y),
