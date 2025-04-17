@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"go.uber.org/zap"
+	"pixels-emulator/core/event"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/core/server"
 	"pixels-emulator/room"
@@ -16,9 +17,10 @@ import (
 
 // FurnitureRequestHandler INVESTIGATION: Why does this exist?
 type FurnitureRequestHandler struct {
-	logger    *zap.Logger // logger for packet processing details.
-	roomStore room.Store  // roomStore is the room list to check user transitioning room.
-	userStore user.Store  // userStore is the user store to check user related conn.
+	logger    *zap.Logger   // logger for packet processing details.
+	roomStore room.Store    // roomStore is the room list to check user transitioning room.
+	userStore user.Store    // userStore is the user store to check user related conn.
+	em        event.Manager // em is the event manager for closing events.
 }
 
 // Handle processes the incoming navigation search packet.
@@ -34,7 +36,7 @@ func (h *FurnitureRequestHandler) Handle(ctx context.Context, raw protocol.Packe
 	defer func() {
 		if err != nil {
 			server.GetServer().Logger().Error("error during user furniture handling", zap.Error(err), zap.String("identifier", conn.Identifier()))
-			room.CloseConnection(conn, message.Default, "")
+			room.CloseConnection(conn, message.Default, "", h.em)
 		}
 	}()
 
@@ -101,5 +103,6 @@ func NewFurnitureRequest() *FurnitureRequestHandler {
 		logger:    server.GetServer().Logger(),
 		roomStore: server.GetServer().RoomStore(),
 		userStore: server.GetServer().UserStore(),
+		em:        server.GetServer().EventManager(),
 	}
 }

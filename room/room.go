@@ -75,6 +75,15 @@ func (r *Room) Open(p *user.Player) {
 	p.Conn().SendPacket(&message.RoomReadyPacket{Room: int32(r.Id), Layout: r.Layout().Slug()})
 	// TODO: If enqueued, prevent opening and send to queue.
 
+	CloseConnection(p.Conn(), message.Default, "", r.em)
+
+}
+
+// Clear removes completely a player from a room.
+func (r *Room) Clear(id string) {
+	delete(r.Transitioning, id)
+	delete(r.Players, id)
+	r.Queue.Remove(id)
 }
 
 func Load(room *model.Room, em event.Manager) (*Room, error) {

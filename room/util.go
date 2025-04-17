@@ -2,7 +2,9 @@ package room
 
 import (
 	"context"
+	"pixels-emulator/core/event"
 	"pixels-emulator/core/protocol"
+	ev "pixels-emulator/room/event"
 	"pixels-emulator/room/message"
 	"pixels-emulator/room/path"
 	"pixels-emulator/user"
@@ -10,11 +12,12 @@ import (
 )
 
 // CloseConnection is an aux function to send disconnection packets.
-func CloseConnection(conn protocol.Connection, reason message.ReasonType, q string) {
+func CloseConnection(conn protocol.Connection, reason message.ReasonType, q string, em event.Manager) {
 	cPck := &message.CloseRoomConnectionPacket{}
 	rPck := &message.DenyRoomConnectionPacket{Type: reason, QueryHolder: q}
 	conn.SendPacket(rPck)
 	conn.SendPacket(cPck)
+	em.Fire(ev.RoomCloseConnectionEventName, ev.NewRoomCloseConnectionEvent(conn, 0, make(map[string]string)))
 }
 
 // GetUserRoom provides the related user room, if queuing, transitioning or in-game.

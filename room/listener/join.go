@@ -48,7 +48,7 @@ func OnUserRoomJoin(ev event.Event) {
 	defer func() {
 		if err != nil {
 			server.GetServer().Logger().Error("error during user room join", zap.Error(err))
-			room.CloseConnection(joinEv.Conn, message.Default, "")
+			room.CloseConnection(joinEv.Conn, message.Default, "", server.GetServer().EventManager())
 		}
 	}()
 
@@ -61,7 +61,7 @@ func OnUserRoomJoin(ev event.Event) {
 	uSvc := &database.ModelService[model.User]{DB: db}
 
 	if joinEv.IsCancelled() {
-		room.CloseConnection(joinEv.Conn, message.Default, "")
+		room.CloseConnection(joinEv.Conn, message.Default, "", server.GetServer().EventManager())
 		return
 	}
 
@@ -95,7 +95,7 @@ func OnUserRoomJoin(ev event.Event) {
 	}
 
 	if rel == room.Restriction {
-		room.CloseConnection(joinEv.Conn, message.Banned, "")
+		room.CloseConnection(joinEv.Conn, message.Banned, "", server.GetServer().EventManager())
 		return
 	}
 
@@ -115,7 +115,7 @@ func OnUserRoomJoin(ev event.Event) {
 		u, r := strconv.Itoa(int(uRes.Data.ID)), strconv.Itoa(int(rRes.Data.ID))
 
 		if rStore.Limits().IsFrozen(u, r) {
-			room.CloseConnection(joinEv.Conn, message.Default, "exceeded")
+			room.CloseConnection(joinEv.Conn, message.Default, "exceeded", server.GetServer().EventManager())
 			return
 		}
 
@@ -133,7 +133,7 @@ func OnUserRoomJoin(ev event.Event) {
 			return
 		}
 
-		room.CloseConnection(joinEv.Conn, message.Default, "exceeded")
+		room.CloseConnection(joinEv.Conn, message.Default, "exceeded", server.GetServer().EventManager())
 		return
 
 	}
@@ -144,6 +144,6 @@ func OnUserRoomJoin(ev event.Event) {
 		// When user with rights join, we should send again after 3 seconds the message.
 	}
 
-	room.CloseConnection(joinEv.Conn, message.Default, "")
+	room.CloseConnection(joinEv.Conn, message.Default, "", server.GetServer().EventManager())
 
 }

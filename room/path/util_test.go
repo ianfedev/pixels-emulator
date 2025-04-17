@@ -17,7 +17,8 @@ func TestGetFlatHeights(t *testing.T) {
 		Heightmap:     "xxxx\nx22x\nx01x\nxxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
+	assert.NoError(t, err)
 
 	heights := GetFlatHeights(layout)
 

@@ -17,8 +17,9 @@ func TestNewLayout(t *testing.T) {
 		Heightmap:     "xxxx\nx22x\nx00x\nxxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
 
+	assert.NoError(t, err)
 	assert.NotNil(t, layout)
 	assert.Equal(t, "test_map", layout.Slug())
 	assert.Equal(t, 5, int(layout.Door().X()))
@@ -36,8 +37,9 @@ func TestTileExists(t *testing.T) {
 		Heightmap:     "xxx\r\nx2x\r\nxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
 
+	assert.NoError(t, err)
 	assert.True(t, layout.TileExists(1, 1))
 	assert.False(t, layout.TileExists(5, 5)) // Out of bounds
 	assert.False(t, layout.TileExists(-1, -1))
@@ -53,7 +55,9 @@ func TestLayout_GetSizes(t *testing.T) {
 		Heightmap:     "xxx\r\nx2x\r\nxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
+	assert.NoError(t, err)
+
 	tot, x, y := layout.GetSizes()
 	assert.Equal(t, tot, 9)
 	assert.Equal(t, x, 3)
@@ -71,7 +75,8 @@ func TestDoorTile(t *testing.T) {
 		Heightmap:     "xxx\r\nx2x\r\nxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
+	assert.NoError(t, err)
 
 	doorTile := layout.DoorTile()
 	assert.NotNil(t, doorTile)
@@ -89,7 +94,8 @@ func TestSetupDoor(t *testing.T) {
 		Heightmap:     "xxxx\r\nx22x\r\nx00x\r\nxxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
+	assert.NoError(t, err)
 	layout.setupDoor()
 
 	doorTile := layout.DoorTile()
@@ -124,7 +130,8 @@ func TestGenerateGrid_EmptyOrMalformedRow(t *testing.T) {
 		Heightmap:     "xxxx\r\n\r\nx2x\r\nxxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
+	assert.NoError(t, err)
 
 	assert.Equal(t, 4, layout.yLen)
 	assert.Equal(t, 4, layout.xLen)
@@ -145,7 +152,8 @@ func TestGenerateGrid_EmptyHeight(t *testing.T) {
 		Heightmap:     "xxxx\r\nx xx\r\nxxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
+	assert.NoError(t, err)
 
 	assert.Equal(t, int16(0), layout.grid[1][1].Z)
 }
@@ -160,7 +168,8 @@ func TestGenerateGrid_LetterHeightValid(t *testing.T) {
 		Heightmap:     "xxxx\r\nxAxx\r\nxxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
+	assert.NoError(t, err)
 
 	assert.Equal(t, int16(10), layout.grid[1][1].Z)
 }
@@ -174,7 +183,8 @@ func TestGenerateGrid_LetterHeightInvalid(t *testing.T) {
 		Heightmap:     "xxxx\r\nx!xx\r\nxxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
+	assert.NoError(t, err)
 	assert.Equal(t, int16(0), layout.grid[1][1].Z)
 }
 
@@ -188,7 +198,8 @@ func TestSetupDoor_NoDoorTile(t *testing.T) {
 		Heightmap:     "xxxx\r\nx22x\r\nx00x\r\nxxxx",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
+	assert.NoError(t, err)
 	layout.setupDoor()
 
 	assert.Nil(t, layout.DoorTile())
@@ -204,7 +215,8 @@ func TestSetupDoor_NoDoorFrontTile(t *testing.T) {
 		Heightmap:     "x",
 	}
 
-	layout := NewLayout(hMap)
+	layout, err := NewLayout(hMap)
+	assert.NoError(t, err)
 	layout.setupDoor()
 
 	doorTile := layout.DoorTile()

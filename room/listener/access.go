@@ -37,7 +37,7 @@ func OnRoomLoadRequest(ev event.Event) {
 	defer func() {
 		if err != nil {
 			server.GetServer().Logger().Error("error during user room access", zap.Error(err))
-			room.CloseConnection(accEv.Conn, message.Default, "")
+			room.CloseConnection(accEv.Conn, message.Default, "", server.GetServer().EventManager())
 		}
 	}()
 
