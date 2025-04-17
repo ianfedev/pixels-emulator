@@ -1,11 +1,12 @@
 package room
 
 import (
-	"fmt"
+	"go.uber.org/zap"
 	"pixels-emulator/core/cycle"
 	"pixels-emulator/core/event"
 	"pixels-emulator/core/model"
 	"pixels-emulator/core/util"
+	ev "pixels-emulator/room/event"
 	"pixels-emulator/room/message"
 	"pixels-emulator/room/path"
 	"pixels-emulator/user"
@@ -100,10 +101,12 @@ func Load(room *model.Room, em event.Manager) (*Room, error) {
 	}
 
 	go func() {
-		// Async load simulation
-		//time.Sleep(10 * time.Second)
-		fmt.Println("WAHAHA")
 		r.ready = true
+		em.Fire(ev.RoomOpenEventName, ev.NewRoomOpenEvent(r.Id, 0, make(map[string]string)))
+		for _, p := range r.Transitioning {
+			r.Open(p)
+		}
+		zap.L().Debug("Room opened", zap.Uint("identifier", r.Id))
 	}()
 
 	return r, nil
