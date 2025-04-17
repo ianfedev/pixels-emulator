@@ -165,7 +165,12 @@ func letterToHeight(letter string) (int16, error) {
 }
 
 // NewLayout provides a clean layout
-func NewLayout(hMap *model.HeightMap) *Layout {
+func NewLayout(hMap *model.HeightMap) (*Layout, error) {
+
+	if hMap == nil {
+		return nil, errors.New("layout not found")
+	}
+
 	door := NewCoordinate(int16(hMap.DoorX), int16(hMap.DoorY), 0, Direction(hMap.DoorDirection))
 	l := &Layout{
 		slug:    hMap.Slug,
@@ -176,5 +181,5 @@ func NewLayout(hMap *model.HeightMap) *Layout {
 		yLen:    0,
 	}
 	l.generateGrid()
-	return l
+	return l, nil
 }

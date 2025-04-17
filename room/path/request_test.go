@@ -47,7 +47,6 @@ func TestCalculatePathWithObstacles_Diagonal(t *testing.T) {
 	}
 
 	path := req.CalculatePath(true)
-	fmt.Println(GlyphMap(layout, path, false))
 	assert.NotNil(t, path, "Path should not be nil")
 	assert.Greater(t, len(path), 0, "Path should contain at least one tile")
 	assert.Equal(t, base, path[0], "Path should start at base position")
@@ -75,7 +74,6 @@ func TestCalculatePathWithObstacles_Straight(t *testing.T) {
 	}
 
 	path := req.CalculatePath(false)
-	fmt.Println(GlyphMap(layout, path, false))
 	assert.NotNil(t, path, "Path should not be nil")
 	assert.Greater(t, len(path), 0, "Path should contain at least one tile")
 	assert.Equal(t, base, path[0], "Path should start at base position")

@@ -36,7 +36,6 @@ func GlyphMap(l *Layout, path []*Tile, flatMode bool) string {
 					if flatMode {
 						sb.WriteString("O")
 					} else {
-						fmt.Println(tile.height)
 						sb.WriteString(fmt.Sprintf("%d", tile.Height()))
 					}
 				case Blocked:

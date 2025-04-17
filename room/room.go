@@ -64,7 +64,6 @@ func (r *Room) Layout() *path.Layout {
 
 func (r *Room) Open(p *user.Player) {
 
-	fmt.Println("LOGGED")
 	r.ready = true
 	if !r.ready {
 		r.Transitioning[p.Id] = p
@@ -77,11 +76,15 @@ func (r *Room) Open(p *user.Player) {
 
 }
 
-func Load(room *model.Room, em event.Manager) *Room {
+func Load(room *model.Room, em event.Manager) (*Room, error) {
 
 	q := util.NewQueue[string]()
 	cRoom := *room
-	l := path.NewLayout(&room.Layout)
+	l, err := path.NewLayout(&room.Layout)
+
+	if err != nil {
+		return nil, err
+	}
 
 	r := &Room{
 		Id:            room.ID,
@@ -103,6 +106,6 @@ func Load(room *model.Room, em event.Manager) *Room {
 		r.ready = true
 	}()
 
-	return r
+	return r, nil
 
 }

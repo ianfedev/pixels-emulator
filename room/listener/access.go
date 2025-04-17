@@ -68,7 +68,10 @@ func OnRoomLoadRequest(ev event.Event) {
 			return
 		}
 
-		r = room.Load(rRes.Data, server.GetServer().EventManager())
+		r, err = room.Load(rRes.Data, server.GetServer().EventManager())
+		if err != nil {
+			return
+		}
 		err = rStore.Records().Create(ctx, strconv.Itoa(int(r.Id)), r)
 		if err != nil {
 			return

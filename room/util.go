@@ -2,7 +2,6 @@ package room
 
 import (
 	"context"
-	"fmt"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/room/message"
 	"pixels-emulator/room/path"
@@ -50,8 +49,6 @@ func SendHeightMapPackets(conn protocol.Connection, h int32, l *path.Layout) {
 
 	s, _, y := l.GetSizes()
 	rl := strings.ReplaceAll(l.RawMap(), "\\r\\n", "\r")
-	fmt.Println(rl)
-	fmt.Println(h)
 
 	fPck := &message.FloorHeightMapRequestPacket{
 		Scale:      true, // INVESTIGATION: What does this scale really means?
