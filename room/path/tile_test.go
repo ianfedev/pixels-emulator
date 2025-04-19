@@ -45,7 +45,7 @@ func TestWalkable(t *testing.T) {
 
 	t.Run("Tile With Units", func(t *testing.T) {
 		tile := NewTile(2, 2, 0, Open, true)
-		tile.Units = append(tile.Units, struct{}{})
+		tile.Units = append(tile.Units, "")
 		assert.False(t, tile.Walkable(false, adjacent, false))
 	})
 

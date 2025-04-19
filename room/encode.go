@@ -1,9 +1,12 @@
 package room
 
 import (
+	"context"
 	"pixels-emulator/core/model"
 	"pixels-emulator/room/encode"
 	"pixels-emulator/room/unit"
+	"pixels-emulator/user"
+	"strconv"
 )
 
 // EncodeUnit codifies a room unit into a binary unit wrapper.
@@ -76,4 +79,42 @@ func EncodeRoom(r *model.Room, t *Room) *encode.RoomData {
 
 	return enc
 
+}
+
+func EncodePlayer(ctx context.Context, p *user.Player, r *Room) (*encode.UnitDetail, *encode.PlayerDetail, error) {
+
+	id, err := strconv.ParseInt(p.Id, 10, 32)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	uData := <-p.Record(ctx)
+	if uData.Error != nil {
+		return nil, nil, uData.Error
+	}
+	u := uData.Data
+
+	uDetail := &encode.UnitDetail{
+		Id:        int32(id),
+		Username:  u.Username,
+		Custom:    u.Motto,
+		Figure:    u.Look,
+		RoomIndex: int32(r.Id),
+		UnitX:     int32(p.Unit().Current.X()),
+		UnitY:     int32(p.Unit().Current.Y()),
+		UnitZ:     int32(p.Unit().Current.Z()),
+		Rot:       int32(p.Unit().Current.Dir()),
+		Type:      encode.User,
+	}
+
+	pDetail := &encode.PlayerDetail{
+		Gender:         u.Gender,
+		GroupId:        0,
+		GroupName:      "",   // TODO: Groups
+		SwimFigure:     "",   // INVESTIGATION
+		ActivityPoints: 0,    // TODO: Achievements
+		Moderator:      true, // TODO: Permissions
+	}
+
+	return uDetail, pDetail, nil
 }
