@@ -6,8 +6,8 @@ type Unit struct {
 	Id         int32
 	Status     map[Status]string // Status defines the actual movement control status.
 	head, body path.Direction    // head, body defines the corporal rotation.
-	Current    *path.Coordinate
-	Request    *path.Request
+	Current    path.Coordinate
+	Request    path.Request
 }
 
 func (u *Unit) GetCurrentTile(l *path.Layout) *path.Tile {

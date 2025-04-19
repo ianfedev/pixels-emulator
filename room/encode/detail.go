@@ -40,6 +40,7 @@ func (u *UnitDetail) Encode(pck *protocol.RawPacket) {
 	pck.AddInt(u.UnitY)
 	pck.AddString(strconv.Itoa(int(u.UnitZ)))
 	pck.AddInt(u.Rot)
+	pck.AddInt(int32(u.Type))
 }
 
 // Decode parses unit detail from binary packet.

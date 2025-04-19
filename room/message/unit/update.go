@@ -32,6 +32,7 @@ func (p *UpdateStatusPacket) Deadline() uint {
 // Serialize transforms packet in byte.
 func (p *UpdateStatusPacket) Serialize() protocol.RawPacket {
 	pck := protocol.NewPacket(UpdateStatusCode)
+	pck.AddInt(int32(len(p.Units)))
 	for _, unit := range p.Units {
 		unit.Encode(&pck)
 	}

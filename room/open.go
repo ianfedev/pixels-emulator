@@ -1,6 +1,7 @@
 package room
 
 import (
+	"context"
 	"go.uber.org/zap"
 	"pixels-emulator/room/message"
 	"pixels-emulator/room/path"
@@ -28,6 +29,7 @@ func (r *Room) Open(p *user.Player, c *path.Coordinate) {
 	p.Conn().SendPacket(&message.RoomReadyPacket{Room: int32(r.Id), Layout: r.Layout().Slug()})
 
 	// Updates position to the tile on the coordinate provided or the room door.
+	var tile path.Coordinate
 	door := path.NewCoordinate(
 		r.Layout().Door().X(),
 		r.Layout().Door().Y(),
@@ -36,16 +38,23 @@ func (r *Room) Open(p *user.Player, c *path.Coordinate) {
 	)
 
 	if c == nil {
-		c = &door
+		tile = door
+	} else {
+		tile = *c
 	}
 
-	p.Unit().Current = c
-	p.Unit().SetRotation(c.Dir(), c.Dir())
+	p.Unit().Current = tile
+	p.Unit().SetRotation(tile.Dir(), tile.Dir())
 
 	// Prepare player array
 	var roomP []*user.Player
 	for _, v := range r.Players {
 		roomP = append(roomP, v)
+	}
+
+	err = SendUnitDetailPacket(context.Background(), r, roomP, p)
+	if err != nil {
+		return
 	}
 
 	// Send new player packet for old players

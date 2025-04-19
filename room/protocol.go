@@ -1,6 +1,7 @@
 package room
 
 import (
+	"context"
 	"pixels-emulator/core/event"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/room/encode"
@@ -55,6 +56,34 @@ func SendUnitSyncPacket(origin []*user.Player, target *user.Player) error {
 	}
 
 	target.Conn().SendPacket(&unit.UpdateStatusPacket{Units: units})
+	return nil
+
+}
+
+func SendUnitDetailPacket(ctx context.Context, r *Room, origin []*user.Player, target *user.Player) error {
+
+	units := make([]*encode.UnitDetail, len(origin))
+	details := make([]*encode.PlayerDetail, len(origin))
+
+	for i, player := range origin {
+		u, d, err := EncodePlayerDetail(ctx, player, r)
+		if err != nil {
+			return err
+		}
+		units[i] = u
+		details[i] = d
+	}
+
+	pck := &unit.DetailPacket{
+		Units:        units,
+		PlayerDetail: details,
+	}
+	raw, err := pck.Serialize(encode.User)
+	if err != nil {
+		return err
+	}
+
+	target.Conn().SendRaw(*raw, 0, 0)
 	return nil
 
 }

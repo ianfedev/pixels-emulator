@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"pixels-emulator/core/protocol"
 	"pixels-emulator/room/unit"
+	"strconv"
 	"strings"
 )
 
@@ -18,11 +19,10 @@ type UnitMessage struct {
 
 // Encode adds the RoomChatSettings data to a packet
 func (e *UnitMessage) Encode(pck *protocol.RawPacket) {
-
 	pck.AddInt(e.Id)
 	pck.AddInt(e.X)
 	pck.AddInt(e.Y)
-	pck.AddInt(e.Z)
+	pck.AddString(strconv.Itoa(int(e.Z)))
 	pck.AddInt(e.Head)
 	pck.AddInt(e.Body)
 

@@ -81,7 +81,7 @@ func EncodeRoom(r *model.Room, t *Room) *encode.RoomData {
 
 }
 
-func EncodePlayer(ctx context.Context, p *user.Player, r *Room) (*encode.UnitDetail, *encode.PlayerDetail, error) {
+func EncodePlayerDetail(ctx context.Context, p *user.Player, r *Room) (*encode.UnitDetail, *encode.PlayerDetail, error) {
 
 	id, err := strconv.ParseInt(p.Id, 10, 32)
 	if err != nil {
