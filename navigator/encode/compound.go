@@ -21,7 +21,7 @@ type SearchResultCompound struct {
 	// Collapsed if desired result should be collapsed or expanded based on user preferences.
 	Collapsed bool
 
-	// Actionable if it should be any further action for the user (Handled by Nitro client. e.g: "More")
+	// Actionable if it should be any further action.go for the user (Handled by Nitro client. e.g: "More")
 	Actionable bool
 
 	// Thumbnails showing the room image or default listing.

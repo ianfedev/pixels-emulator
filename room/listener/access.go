@@ -68,7 +68,7 @@ func OnRoomLoadRequest(ev event.Event) {
 			return
 		}
 
-		r, err = room.Load(rRes.Data, server.GetServer().EventManager())
+		r, err = room.Load(rRes.Data, server.GetServer().Logger(), server.GetServer().EventManager())
 		if err != nil {
 			return
 		}
@@ -79,6 +79,6 @@ func OnRoomLoadRequest(ev event.Event) {
 
 	}
 
-	r.Open(p)
+	r.Open(p, nil)
 
 }

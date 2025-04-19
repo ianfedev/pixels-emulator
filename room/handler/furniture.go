@@ -74,7 +74,7 @@ func (h *FurnitureRequestHandler) Handle(ctx context.Context, raw protocol.Packe
 	upPck := &guest.ResponseRoomPacket{
 		Enter:         true,
 		Forward:       false,
-		Room:          encode.RoomToEncodable(&r.Data, r),
+		Room:          room.EncodeRoom(&r.Data, r),
 		StaffPick:     false, // TODO: Make this work, create full response packet on utility
 		GuildMember:   false,
 		GlobalMute:    false,
@@ -84,7 +84,7 @@ func (h *FurnitureRequestHandler) Handle(ctx context.Context, raw protocol.Packe
 			Kick: encode.Administrator,
 			Ban:  encode.Administrator,
 		},
-		Settings: encode.SettingsToEncodable(&r.Data.Configuration),
+		Settings: room.EncodeSettings(&r.Data.Configuration),
 	}
 	conn.SendPacket(upPck)
 

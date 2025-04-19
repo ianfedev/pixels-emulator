@@ -7,7 +7,6 @@ import (
 	"pixels-emulator/core/model"
 	"pixels-emulator/core/util"
 	ev "pixels-emulator/room/event"
-	"pixels-emulator/room/message"
 	"pixels-emulator/room/path"
 	"pixels-emulator/user"
 	"time"
@@ -27,6 +26,7 @@ type Room struct {
 	stamp           int64                   // stamp is the last timestamp from cycle
 	ready           bool                    // ready defines if room finished loading cycle
 	em              event.Manager           // em is an event manager to handle further events.
+	logger          *zap.Logger             // logger to logging tools.
 }
 
 func (r *Room) Cycle() {
@@ -63,22 +63,6 @@ func (r *Room) Layout() *path.Layout {
 	return r.l
 }
 
-func (r *Room) Open(p *user.Player) {
-
-	r.ready = true
-	if !r.ready {
-		r.Transitioning[p.Id] = p
-		return
-	}
-
-	r.Players[p.Id] = p
-	p.Conn().SendPacket(&message.RoomReadyPacket{Room: int32(r.Id), Layout: r.Layout().Slug()})
-	// TODO: If enqueued, prevent opening and send to queue.
-
-	CloseConnection(p.Conn(), message.Default, "", r.em)
-
-}
-
 // Clear removes completely a player from a room.
 func (r *Room) Clear(id string) {
 	delete(r.Transitioning, id)
@@ -86,7 +70,7 @@ func (r *Room) Clear(id string) {
 	r.Queue.Remove(id)
 }
 
-func Load(room *model.Room, em event.Manager) (*Room, error) {
+func Load(room *model.Room, logger *zap.Logger, em event.Manager) (*Room, error) {
 
 	q := util.NewQueue[string]()
 	cRoom := *room
@@ -107,13 +91,14 @@ func Load(room *model.Room, em event.Manager) (*Room, error) {
 		l:             l,
 		Transitioning: make(map[string]*user.Player),
 		Players:       make(map[string]*user.Player),
+		logger:        logger,
 	}
 
 	go func() {
 		r.ready = true
 		em.Fire(ev.RoomOpenEventName, ev.NewRoomOpenEvent(r.Id, 0, make(map[string]string)))
 		for _, p := range r.Transitioning {
-			r.Open(p)
+			r.Open(p, nil)
 		}
 		zap.L().Debug("Room opened", zap.Uint("identifier", r.Id))
 	}()

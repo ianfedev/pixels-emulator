@@ -19,12 +19,12 @@ const MaxHeight float64 = 1.1 // MaxHeight defines the maximum height a user can
 
 // Tile defines a single cell of the room map.
 type Tile struct {
-	X, Y, Z   int16         // X, Y, Z defines coordinates of the tile.
-	Units     []interface{} // Units define the list of room units at the tile.
-	State     Status        // State defines the current accessibility status of the tile.
-	Diagonal  bool          // Diagonal defines if tile allow diagonal.
-	stackable bool          // stackable defines if the tile allows stack.
-	height    int           // Height defines the actual stackable height of the tile.
+	X, Y, Z   int16    // X, Y, Z defines coordinates of the tile.
+	Units     []string // Units define the list of room units at the tile.
+	State     Status   // State defines the current accessibility status of the tile.
+	Diagonal  bool     // Diagonal defines if tile allow diagonal.
+	stackable bool     // stackable defines if the tile allows stack.
+	height    int      // Height defines the actual stackable height of the tile.
 }
 
 // UpdateHeight updates the height according to the tile context and value.
@@ -111,7 +111,7 @@ func NewTile(x, y, z int16, status Status, stack bool) *Tile {
 		Y:         y,
 		Z:         z,
 		height:    int(z),
-		Units:     make([]interface{}, 0),
+		Units:     make([]string, 0),
 		State:     status,
 		Diagonal:  false,
 		stackable: stack,

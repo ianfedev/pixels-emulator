@@ -7,6 +7,7 @@ import (
 	oEvent "pixels-emulator/core/event"
 	"pixels-emulator/core/model"
 	mockproto "pixels-emulator/core/protocol/mock"
+	scmock "pixels-emulator/core/scheduler/mock"
 	mockserver "pixels-emulator/core/server/mock"
 	"pixels-emulator/core/store"
 	"pixels-emulator/core/util"
@@ -26,6 +27,7 @@ func setupMocks(exist bool) (*mockserver.Server, *mockproto.MockConnection, *byt
 	sv := &mockserver.Server{}
 	connStore := &mockproto.MockConnectionManager{}
 	con := &mockproto.MockConnection{}
+	sc := &scmock.MockScheduler{}
 	log, buf := util.CreateTestLogger()
 
 	us := &mockuser.Store{}
@@ -41,6 +43,7 @@ func setupMocks(exist bool) (*mockserver.Server, *mockproto.MockConnection, *byt
 	connStore.On("GetConnection", mock.Anything).Return(con, exist)
 	sv.On("UserStore").Return(us)
 	sv.On("ConnStore").Return(connStore)
+	sv.On("Scheduler").Return(sc)
 	sv.On("Logger").Return(log)
 
 	return sv, con, buf

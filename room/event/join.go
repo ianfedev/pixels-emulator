@@ -7,7 +7,7 @@ import (
 
 const RoomJoinEventName = "room.join"
 
-// RoomJoinEvent represents the action when a connection
+// RoomJoinEvent represents the action.go when a connection
 // queries to log the room.
 type RoomJoinEvent struct {
 	*event.CancellableEvent                     // Extends functionality for cancellation.

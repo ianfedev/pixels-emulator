@@ -26,6 +26,9 @@ type Scheduler interface {
 
 	// Start starts the scheduler.
 	Start()
+
+	// Cancel stops a task
+	Cancel(id cron.EntryID)
 }
 
 // CronScheduler implements the Scheduler interface using robfig/cron.
@@ -91,4 +94,8 @@ func (cs *CronScheduler) Stop() {
 // Start starts the scheduler.
 func (cs *CronScheduler) Start() {
 	cs.CronInstance.Start()
+}
+
+func (cs *CronScheduler) Cancel(id cron.EntryID) {
+	cs.CronInstance.Remove(id)
 }

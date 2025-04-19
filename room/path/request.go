@@ -24,6 +24,16 @@ type Node struct {
 	index   int
 }
 
+// Base provides abstract coordinate of base point.
+func (pr *Request) Base() Coordinate {
+	return NewCoordinate(pr.basePosition.X, pr.basePosition.Y, pr.basePosition.Z, 0)
+}
+
+// Target provides abstract coordinate of targeted point.
+func (pr *Request) Target() Coordinate {
+	return NewCoordinate(pr.targetPosition.X, pr.targetPosition.Y, pr.targetPosition.Z, 0)
+}
+
 // CalculatePath finds the shortest path using the A* algorithm.
 // It starts from the basePosition and attempts to reach the targetPosition.
 func (pr *Request) CalculatePath(diag bool) []*Tile {
