@@ -42,13 +42,45 @@ func (e *UnitMessage) Decode(pck *protocol.RawPacket) error {
 	var err error
 
 	e.Id, err = pck.ReadInt()
+	if err != nil {
+		return err
+	}
+
 	e.X, err = pck.ReadInt()
+	if err != nil {
+		return err
+	}
+
 	e.Y, err = pck.ReadInt()
-	e.Z, err = pck.ReadInt()
+	if err != nil {
+		return err
+	}
+
+	z, err := pck.ReadString()
+	if err != nil {
+		return err
+	}
+
+	pz, err := strconv.ParseInt(z, 10, 32)
+	if err != nil {
+		return err
+	}
+	e.Z = int32(pz)
+
 	e.Head, err = pck.ReadInt()
+	if err != nil {
+		return err
+	}
+
 	e.Body, err = pck.ReadInt()
+	if err != nil {
+		return err
+	}
 
 	statusStr, err := pck.ReadString()
+	if err != nil {
+		return err
+	}
 
 	e.Status = make(map[unit.Status]string)
 

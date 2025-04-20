@@ -48,8 +48,8 @@ func (l *Layout) RawMap() string {
 func (l *Layout) generateGrid() {
 
 	// Creates an array with all Y tiles to further processing
-	c := strings.ReplaceAll(l.hMap, "\n", "")
-	yRawGrid := strings.Split(c, "\r")
+	c := strings.ReplaceAll(l.hMap, "\\n", "")
+	yRawGrid := strings.Split(c, "\\r")
 	l.size = 0
 	l.xLen = len(yRawGrid[0])
 	l.yLen = len(yRawGrid)
@@ -59,16 +59,16 @@ func (l *Layout) generateGrid() {
 		l.grid[i] = make([]*Tile, l.yLen)
 	}
 
-	for y, yRow := range yRawGrid {
+	for y := 0; y < l.yLen; y++ {
 
-		l.grid[y] = make([]*Tile, l.yLen)
+		yRow := yRawGrid[y]
 
 		if len(yRow) == 0 || yRow == "\r" || len(yRow) != l.xLen {
 			// Prevent bad formatted lines or empty ones.
 			continue
 		}
 
-		for x := range len(yRow) {
+		for x := 0; x < l.xLen; x++ {
 
 			xRow := string(yRow[x])
 			var state Status = Open
@@ -94,6 +94,7 @@ func (l *Layout) generateGrid() {
 
 			l.size++
 			l.grid[x][y] = NewTile(int16(x), int16(y), h, state, true)
+
 		}
 
 	}

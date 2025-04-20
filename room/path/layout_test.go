@@ -14,7 +14,7 @@ func TestNewLayout(t *testing.T) {
 		DoorX:         5,
 		DoorY:         5,
 		DoorDirection: 2,
-		Heightmap:     "xxxx\nx22x\nx00x\nxxxx",
+		Heightmap:     "xxxx\\nx22x\\nx00x\\nxxxx",
 	}
 
 	layout, err := NewLayout(hMap)
@@ -34,7 +34,7 @@ func TestTileExists(t *testing.T) {
 		DoorX:         1,
 		DoorY:         1,
 		DoorDirection: 0,
-		Heightmap:     "xxx\r\nx2x\r\nxxx",
+		Heightmap:     "xxx\\r\\nx2x\\r\\nxxx",
 	}
 
 	layout, err := NewLayout(hMap)
@@ -52,7 +52,7 @@ func TestLayout_GetSizes(t *testing.T) {
 		DoorX:         1,
 		DoorY:         1,
 		DoorDirection: 0,
-		Heightmap:     "xxx\r\nx2x\r\nxxx",
+		Heightmap:     "xxx\\r\\nx2x\\r\\nxxx",
 	}
 
 	layout, err := NewLayout(hMap)
@@ -72,7 +72,7 @@ func TestDoorTile(t *testing.T) {
 		DoorX:         1,
 		DoorY:         1,
 		DoorDirection: 0,
-		Heightmap:     "xxx\r\nx2x\r\nxxx",
+		Heightmap:     "xxx\\r\\nx2x\\r\\nxxx",
 	}
 
 	layout, err := NewLayout(hMap)
@@ -91,7 +91,7 @@ func TestSetupDoor(t *testing.T) {
 		DoorX:         1,
 		DoorY:         1,
 		DoorDirection: 2,
-		Heightmap:     "xxxx\r\nx22x\r\nx00x\r\nxxxx",
+		Heightmap:     "xxxx\\r\\nx22x\\r\\nx00x\\r\\nxxxx",
 	}
 
 	layout, err := NewLayout(hMap)
@@ -127,7 +127,7 @@ func TestGenerateGrid_EmptyOrMalformedRow(t *testing.T) {
 		DoorX:         1,
 		DoorY:         1,
 		DoorDirection: 0,
-		Heightmap:     "xxxx\r\n\r\nx2x\r\nxxxx",
+		Heightmap:     "xxxx\\r\\n\\r\\nx2x\\r\\nxxxx",
 	}
 
 	layout, err := NewLayout(hMap)
@@ -149,7 +149,7 @@ func TestGenerateGrid_EmptyHeight(t *testing.T) {
 		DoorX:         1,
 		DoorY:         1,
 		DoorDirection: 0,
-		Heightmap:     "xxxx\r\nx xx\r\nxxxx",
+		Heightmap:     "xxxx\\r\\nx xx\\r\\nxxxx",
 	}
 
 	layout, err := NewLayout(hMap)
@@ -165,7 +165,7 @@ func TestGenerateGrid_LetterHeightValid(t *testing.T) {
 		DoorX:         1,
 		DoorY:         1,
 		DoorDirection: 0,
-		Heightmap:     "xxxx\r\nxAxx\r\nxxxx",
+		Heightmap:     "xxxx\\r\\nxAxx\\r\\nxxxx",
 	}
 
 	layout, err := NewLayout(hMap)
@@ -180,7 +180,7 @@ func TestGenerateGrid_LetterHeightInvalid(t *testing.T) {
 		DoorX:         1,
 		DoorY:         1,
 		DoorDirection: 0,
-		Heightmap:     "xxxx\r\nx!xx\r\nxxxx",
+		Heightmap:     "xxxx\\r\\nx!xx\\r\\nxxxx",
 	}
 
 	layout, err := NewLayout(hMap)
@@ -195,7 +195,7 @@ func TestSetupDoor_NoDoorTile(t *testing.T) {
 		DoorX:         10,
 		DoorY:         10,
 		DoorDirection: 2,
-		Heightmap:     "xxxx\r\nx22x\r\nx00x\r\nxxxx",
+		Heightmap:     "xxxx\\r\\nx22x\\r\\nx00x\\r\\nxxxx",
 	}
 
 	layout, err := NewLayout(hMap)

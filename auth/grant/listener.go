@@ -70,7 +70,7 @@ func OnAuthGrantEvent(ev event.Event) {
 		return
 	}
 
-	p := user.Load(uRes.Data, con, server.GetServer().Scheduler(), GetUserDatabase())
+	p := user.Load(uRes.Data, con, server.GetServer().Scheduler(), UserDatabaseFunc())
 	err = server.GetServer().UserStore().Records().Create(ctx, strconv.Itoa(authEv.UserID()), p)
 	if err != nil {
 		return
